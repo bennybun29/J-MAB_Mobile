@@ -15,18 +15,21 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.j_mabmobile.SignInActivity
 
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var emailTextField : EditText
     private lateinit var usernameTextField : EditText
     private lateinit var passwordTextField : EditText
-    private lateinit var signInBtn : Button
+    private lateinit var signUpBtn : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_up)
+
+        signUpBtn = findViewById(R.id.signUpBtn)
 
         val tvSignInHere = findViewById<TextView>(R.id.tvSignInHere)
         val text = "Already have an account? Sign in"
@@ -60,5 +63,10 @@ class SignUpActivity : AppCompatActivity() {
 
         tvSignInHere.text = spannableString
         tvSignInHere.movementMethod = LinkMovementMethod.getInstance()
+
+        signUpBtn.setOnClickListener {
+            val intent = Intent(this@SignUpActivity, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

@@ -35,8 +35,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     openFragment(NotificationFragment())
                     true
                 }
-                R.id.settings_btn -> {
-                    openFragment(SettingsFragment())
+                R.id.message_btn -> {
+                    openFragment(MessagesFragment())
+                    true
+                }
+                R.id.account_btn -> {
+                    openFragment(AccountFragment())
                     true
                 }
                 else -> false

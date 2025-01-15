@@ -12,13 +12,18 @@
         android:icon="@drawable/cart_icon"/>
 
     <item
+        android:id="@+id/message_btn"
+        android:title="Messages"
+        android:icon="@drawable/message_icon"/>
+
+    <item
         android:id="@+id/notification_btn"
         android:title="Notification"
         android:icon="@drawable/notification_icon"/>
 
     <item
-        android:id="@+id/settings_btn"
-        android:title="Settings"
-        android:icon="@drawable/settings_icon"/>
+        android:id="@+id/account_btn"
+        android:title="Account"
+        android:icon="@drawable/profile_button"/>
 
 </menu>

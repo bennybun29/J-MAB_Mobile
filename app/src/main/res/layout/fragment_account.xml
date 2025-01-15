@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".AccountFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="match_parent"
+            android:layout_height="170dp"
+            android:src="@drawable/top_background_gradient"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/ProfilePictureButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/profile_picture_btn"
+            android:background="@null"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginLeft="20dp"/>
+
+
+        <TextView
+            android:id="@+id/UsernameTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/dmsans"
+            android:text="Username Example"
+            android:textColor="@color/white"
+            android:layout_marginTop="30dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginLeft="-80dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ProfilePictureButton"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/FullNameTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/dmsans"
+            android:text="Full Name"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintTop_toBottomOf="@+id/UsernameTV"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/userPhoneNumberTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="(09##) ### ####"
+            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintTop_toBottomOf="@+id/FullNameTV"
+            android:fontFamily="@font/dmsans"
+            android:textStyle="italic"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/userFullAddressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full Address"
+            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintTop_toBottomOf="@+id/userPhoneNumberTV"
+            android:fontFamily="@font/dmsans"
+            android:textStyle="italic"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginBottom="5dp"/>
+
+        <TextView
+            android:id="@+id/userIDNumberTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ID Number"
+            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintTop_toBottomOf="@+id/userFullAddressTV"
+            android:fontFamily="@font/dmsans"
+            android:textStyle="italic"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginBottom="5dp"/>
+
+        <ImageButton
+            android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/settings_button"
+            android:background="@null"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"/>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>
