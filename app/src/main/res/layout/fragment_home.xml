@@ -22,40 +22,50 @@
                 <ImageView
                     android:id="@+id/imageView3"
                     android:layout_width="match_parent"
-                    android:layout_height="216dp"
+                    android:layout_height="200dp"
                     android:src="@drawable/top_background_gradient"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageButton
-                    android:id="@+id/userImageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/profile_button"
-                    app:layout_constraintBottom_toBottomOf="@+id/imageView3"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/searchView"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:background="@null"/>
-
                 <androidx.appcompat.widget.SearchView
                     android:id="@+id/searchView"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="-60dp"
                     android:background="@drawable/search_view_bg"
                     app:circularflow_radiusInDP="20dp"
                     app:defaultQueryHint="Search"
-                    app:layout_constraintEnd_toStartOf="@id/userImageButton"
                     app:layout_constraintBottom_toBottomOf="@+id/imageView3"
-                    app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
+                    app:queryHint="Search"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toStartOf="@+id/cart_icon"/>
 
-                    app:queryHint="Search" />
-
+                <ImageButton
+                    android:id="@+id/cart_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/cart_icon"
+                    android:background="@null"
+                    android:layout_marginTop="60dp"
+                    android:layout_marginRight="30dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Your Expert Partner \nfor Tires and \nBatteries"
+                    android:fontFamily="@font/dmsans"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toBottomOf="@id/searchView"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="5dp"
+                    android:textSize="15sp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>

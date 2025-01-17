@@ -27,10 +27,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     openFragment(HomeFragment())
                     true
                 }
-                R.id.cart_btn -> {
-                    openFragment(CartFragment())
-                    true
-                }
                 R.id.notification_btn -> {
                     openFragment(NotificationFragment())
                     true
@@ -54,12 +50,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onBackPressed() {
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        // Check if the current fragment is NOT HomeFragment
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        if (currentFragment !is HomeFragment) {
+            // Navigate to HomeFragment
+            openFragment(HomeFragment())
+            binding.bottomNavigation.selectedItemId = R.id.home_btn
         } else {
+            // If already in HomeFragment, allow the default behavior (exit the app)
             super.onBackPressedDispatcher.onBackPressed()
         }
     }
+
 
     private fun openFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
