@@ -66,6 +66,62 @@
                     android:layout_marginLeft="30dp"
                     android:layout_marginTop="5dp"
                     android:textSize="15sp"/>
+    
+                
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    app:layout_constraintTop_toBottomOf="@id/imageView3">
+
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/tiresButton"
+                            android:backgroundTint="#295789"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TIRES"
+                            android:layout_marginLeft="5dp"
+                            android:fontFamily="@font/dmsans"
+                            android:textStyle="bold"/>
+
+                        <Button
+                            android:id="@+id/oilsButton"
+                            android:backgroundTint="#295789"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="OILS"
+                            android:layout_marginLeft="5dp"
+                            android:fontFamily="@font/dmsans"
+                            android:textStyle="bold"/>
+
+                        <Button
+                            android:id="@+id/batteryButton"
+                            android:backgroundTint="#295789"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="BATTERY"
+                            android:layout_marginLeft="5dp"
+                            android:fontFamily="@font/dmsans"
+                            android:textStyle="bold"/>
+
+                        <Button
+                            android:id="@+id/lubricantButton"
+                            android:backgroundTint="#295789"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:text="LUBRICANT"
+                            android:fontFamily="@font/dmsans"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                </HorizontalScrollView>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </ScrollView>

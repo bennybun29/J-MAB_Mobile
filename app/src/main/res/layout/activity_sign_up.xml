@@ -41,23 +41,23 @@
         app:layout_constraintTop_toBottomOf="@+id/textView"
         android:textSize="13sp"/>
 
-
     <LinearLayout
-        android:id="@+id/SignUpForm"
+        android:id="@+id/firstLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@+id/tvCreateAccount"
-        android:layout_marginTop="50dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp">
 
         <EditText
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="55dp"
-            android:hint="Username"
+            android:layout_weight="1"
+            android:hint="First Name"
+            android:layout_marginEnd="5dp"
             android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
             android:fontFamily="@font/cabin"
             android:textStyle="italic"
             android:background="@drawable/rounded_textfield"
@@ -66,6 +66,36 @@
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
             android:inputType="text"/>
+
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="55dp"
+            android:hint="Last Name"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="5dp"
+            android:fontFamily="@font/cabin"
+            android:textStyle="italic"
+            android:background="@drawable/rounded_textfield"
+            android:layout_marginBottom="10dp"
+            android:drawableStart="@drawable/user_icon"
+            android:paddingStart="5dp"
+            android:drawablePadding="10dp"
+            android:inputType="text"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/SignUpForm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@+id/firstLinearLayout"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp">
+
+
 
         <EditText
             android:layout_width="match_parent"
