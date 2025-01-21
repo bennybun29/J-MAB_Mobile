@@ -53,6 +53,7 @@
         android:layout_marginLeft="10dp">
 
         <EditText
+            android:id="@+id/emailAddress"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginStart="30dp"
@@ -68,6 +69,7 @@
             android:drawablePadding="10dp"/>
 
         <EditText
+            android:id="@+id/userPassword"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:layout_marginStart="30dp"

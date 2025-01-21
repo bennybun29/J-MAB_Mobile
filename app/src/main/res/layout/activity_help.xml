@@ -36,4 +36,62 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="25dp"/>
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#C8C8C8"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="5dp"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintTop_toBottomOf="@id/imageView3">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ABOUT US"
+                android:layout_gravity="center"
+                android:fontFamily="@font/dmsans"
+                android:textColor="@color/j_mab_blue"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/j_mab_blue"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="At J-MAB, we’re passionate about helping you get the most out of your vehicle. We offer a wide range of high-quality car supplies, from performance parts to everyday essentials, all designed to keep your car running smoothly and efficiently. Whether you're upgrading your ride or simply maintaining it, we make it easy to find the products you need. Your journey matters to us, and we're here to support you every mile of the way with reliable, top-notch car care solutions."
+                android:fontFamily="@font/dmsans"
+                android:textColor="@color/j_mab_blue"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="25dp"
+                android:text="In case of Emergency call us:\n  GLOBE: 0977 769 3620\n  SMART: 0946 289 6767"
+                android:fontFamily="@font/dmsans"
+                android:textColor="@color/j_mab_blue"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
