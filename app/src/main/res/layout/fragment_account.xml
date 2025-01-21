@@ -23,19 +23,20 @@
             android:id="@+id/ProfilePictureButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="25dp"
             android:layout_marginTop="25dp"
             android:background="@null"
             android:src="@drawable/profile_picture_btn"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/UsernameTV"/>
 
 
         <TextView
             android:id="@+id/UsernameTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="-80dp"
+
             android:layout_marginTop="30dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/dmsans"

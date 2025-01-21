@@ -29,7 +29,7 @@
         android:fontFamily="@font/dmsans"
         android:text="Account &amp; Security"
         android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

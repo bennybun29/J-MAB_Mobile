@@ -1,12 +1,22 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.UnderlineSpan
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.j_mabmobile.SignUpActivity
 import com.example.j_mabmobile.api.ApiResponse
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
@@ -30,6 +40,39 @@ class SignInActivity : AppCompatActivity() {
         signInBtn = findViewById(R.id.signInBtn)
         emailEditText = findViewById(R.id.emailAddress)
         passwordEditText = findViewById(R.id.userPassword)
+
+        val tvSignUpHere = findViewById<TextView>(R.id.tvSignInHere)
+        val text = "Don't have an account? Sign up"
+        val spannableString = SpannableString(text)
+
+        // Set the clickable span for "Sign in here"
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                // Handle the click event, e.g., navigate to SignInActivity
+                startActivity(Intent(this@SignInActivity, SignUpActivity::class.java))
+            }
+        }
+
+        val signInStart = text.indexOf("Sign up")
+        val signInEnd = signInStart + "Sign up".length
+
+        spannableString.setSpan(clickableSpan, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        spannableString.setSpan(
+            ForegroundColorSpan(Color.rgb(2,37,75)),
+            signInStart,
+            signInEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        spannableString.setSpan(object : UnderlineSpan() {
+            override fun updateDrawState(ds: android.text.TextPaint) {
+                ds.isUnderlineText = false // Disable underline
+            }
+        }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        tvSignUpHere.text = spannableString
+        tvSignUpHere.movementMethod = LinkMovementMethod.getInstance()
 
         signInBtn.setOnClickListener {
             val email = emailEditText.text.toString()
