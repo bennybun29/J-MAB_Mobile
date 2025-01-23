@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -20,6 +21,7 @@ class AccountFragment : Fragment() {
     lateinit var account_and_sec_btn: Button
     lateinit var my_addresses_btn: Button
     lateinit var help_btn: Button
+    lateinit var log_out_btn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,16 +35,13 @@ class AccountFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_account, container, false)
 
-        // Find the button in the view
         account_and_sec_btn = view.findViewById(R.id.account_and_security_btn)
         my_addresses_btn = view.findViewById(R.id.my_addresses_btn)
         help_btn = view.findViewById(R.id.help_btn)
+        log_out_btn = view.findViewById(R.id.log_out_btn)
 
-
-        // Set up the OnClickListener for the button
         account_and_sec_btn.setOnClickListener {
             val intent = Intent(activity, AccountAndSecurityActivity::class.java)
             startActivity(intent)
@@ -56,6 +55,21 @@ class AccountFragment : Fragment() {
         help_btn.setOnClickListener( {
             val intent = Intent(activity, HelpActivity::class.java)
             startActivity(intent)
+        })
+
+        log_out_btn.setOnClickListener({
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Log Out")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Yes") { _, _ ->
+                    val intent = Intent(activity, SignInActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+
         })
 
 

@@ -1,8 +1,12 @@
 package com.example.j_mabmobile
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.example.j_mabmobile.databinding.ActivityMainBinding
@@ -58,9 +62,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             binding.bottomNavigation.selectedItemId = R.id.home_btn
         } else {
             // If already in HomeFragment, allow the default behavior (exit the app)
-            super.onBackPressedDispatcher.onBackPressed()
+            AlertDialog.Builder(this)
+                .setTitle("Log Out")
+                .setMessage("Are you sure you want close the app?")
+                .setPositiveButton("Yes") { _, _ ->
+                    super.onBackPressed()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
+
 
 
     private fun openFragment(fragment: Fragment) {

@@ -7,6 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.j_mabmobile.model.Item
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -40,20 +44,40 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // Find the cart icon in the view
         cart_icon = view.findViewById(R.id.cart_icon)
 
-        // Set up the OnClickListener for the cart icon
         cart_icon.setOnClickListener {
             val intent = Intent(activity, CartActivity::class.java)
             startActivity(intent)
         }
 
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2) // Two-column layout
+
+        val itemList = listOf(
+            Item(R.drawable.gulong, "Gulong 1"),
+            Item(R.drawable.castrol, "Castrol"),
+            Item(R.drawable.battery, "Eveready"),
+            Item(R.drawable.second_gulong, "Gulong 2"),
+            Item(R.drawable.motolola, "Motolola"),
+            Item(R.drawable.baby_oil, "Baby Oil"),
+            Item(R.drawable.gulong, "Gulong 1"),
+            Item(R.drawable.castrol, "Castrol"),
+            Item(R.drawable.battery, "Eveready"),
+            Item(R.drawable.second_gulong, "Gulong 2"),
+            Item(R.drawable.motolola, "Motolola"),
+            Item(R.drawable.baby_oil, "Baby Oil")
+        )
+
+        // Set adapter
+        recyclerView.adapter = RecyclerAdapter(itemList)
+
+
         return view
     }
+
 
     override fun onPause() {
         super.onPause()

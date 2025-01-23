@@ -100,7 +100,7 @@ class SignInActivity : AppCompatActivity() {
                     Toast.makeText(this@SignInActivity, apiResponse?.message ?: "Login successful", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this@SignInActivity, MainActivity::class.java)
                     startActivity(intent)
-                    finish() // Finish the current activity to avoid returning to it on back press
+                    finishAffinity() // Finish the current activity to avoid returning to it on back press
                 } else {
                     // Login failed
                     try {

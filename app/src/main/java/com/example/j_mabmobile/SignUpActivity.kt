@@ -110,7 +110,7 @@ class SignUpActivity : AppCompatActivity() {
                         if (response.code() == 201) { // Successful registration
                             val intent = Intent(this@SignUpActivity, MainActivity::class.java)
                             startActivity(intent)
-                            finish()
+                            finishAffinity()
                         } else {
                             // Handle unexpected successful response code if needed
                             Toast.makeText(this@SignUpActivity, "Unexpected success response", Toast.LENGTH_SHORT).show()

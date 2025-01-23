@@ -11,3 +11,8 @@ data class LogInRequest(
     val email: String,
     val password: String
 )
+
+data class Item(
+    val imageResId: Int,
+    val text: String
+)
