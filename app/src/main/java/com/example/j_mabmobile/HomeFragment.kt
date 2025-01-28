@@ -2,42 +2,41 @@ package com.example.j_mabmobile
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
-import androidx.core.widget.NestedScrollView
+import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.j_mabmobile.model.Item
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-
-
+import com.example.j_mabmobile.api.ApiService
+import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.Product
+import com.example.j_mabmobile.model.ProductResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    lateinit var cart_icon : ImageButton
+    private lateinit var allBtn: Button
+    private lateinit var tiresButton: Button
+    private lateinit var oilsButton: Button
+    private lateinit var batteryButton: Button
+    private lateinit var lubricantButton: Button
+    private lateinit var cartIcon: ImageButton
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var emptyMessage: View // Placeholder for the empty message
+    private var allProducts: List<Product> = listOf() // To store all products
+    private var filteredProducts: List<Product> = listOf() // To store filtered products
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -46,61 +45,99 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        cart_icon = view.findViewById(R.id.cart_icon)
+        // Initialize views
+        cartIcon = view.findViewById(R.id.cart_icon)
+        allBtn = view.findViewById(R.id.allBtn)
+        tiresButton = view.findViewById(R.id.tiresButton)
+        oilsButton = view.findViewById(R.id.oilsButton)
+        batteryButton = view.findViewById(R.id.batteryButton)
+        lubricantButton = view.findViewById(R.id.lubricantButton)
+        recyclerView = view.findViewById(R.id.recyclerView)
+        progressBar = view.findViewById(R.id.progressBar)
+        emptyMessage = view.findViewById(R.id.emptyMessage) // Reference the empty message view
 
-        cart_icon.setOnClickListener {
+        // Setup buttons
+        val buttons = listOf(allBtn, tiresButton, oilsButton, batteryButton, lubricantButton)
+        for (button in buttons) {
+            button.setOnClickListener {
+                buttons.forEach { it.isSelected = false }
+                it.isSelected = true
+
+                // Apply filter based on selected button
+                when (button) {
+                    allBtn -> filterProducts("All")
+                    tiresButton -> filterProducts("Tires")
+                    oilsButton -> filterProducts("Oils")
+                    batteryButton -> filterProducts("Battery")
+                    lubricantButton -> filterProducts("Lubricant")
+                }
+            }
+        }
+        allBtn.isSelected = true
+
+        // Set cart button click listener
+        cartIcon.setOnClickListener {
             val intent = Intent(activity, CartActivity::class.java)
             startActivity(intent)
         }
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2) // Two-column layout
+        // Setup RecyclerView
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        val itemList = listOf(
-            Item(R.drawable.gulong, "Gulong 1"),
-            Item(R.drawable.castrol, "Castrol"),
-            Item(R.drawable.battery, "Eveready"),
-            Item(R.drawable.second_gulong, "Gulong 2"),
-            Item(R.drawable.motolola, "Motolola"),
-            Item(R.drawable.baby_oil, "Baby Oil"),
-            Item(R.drawable.gulong, "Gulong 1"),
-            Item(R.drawable.castrol, "Castrol"),
-            Item(R.drawable.battery, "Eveready"),
-            Item(R.drawable.second_gulong, "Gulong 2"),
-            Item(R.drawable.motolola, "Motolola"),
-            Item(R.drawable.baby_oil, "Baby Oil")
-        )
-
-        // Set adapter
-        recyclerView.adapter = RecyclerAdapter(itemList)
-
+        // Fetch products
+        fetchProducts()
 
         return view
     }
 
+    private fun fetchProducts() {
+        progressBar.visibility = View.VISIBLE
+        emptyMessage.visibility = View.GONE // Hide the empty message initially
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+        val apiService = RetrofitClient.instance.create(ApiService::class.java)
+        apiService.getProducts().enqueue(object : Callback<ProductResponse> {
+            override fun onResponse(
+                call: Call<ProductResponse>,
+                response: Response<ProductResponse>
+            ) {
+                progressBar.visibility = View.GONE
+                if (response.isSuccessful && response.body() != null) {
+                    val productResponse = response.body()!!
+                    if (productResponse.success) {
+                        allProducts = productResponse.products // Store all products
+                        filterProducts("All") // Show all products by default
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to load products", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Unexpected response format", Toast.LENGTH_SHORT).show()
                 }
             }
+
+            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
+                progressBar.visibility = View.GONE
+                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("HomeFragment", "Error fetching products", t)
+            }
+        })
+    }
+
+    private fun filterProducts(category: String) {
+        filteredProducts = if (category == "All") {
+            allProducts // Show all products
+        } else {
+            // Filter products based on the category
+            allProducts.filter { it.category.equals(category, ignoreCase = true) }
+        }
+
+        // Check if there are products to display
+        if (filteredProducts.isEmpty()) {
+            recyclerView.visibility = View.GONE
+            emptyMessage.visibility = View.VISIBLE // Show the empty message
+        } else {
+            recyclerView.visibility = View.VISIBLE
+            emptyMessage.visibility = View.GONE // Hide the empty message
+            recyclerView.adapter = RecyclerAdapter(filteredProducts) // Update RecyclerView
+        }
     }
 }

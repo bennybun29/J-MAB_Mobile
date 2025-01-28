@@ -10,7 +10,7 @@ class AccountAndSecurityActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Set the layout for the CartActivity
+
         setContentView(R.layout.activity_account_and_activity)
 
         backBtn = findViewById(R.id.backButton)

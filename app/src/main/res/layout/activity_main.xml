@@ -30,14 +30,20 @@
                 app:fabCradleRoundedCornerRadius="50dp">
 
                 <com.google.android.material.bottomnavigation.BottomNavigationView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/bottom_navigation"
-                    app:labelVisibilityMode="labeled"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     app:menu="@menu/bottom_menu"
                     android:background="@android:color/transparent"
+                    app:itemTextAppearanceActive="@style/BottomNavTextActive"
+                    app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
+                    app:itemIconSize="24dp"
+                    app:itemIconTint="@color/white"
                     app:itemTextColor="@color/white"
-                    app:itemIconTint="@color/white"/>
+                    app:itemRippleColor="@android:color/transparent"
+                    app:labelVisibilityMode="labeled" />
+
+
 
             </com.google.android.material.bottomappbar.BottomAppBar>
 
