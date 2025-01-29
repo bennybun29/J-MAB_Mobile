@@ -8,6 +8,7 @@ import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -19,4 +20,14 @@ interface ApiService {
 
     @GET("product/products")
     fun getProducts(): Call<ProductResponse>
+
+    @GET("product/search")
+    fun searchProducts(
+        @Query("name") name: String? = null,
+        @Query("brand") brand: String? = null,
+        @Query("category") category: String? = null,
+        @Query("subcategory") subcategory: String? = null,
+        @Query("tags") tags: String? = null // Pass tags as a comma-separated string
+    ): Call<ProductResponse>
+
 }

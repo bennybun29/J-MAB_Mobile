@@ -20,12 +20,12 @@ class RecyclerAdapter(private val products: List<Product>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val product = products[position]
         holder.textView.text = product.name
-        holder.priceView.text = "$${product.price}"
+        holder.priceView.text = "₱${product.price}"
 
         // Load image using Picasso
         Picasso.get()
             .load(product.image_url)
-            .placeholder(R.drawable.gulong) // Use a placeholder drawable
+            .placeholder(R.drawable.jmab_fab) // Use a placeholder drawable
             .error(R.drawable.jmab_fab) // Use an error drawable if loading fails
             .into(holder.imageView)
     }

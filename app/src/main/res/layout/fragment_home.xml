@@ -4,7 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    tools:context=".HomeFragment"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="afterDescendants"
+    >
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -26,13 +29,13 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="30dp"
                     android:layout_marginEnd="10dp"
+                    app:iconifiedByDefault="false"
                     android:background="@drawable/search_view_bg"
-                    app:circularflow_radiusInDP="20dp"
-                    app:defaultQueryHint="Search"
                     app:layout_constraintEnd_toStartOf="@+id/cart_icon"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:queryHint="Search" />
+
 
                 <ImageButton
                     android:id="@+id/cart_icon"
@@ -41,9 +44,10 @@
                     android:src="@drawable/cart_icon"
                     android:background="@null"
                     android:layout_marginTop="40dp"
-                    android:layout_marginRight="30dp"
-                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_marginEnd="30dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
 
                 <TextView
                     android:id="@+id/categoriesTV"
