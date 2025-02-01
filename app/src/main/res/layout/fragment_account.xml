@@ -49,30 +49,17 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/FullNameTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/dmsans"
-            android:text="Full Name"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:textStyle="italic"
-            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
-            app:layout_constraintTop_toBottomOf="@+id/UsernameTV" />
-
-        <TextView
             android:id="@+id/userPhoneNumberTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
             android:fontFamily="@font/dmsans"
             android:text="(09##) ### ####"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="@+id/UsernameTV"
-            app:layout_constraintTop_toBottomOf="@+id/FullNameTV" />
+            app:layout_constraintTop_toBottomOf="@+id/UsernameTV"
+            tools:layout_editor_absoluteY="75dp" />
 
         <TextView
             android:id="@+id/userFullAddressTV"

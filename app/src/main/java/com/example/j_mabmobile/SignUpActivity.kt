@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -18,9 +19,9 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.j_mabmobile.SignInActivity
-import com.example.j_mabmobile.api.ApiResponse
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import org.json.JSONObject
 import retrofit2.Call
@@ -39,6 +40,16 @@ class SignUpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_up)
+
+        // Check if token is already present and valid
+        val token = getToken()
+        if (token != null && isTokenValid()) {
+            // If valid token exists, go to MainActivity
+            val intent = Intent(this@SignUpActivity, MainActivity::class.java)
+            startActivity(intent)
+            finish() // Close the SignUpActivity to prevent returning to it
+            return
+        }
 
         emailTextField = findViewById(R.id.emailAddress)
         lastNameTextField = findViewById(R.id.lastName)
@@ -97,8 +108,8 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun signUpUser(signUpRequest: SignUpRequest) {
-        val apiService = RetrofitClient.instance.create(ApiService::class.java)
-        val call = apiService.register(signUpRequest)
+        val apiService = RetrofitClient.getRetrofitInstance(this)
+        val call = apiService.create(ApiService::class.java).register(signUpRequest)
 
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
@@ -132,5 +143,16 @@ class SignUpActivity : AppCompatActivity() {
                 Toast.makeText(this@SignUpActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun getToken(): String? {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("jwt_token", null)
+    }
+
+    private fun isTokenValid(): Boolean {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val expiryTime = sharedPreferences.getLong("token_expiry_time", 0)
+        return System.currentTimeMillis() < expiryTime
     }
 }

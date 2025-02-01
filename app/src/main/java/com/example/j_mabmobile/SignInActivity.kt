@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -9,6 +10,7 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.UnderlineSpan
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -16,10 +18,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.j_mabmobile.SignUpActivity
-import com.example.j_mabmobile.api.ApiResponse
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.LogInRequest
 import org.json.JSONObject
 import retrofit2.Call
@@ -37,42 +38,21 @@ class SignInActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_in)
 
+        // Initialize views
         signInBtn = findViewById(R.id.signInBtn)
         emailEditText = findViewById(R.id.emailAddress)
         passwordEditText = findViewById(R.id.userPassword)
 
-        val tvSignUpHere = findViewById<TextView>(R.id.tvSignInHere)
-        val text = "Don't have an account? Sign up"
-        val spannableString = SpannableString(text)
-
-        // Set the clickable span for "Sign in here"
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Handle the click event, e.g., navigate to SignInActivity
-                startActivity(Intent(this@SignInActivity, SignUpActivity::class.java))
-            }
+        // Check if the token exists and is still valid
+        if (isTokenValid()) {
+            // Token is valid, navigate to the main activity directly
+            startActivity(Intent(this, MainActivity::class.java))
+            finish() // Close the sign-in activity
+            return
         }
 
-        val signInStart = text.indexOf("Sign up")
-        val signInEnd = signInStart + "Sign up".length
-
-        spannableString.setSpan(clickableSpan, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        spannableString.setSpan(
-            ForegroundColorSpan(Color.rgb(2,37,75)),
-            signInStart,
-            signInEnd,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-
-        spannableString.setSpan(object : UnderlineSpan() {
-            override fun updateDrawState(ds: android.text.TextPaint) {
-                ds.isUnderlineText = false // Disable underline
-            }
-        }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        tvSignUpHere.text = spannableString
-        tvSignUpHere.movementMethod = LinkMovementMethod.getInstance()
+        // Set up the sign-up link
+        setupSignUpLink()
 
         signInBtn.setOnClickListener {
             val email = emailEditText.text.toString()
@@ -88,21 +68,71 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSignUpLink() {
+        val tvSignUpHere = findViewById<TextView>(R.id.tvSignInHere)
+        val text = "Don't have an account? Sign up"
+        val spannableString = SpannableString(text)
+
+        // Set the clickable span for "Sign up"
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                startActivity(Intent(this@SignInActivity, SignUpActivity::class.java))
+            }
+        }
+
+        val signInStart = text.indexOf("Sign up")
+        val signInEnd = signInStart + "Sign up".length
+
+        spannableString.setSpan(clickableSpan, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        spannableString.setSpan(
+            ForegroundColorSpan(Color.rgb(2, 37, 75)),
+            signInStart,
+            signInEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        spannableString.setSpan(object : UnderlineSpan() {
+            override fun updateDrawState(ds: android.text.TextPaint) {
+                ds.isUnderlineText = false
+            }
+        }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        tvSignUpHere.text = spannableString
+        tvSignUpHere.movementMethod = LinkMovementMethod.getInstance()
+    }
+
     private fun loginUser(logInRequest: LogInRequest) {
-        val apiService = RetrofitClient.instance.create(ApiService::class.java)
-        val call = apiService.login(logInRequest)
+        val apiService = RetrofitClient.getRetrofitInstance(this)
+        val call = apiService.create(ApiService::class.java).login(logInRequest)
 
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    // Login success, proceed to MainActivity
                     val apiResponse = response.body()
+                    val token = apiResponse?.token
+                    val firstName = apiResponse?.user?.first_name
+                    val lastName = apiResponse?.user?.last_name
+                    val userId = apiResponse?.user?.id
+                    val expiresIn = apiResponse?.expiresIn ?: 3600L
+
+                    if (token != null) {
+                        saveToken(token, expiresIn)
+                    }
+
+                    if (firstName != null && lastName != null) {
+                        saveUserName(firstName, lastName)
+                    }
+
+                    if (userId != null) {
+                        saveUserId(userId)
+                    }
+
                     Toast.makeText(this@SignInActivity, apiResponse?.message ?: "Login successful", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this@SignInActivity, MainActivity::class.java)
-                    startActivity(intent)
-                    finishAffinity() // Finish the current activity to avoid returning to it on back press
+                    startActivity(Intent(this@SignInActivity, MainActivity::class.java))
+                    finishAffinity()
                 } else {
-                    // Login failed
+                    // Handle failure response
                     try {
                         val errorResponse = response.errorBody()?.string()
                         val errorMessage = JSONObject(errorResponse).getString("message")
@@ -118,4 +148,46 @@ class SignInActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun saveToken(token: String, expiresIn: Long) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val expiryTime = System.currentTimeMillis() + expiresIn * 1000 // Expiry time in milliseconds
+        editor.putString("jwt_token", token)
+        editor.putLong("token_expiry_time", expiryTime)
+        editor.apply()
+
+        Log.d("Token", "Token saved with expiry time: $expiryTime")
+    }
+
+    private fun saveUserName(firstName: String, lastName: String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("first_name", firstName)
+        editor.putString("last_name", lastName)
+        editor.apply()
+    }
+
+    private fun saveUserId(userId: Int) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putInt("user_id", userId)
+        editor.apply()
+
+        Log.d("UserID", "User ID saved: $userId")
+    }
+
+
+    private fun isTokenValid(): Boolean {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("jwt_token", null)
+        val expiryTime = sharedPreferences.getLong("token_expiry_time", 0L)
+
+        if (token != null && System.currentTimeMillis() < expiryTime) {
+            return true
+        }
+
+        return false
+    }
 }
+

@@ -1,8 +1,11 @@
 package com.example.j_mabmobile
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.text.format.DateUtils
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -17,8 +20,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set the first fragment (default)
-        openFragment(HomeFragment())
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
+
+
+        // Check if the token is valid and handle authentication
+        if (!isTokenValid()) {
+            // If the token is not valid or expired, navigate to the SignInActivity
+            navigateToSignIn()
+        } else {
+            // Set the first fragment (default)
+            openFragment(HomeFragment())
+        }
 
         // Set the BottomNavigationView listener
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -101,5 +113,27 @@ class MainActivity : AppCompatActivity() {
             val icon = menuItem.icon
             scaleIcon(icon, 24) // Smaller icon size
         }
+    }
+
+    // Check if the token is saved and valid
+    private fun isTokenValid(): Boolean {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", MODE_PRIVATE)
+        val token = sharedPreferences.getString("jwt_token", null)
+        val tokenExpiryTime = sharedPreferences.getLong("token_expiry_time", 0L)
+
+        // Check if token exists and if it has expired
+        if (token != null && tokenExpiryTime > System.currentTimeMillis()) {
+            // Token is valid
+            return true
+        }
+        // Token is either missing or expired
+        return false
+    }
+
+    // Navigate to the SignInActivity if the token is invalid
+    private fun navigateToSignIn() {
+        val intent = Intent(this, SignInActivity::class.java)
+        startActivity(intent)
+        finish() // Close the MainActivity so the user cannot go back to it
     }
 }

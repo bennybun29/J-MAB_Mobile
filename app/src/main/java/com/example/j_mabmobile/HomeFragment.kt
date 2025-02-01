@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -37,16 +39,23 @@ class HomeFragment : Fragment() {
     private var filteredProducts: List<Product> = listOf() // To store filtered products
     private lateinit var searchView: SearchView
     private var currentCategory: String = "All"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    private var userId: Int = -1 // Default userId value
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
+
+        // Retrieve user_id from SharedPreferences
+        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", MODE_PRIVATE)
+        userId = sharedPreferences.getInt("user_id", -1) // Default to -1 if not found
+
+        if (userId != -1) {
+            Log.d("UserID", "Retrieved User ID: $userId")
+        } else {
+            Log.d("UserID", "No User ID found")
+        }
 
         // Initialize views
         cartIcon = view.findViewById(R.id.cart_icon)
@@ -60,12 +69,12 @@ class HomeFragment : Fragment() {
         emptyMessage = view.findViewById(R.id.emptyMessage)
         searchView = view.findViewById(R.id.searchView)
 
-        // Ensure the SearchView is collapsed initially but is clickable
-        searchView.setIconified(true) // Collapse the SearchView initially
-        searchView.clearFocus() // Remove any initial focus
+        // Ensure the SearchView is collapsed initially
+        searchView.setIconified(true)
+        searchView.clearFocus()
         searchView.isFocusable = false
 
-        // Set up the listener for the SearchView
+        // Search functionality
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null && query.isNotBlank()) {
@@ -76,29 +85,18 @@ class HomeFragment : Fragment() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!newText.isNullOrBlank()) {
-                    filterProducts("All")
+                    searchProducts(newText, currentCategory)
                 }
                 return true
             }
         })
 
-        // When the SearchView gains focus, prevent iconification
-        searchView.setOnQueryTextFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                searchView.isIconified = false // Prevent iconification when focused
-            }
-        }
-
-
-
-// Setup buttons
+        // Setup buttons for category selection
         val buttons = listOf(allBtn, tiresButton, oilsButton, batteryButton, lubricantButton)
         for (button in buttons) {
             button.setOnClickListener {
                 buttons.forEach { it.isSelected = false }
                 it.isSelected = true
-
-                // Apply filter based on selected button
                 when (button) {
                     allBtn -> {
                         currentCategory = "All"
@@ -114,45 +112,24 @@ class HomeFragment : Fragment() {
                     }
                     batteryButton -> {
                         currentCategory = "Battery"
-                        filterProducts("Battery")
+                        filterProducts("Batteries")
                     }
                     lubricantButton -> {
                         currentCategory = "Lubricant"
-                        filterProducts("Lubricant")
+                        filterProducts("Lubricants")
                     }
                 }
             }
         }
-        allBtn.isSelected = true // Set default category to "All"
+        allBtn.isSelected = true // Default category
 
-// In the search query listener, modify to filter according to the active category:
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query != null && query.isNotBlank()) {
-                    searchProducts(query, currentCategory) // Pass the active category
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (!newText.isNullOrBlank()) {
-                    searchProducts(newText, currentCategory) // Pass the active category
-                } else {
-                    // If no search text, show products based on the current category
-                    filterProducts(currentCategory)
-                }
-                return true
-            }
-        })
-
-
-        // Set cart button click listener
+        // Cart button listener
         cartIcon.setOnClickListener {
             val intent = Intent(activity, CartActivity::class.java)
             startActivity(intent)
         }
 
-        // Setup RecyclerView
+        // RecyclerView setup
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
         // Fetch products
@@ -161,18 +138,13 @@ class HomeFragment : Fragment() {
         return view
     }
 
-
-
     private fun fetchProducts() {
         progressBar.visibility = View.VISIBLE
-        emptyMessage.visibility = View.GONE // Hide the empty message initially
+        emptyMessage.visibility = View.GONE
 
-        val apiService = RetrofitClient.instance.create(ApiService::class.java)
+        val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
         apiService.getProducts().enqueue(object : Callback<ProductResponse> {
-            override fun onResponse(
-                call: Call<ProductResponse>,
-                response: Response<ProductResponse>
-            ) {
+            override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
                 progressBar.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
                     val productResponse = response.body()!!
@@ -189,7 +161,8 @@ class HomeFragment : Fragment() {
 
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
                 progressBar.visibility = View.GONE
-                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                emptyMessage.visibility = View.VISIBLE
+                emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = "Error fetching products. Please try again."
                 Log.e("HomeFragment", "Error fetching products", t)
             }
         })
@@ -197,20 +170,18 @@ class HomeFragment : Fragment() {
 
     private fun filterProducts(category: String) {
         filteredProducts = if (category == "All") {
-            allProducts // Show all products
+            allProducts
         } else {
-            // Filter products based on the category
             allProducts.filter { it.category.equals(category, ignoreCase = true) }
         }
 
-        // Check if there are products to display
         if (filteredProducts.isEmpty()) {
             recyclerView.visibility = View.GONE
-            emptyMessage.visibility = View.VISIBLE // Show the empty message
+            emptyMessage.visibility = View.VISIBLE
         } else {
             recyclerView.visibility = View.VISIBLE
-            emptyMessage.visibility = View.GONE // Hide the empty message
-            recyclerView.adapter = RecyclerAdapter(filteredProducts) // Update RecyclerView
+            emptyMessage.visibility = View.GONE
+            recyclerView.adapter = RecyclerAdapter(filteredProducts, userId)
         }
     }
 
@@ -218,13 +189,12 @@ class HomeFragment : Fragment() {
         progressBar.visibility = View.VISIBLE
         emptyMessage.visibility = View.GONE
 
-        val apiService = RetrofitClient.instance.create(ApiService::class.java)
+        val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
         apiService.searchProducts(name = query).enqueue(object : Callback<ProductResponse> {
             override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
                 progressBar.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
                     val productResponse = response.body()!!
-                    // Filter products based on both search query and selected category
                     filteredProducts = if (category == "All") {
                         productResponse.products.filter { it.name.contains(query, ignoreCase = true) }
                     } else {
@@ -239,7 +209,7 @@ class HomeFragment : Fragment() {
                     } else {
                         recyclerView.visibility = View.VISIBLE
                         emptyMessage.visibility = View.GONE
-                        recyclerView.adapter = RecyclerAdapter(filteredProducts)
+                        recyclerView.adapter = RecyclerAdapter(filteredProducts, userId)
                     }
                 } else {
                     Toast.makeText(requireContext(), "No products found", Toast.LENGTH_SHORT).show()
@@ -252,8 +222,4 @@ class HomeFragment : Fragment() {
             }
         })
     }
-
-
-
-
 }
