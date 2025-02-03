@@ -1,9 +1,16 @@
 package com.example.j_mabmobile
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -37,10 +44,17 @@ class ProductScreenActivity : AppCompatActivity() {
         val productPrice: TextView = findViewById(R.id.item_price)
         val backBtn: ImageButton = findViewById(R.id.backBtn)
         val addToCartBtn: LinearLayout = findViewById(R.id.addToCartBtn)
+        val cartBtn: ImageButton = findViewById(R.id.cartBtn)
 
         backBtn.setOnClickListener {
             onBackPressed()
         }
+
+        cartBtn.setOnClickListener({
+            onPause()
+            val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
+        })
 
         // Get data from intent
         val product_id = intent.getIntExtra("product_id", 0)
@@ -74,6 +88,8 @@ class ProductScreenActivity : AppCompatActivity() {
             token?.let {
                 addToCart(userId, product_id, 1, it) // Assuming quantity = 1 for simplicity
             }
+
+            animateCartEffect()
         }
 
 
@@ -82,6 +98,56 @@ class ProductScreenActivity : AppCompatActivity() {
         Log.d("ProductScreenActivity", "User ID: $userId")
         Log.d("ProductScreenActivity", "Token: $token")
         Log.d("ProductScreenActivity", "Product ID: $product_id")
+    }
+
+    private fun animateCartEffect() {
+        val rootLayout = findViewById<ViewGroup>(android.R.id.content)
+        val cartIcon = findViewById<ImageButton>(R.id.cartBtn)
+        val addToCartIcon = findViewById<LinearLayout>(R.id.addToCartBtn)
+            .findViewById<ImageView>(R.id.shopping_cart_image) // Get the ImageView inside LinearLayout
+
+
+        val floatingCart = ImageView(this).apply {
+            setImageResource(R.drawable.shopping_cart_colored)
+            layoutParams = FrameLayout.LayoutParams(100, 100)
+        }
+
+        rootLayout.addView(floatingCart)
+
+        // Get start and end positions
+        val startLoc = IntArray(2)
+        addToCartIcon.getLocationInWindow(startLoc)
+
+        val endLoc = IntArray(2)
+        cartIcon.getLocationInWindow(endLoc)
+
+        val startX = startLoc[0].toFloat()
+        val startY = startLoc[1].toFloat()
+        val endX = endLoc[0].toFloat()
+        val endY = endLoc[1].toFloat()
+
+        floatingCart.x = startX
+        floatingCart.y = startY
+
+        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 500
+            addUpdateListener { animation ->
+                val fraction = animation.animatedValue as Float
+                floatingCart.x = startX + fraction * (endX - startX)
+                floatingCart.y = startY + fraction * (endY - startY)
+            }
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    rootLayout.removeView(floatingCart)
+                }
+            })
+        }
+
+        // Apply scale animation
+        val scaleAnim = AnimationUtils.loadAnimation(this, R.anim.cart_animation)
+        cartIcon.startAnimation(scaleAnim)
+
+        animator.start()
     }
 
     private fun addToCart(userId: Int, productId: Int, quantity: Int, token: String) {

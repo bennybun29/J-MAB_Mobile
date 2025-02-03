@@ -77,21 +77,24 @@ class HomeFragment : Fragment() {
         // Search functionality
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query != null && query.isNotBlank()) {
+                if (!query.isNullOrBlank()) {
                     searchProducts(query, currentCategory)
                 }
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                if (!newText.isNullOrBlank()) {
+                if (newText.isNullOrBlank()) {
+                    filterProducts(currentCategory)
+                } else {
                     searchProducts(newText, currentCategory)
                 }
                 return true
             }
         })
 
-        // Setup buttons for category selection
+
+
         val buttons = listOf(allBtn, tiresButton, oilsButton, batteryButton, lubricantButton)
         for (button in buttons) {
             button.setOnClickListener {
