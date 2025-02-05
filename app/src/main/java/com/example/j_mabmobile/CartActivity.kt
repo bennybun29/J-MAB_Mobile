@@ -42,14 +42,15 @@ class CartActivity : AppCompatActivity() {
             onBackPressed()
         }
 
-        cartAdapter = CartAdapter(cartItems)
+
+        cartAdapter = CartAdapter(cartItems, totalPriceTV, selectAllChkBox)
         recyclerViewCart.layoutManager = LinearLayoutManager(this)
         recyclerViewCart.adapter = cartAdapter
 
         getUserDataFromPreferences()
 
         selectAllChkBox.setOnCheckedChangeListener { _, isChecked ->
-            handleSelectAll(isChecked)
+            cartAdapter.selectAllItems(isChecked)
         }
 
         if (userId != -1 && authToken != null) {

@@ -11,7 +11,7 @@ class AccountAndSecurityActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_account_and_activity)
+        setContentView(R.layout.activity_account_and_security)
 
         backBtn = findViewById(R.id.backButton)
 

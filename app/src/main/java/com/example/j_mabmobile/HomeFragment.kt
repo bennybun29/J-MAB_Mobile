@@ -34,12 +34,12 @@ class HomeFragment : Fragment() {
     private lateinit var cartIcon: ImageButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
-    private lateinit var emptyMessage: View // Placeholder for the empty message
-    private var allProducts: List<Product> = listOf() // To store all products
-    private var filteredProducts: List<Product> = listOf() // To store filtered products
+    private lateinit var emptyMessage: View
+    private var allProducts: List<Product> = listOf()
+    private var filteredProducts: List<Product> = listOf()
     private lateinit var searchView: SearchView
     private var currentCategory: String = "All"
-    private var userId: Int = -1 // Default userId value
+    private var userId: Int = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -114,11 +114,11 @@ class HomeFragment : Fragment() {
                         filterProducts("Oils")
                     }
                     batteryButton -> {
-                        currentCategory = "Battery"
+                        currentCategory = "Batteries"
                         filterProducts("Batteries")
                     }
                     lubricantButton -> {
-                        currentCategory = "Lubricant"
+                        currentCategory = "Lubricants"
                         filterProducts("Lubricants")
                     }
                 }
@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
         }
         allBtn.isSelected = true // Default category
 
-        // Cart button listener
+
         cartIcon.setOnClickListener {
             val intent = Intent(activity, CartActivity::class.java)
             startActivity(intent)
