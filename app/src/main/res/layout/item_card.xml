@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
+    app:cardCornerRadius="20dp"
     app:cardElevation="4dp">
 
     <LinearLayout
@@ -25,8 +25,10 @@
             android:id="@+id/item_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="10dp"
+            android:fontFamily="@font/dmsans"
+            android:gravity="left"
             android:text="Sample Text"
             android:textColor="@android:color/black"
             android:textSize="16sp"
@@ -36,8 +38,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/item_price"
+            android:fontFamily="@font/dmsans"
             android:text="Sample Price"
-            android:layout_gravity="center"/>
+            android:layout_gravity="left"
+            android:layout_marginLeft="10dp"/>
+
+        <TextView
+            android:id="@+id/ratingsTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  0 RATINGS"
+            android:fontFamily="@font/dmsans"
+            android:drawableLeft="@drawable/star"
+            android:layout_marginLeft="10dp"/>
+
+
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

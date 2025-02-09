@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 
 private const val ARG_PARAM1 = "param1"
@@ -25,6 +26,10 @@ class AccountFragment : Fragment() {
     lateinit var help_btn: Button
     lateinit var log_out_btn: Button
     lateinit var UsernameTV: TextView
+    lateinit var toPayBtn: ImageButton
+    lateinit var toShipBtn: ImageButton
+    lateinit var toReceiveBtn: ImageButton
+    lateinit var toRateBtn: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +50,10 @@ class AccountFragment : Fragment() {
         help_btn = view.findViewById(R.id.help_btn)
         log_out_btn = view.findViewById(R.id.log_out_btn)
         UsernameTV = view.findViewById(R.id.UsernameTV)
+        toPayBtn = view.findViewById(R.id.toPayBtn)
+        toShipBtn = view.findViewById(R.id.toShipBtn)
+        toReceiveBtn = view.findViewById(R.id.toReceiveBtn)
+        toRateBtn = view.findViewById(R.id.toRateBtn)
 
         val firstName = getUserFirstName()
         val lastName = getUserLastName()
@@ -52,8 +61,28 @@ class AccountFragment : Fragment() {
         if (firstName != null && lastName != null) {
             UsernameTV.text = "$firstName $lastName"
         } else {
-            UsernameTV.text = "Welcome, User" // Fallback message
+            UsernameTV.text = "Welcome, User"
         }
+
+        toPayBtn.setOnClickListener({
+            val intent = Intent(activity, MyPurchasesActivity::class.java)
+            startActivity(intent)
+        })
+
+        toShipBtn.setOnClickListener({
+            val intent = Intent(activity, MyPurchasesActivity::class.java)
+            startActivity(intent)
+        })
+
+        toReceiveBtn.setOnClickListener({
+            val intent = Intent(activity, MyPurchasesActivity::class.java)
+            startActivity(intent)
+        })
+
+        toRateBtn.setOnClickListener({
+            val intent = Intent(activity, MyPurchasesActivity::class.java)
+            startActivity(intent)
+        })
 
         account_and_sec_btn.setOnClickListener {
             val intent = Intent(activity, AccountAndSecurityActivity::class.java)

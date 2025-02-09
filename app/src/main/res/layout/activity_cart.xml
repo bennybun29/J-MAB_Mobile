@@ -5,6 +5,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView
+        android:id="@+id/empytIcon"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/empty_icon"
+        app:layout_constraintTop_toBottomOf="@id/imageView3"
+        app:layout_constraintBottom_toTopOf="@id/horizontal_linear_layout"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/noOrdersYetTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NO ODERS YET"
+        app:layout_constraintTop_toBottomOf="@id/empytIcon"
+        android:fontFamily="@font/dmsans"
+        android:textStyle="bold"
+        android:textColor="@color/j_mab_blue"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:visibility="gone"/>
+
+
+
+    <ImageView
         android:id="@+id/imageView3"
         android:layout_width="match_parent"
         android:layout_height="100dp"

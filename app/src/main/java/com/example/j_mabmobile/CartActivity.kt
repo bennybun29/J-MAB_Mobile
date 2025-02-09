@@ -3,8 +3,10 @@ package com.example.j_mabmobile
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.CheckBox
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,9 @@ class CartActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageButton
     private lateinit var totalPriceTV: TextView
     private lateinit var selectAllChkBox: CheckBox
+    private lateinit var emptyIcon: ImageView
+    private lateinit var noOrdersYetTV: TextView
+
     private val cartItems = mutableListOf<CartItem>()
 
     private var userId: Int = -1
@@ -37,6 +42,9 @@ class CartActivity : AppCompatActivity() {
         recyclerViewCart = findViewById(R.id.recyclerViewCart)
         totalPriceTV = findViewById(R.id.totalPriceTV)
         selectAllChkBox = findViewById(R.id.selectAllChkBox)
+        emptyIcon = findViewById(R.id.empytIcon)
+        noOrdersYetTV = findViewById(R.id.noOrdersYetTV)
+
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -85,8 +93,13 @@ class CartActivity : AppCompatActivity() {
                             cartItems.clear()
                             cartItems.addAll(cartResponse.cart)
                             cartAdapter.notifyDataSetChanged()
+                            emptyIcon.visibility = View.GONE
+                            noOrdersYetTV.visibility = View.GONE
+                            recyclerViewCart.visibility = View.VISIBLE
                         } else {
-                            Toast.makeText(applicationContext, "Cart is empty", Toast.LENGTH_SHORT).show()
+                            emptyIcon.visibility = View.VISIBLE
+                            noOrdersYetTV.visibility = View.VISIBLE
+                            recyclerViewCart.visibility = View.GONE
                         }
                     } else {
                         Toast.makeText(applicationContext, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()

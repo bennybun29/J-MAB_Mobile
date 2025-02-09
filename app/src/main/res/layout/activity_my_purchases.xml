@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:src="@drawable/top_background_gradient"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/back_btn"
+        android:background="@null"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="30dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dmsans"
+        android:text="My Purchases"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="25dp"/>
+
+    <HorizontalScrollView
+        android:id="@+id/categoryHorizontalScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/imageView3">
+
+        <LinearLayout
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/toPayBtnFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="TO PAY"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"
+                android:background="@drawable/button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"/>
+
+            <Button
+                android:id="@+id/toShipBtnFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                    android:text="TO SHIP"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"
+                android:background="@drawable/button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"/>
+
+            <Button
+                android:id="@+id/toReceiveBtnFragment"
+                android:background="@drawable/button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="TO RECEIVE"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"/>
+
+            <Button
+                android:id="@+id/toRateBtnFragment"
+                android:background="@drawable/button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="TO RATE"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"/>
+
+            <Button
+                android:id="@+id/lubricantButton"
+                android:background="@drawable/button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:text="LUBRICANT"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

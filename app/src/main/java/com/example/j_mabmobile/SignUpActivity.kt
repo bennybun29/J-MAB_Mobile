@@ -34,6 +34,7 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var lastNameTextField : EditText
     private lateinit var firstNameTextField : EditText
     private lateinit var passwordTextField : EditText
+    private lateinit var confirmPasswordTextField: EditText
     private lateinit var signUpBtn : Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +48,7 @@ class SignUpActivity : AppCompatActivity() {
             // If valid token exists, go to MainActivity
             val intent = Intent(this@SignUpActivity, MainActivity::class.java)
             startActivity(intent)
-            finish() // Close the SignUpActivity to prevent returning to it
+            finish()
             return
         }
 
@@ -55,16 +56,25 @@ class SignUpActivity : AppCompatActivity() {
         lastNameTextField = findViewById(R.id.lastName)
         firstNameTextField = findViewById(R.id.firstName)
         passwordTextField = findViewById(R.id.userPassword)
+        confirmPasswordTextField = findViewById(R.id.confirmPassword)
         signUpBtn = findViewById(R.id.signUpBtn)
+
+        signUpBtn.isEnabled = false
+        signUpBtn.setBackgroundColor(Color.LTGRAY)
+
+        emailTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
+        firstNameTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
+        lastNameTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
+        passwordTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
+        confirmPasswordTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
+
 
         val tvSignInHere = findViewById<TextView>(R.id.tvSignInHere)
         val text = "Already have an account? Sign in"
         val spannableString = SpannableString(text)
 
-        // Set the clickable span for "Sign in here"
         val clickableSpan = object : ClickableSpan() {
             override fun onClick(widget: View) {
-                // Handle the click event, e.g., navigate to SignInActivity
                 startActivity(Intent(this@SignUpActivity, SignInActivity::class.java))
             }
         }
@@ -83,21 +93,19 @@ class SignUpActivity : AppCompatActivity() {
 
         spannableString.setSpan(object : UnderlineSpan() {
             override fun updateDrawState(ds: android.text.TextPaint) {
-                ds.isUnderlineText = false // Disable underline
+                ds.isUnderlineText = false
             }
         }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         tvSignInHere.text = spannableString
         tvSignInHere.movementMethod = LinkMovementMethod.getInstance()
 
-        // Sign Up Button Click Listener
         signUpBtn.setOnClickListener {
             val email = emailTextField.text.toString()
             val firstName = firstNameTextField.text.toString()
             val lastName = lastNameTextField.text.toString()
             val password = passwordTextField.text.toString()
 
-            // Validation
             if (email.isNotEmpty() && firstName.isNotEmpty() && lastName.isNotEmpty() && password.isNotEmpty()) {
                 val signUpRequest = SignUpRequest(firstName, lastName, email, password)
                 signUpUser(signUpRequest)
@@ -114,7 +122,6 @@ class SignUpActivity : AppCompatActivity() {
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    // Registration success, navigate to MainActivity
                     val apiResponse = response.body()
                     if (apiResponse != null) {
                         Toast.makeText(this@SignUpActivity, apiResponse.message, Toast.LENGTH_SHORT).show()
@@ -123,7 +130,6 @@ class SignUpActivity : AppCompatActivity() {
                             startActivity(intent)
                             finishAffinity()
                         } else {
-                            // Handle unexpected successful response code if needed
                             Toast.makeText(this@SignUpActivity, "Unexpected success response", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -155,4 +161,25 @@ class SignUpActivity : AppCompatActivity() {
         val expiryTime = sharedPreferences.getLong("token_expiry_time", 0)
         return System.currentTimeMillis() < expiryTime
     }
+
+    private fun checkFields() {
+        val email = emailTextField.text.toString().trim()
+        val firstName = firstNameTextField.text.toString().trim()
+        val lastName = lastNameTextField.text.toString().trim()
+        val password = passwordTextField.text.toString().trim()
+        val confirmPassword = confirmPasswordTextField.text.toString().trim()
+
+        val allFieldsFilled = email.isNotEmpty() && firstName.isNotEmpty() &&
+                lastName.isNotEmpty() && password.isNotEmpty() &&
+                confirmPassword.isNotEmpty()
+
+        if (allFieldsFilled) {
+            signUpBtn.isEnabled = true
+            signUpBtn.setBackgroundColor(Color.parseColor("#02254B")) // Original color
+        } else {
+            signUpBtn.isEnabled = false
+            signUpBtn.setBackgroundColor(Color.LTGRAY) // Greyed out when not clickable
+        }
+    }
+
 }

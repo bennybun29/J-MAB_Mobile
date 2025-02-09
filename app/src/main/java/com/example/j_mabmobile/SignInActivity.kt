@@ -38,27 +38,29 @@ class SignInActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_in)
 
-        // Initialize views
         signInBtn = findViewById(R.id.signInBtn)
         emailEditText = findViewById(R.id.emailAddress)
         passwordEditText = findViewById(R.id.userPassword)
 
-        // Check if the token exists and is still valid
+        signInBtn.isEnabled = false
+        signInBtn.setBackgroundColor(Color.LTGRAY)
+
+        emailEditText.addTextChangedListener(SimpleTextWatcher { checkFields() })
+        passwordEditText.addTextChangedListener(SimpleTextWatcher { checkFields() })
+
+
         if (isTokenValid()) {
-            // Token is valid, navigate to the main activity directly
             startActivity(Intent(this, MainActivity::class.java))
-            finish() // Close the sign-in activity
+            finish()
             return
         }
 
-        // Set up the sign-up link
         setupSignUpLink()
 
         signInBtn.setOnClickListener {
             val email = emailEditText.text.toString()
             val password = passwordEditText.text.toString()
 
-            // Validate user input
             if (email.isNotEmpty() && password.isNotEmpty()) {
                 val logInRequest = LogInRequest(email, password)
                 loginUser(logInRequest)
@@ -152,7 +154,7 @@ class SignInActivity : AppCompatActivity() {
     private fun saveToken(token: String, expiresIn: Long) {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        val expiryTime = System.currentTimeMillis() + expiresIn * 1000 // Expiry time in milliseconds
+        val expiryTime = System.currentTimeMillis() + expiresIn * 1000
         editor.putString("jwt_token", token)
         editor.putLong("token_expiry_time", expiryTime)
         editor.apply()
@@ -189,5 +191,21 @@ class SignInActivity : AppCompatActivity() {
 
         return false
     }
+
+    private fun checkFields() {
+        val email = emailEditText.text.toString().trim()
+        val password = passwordEditText.text.toString().trim()
+
+        val allFieldsFilled = email.isNotEmpty() && password.isNotEmpty()
+
+        if (allFieldsFilled) {
+            signInBtn.isEnabled = true
+            signInBtn.setBackgroundColor(Color.parseColor("#02254B")) // Original color
+        } else {
+            signInBtn.isEnabled = false
+            signInBtn.setBackgroundColor(Color.LTGRAY) // Greyed out when not clickable
+        }
+    }
+
 }
 

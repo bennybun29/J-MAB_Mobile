@@ -38,7 +38,7 @@
                     app:itemTextAppearanceActive="@style/BottomNavTextActive"
                     app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
                     app:itemIconSize="24dp"
-                    app:itemIconTint="@color/white"
+                    app:itemIconTint="@color/bottom_nav_color"
                     app:itemTextColor="@color/white"
                     app:itemRippleColor="@android:color/transparent"
                     app:labelVisibilityMode="labeled" />

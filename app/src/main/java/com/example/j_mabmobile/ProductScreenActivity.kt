@@ -45,6 +45,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val backBtn: ImageButton = findViewById(R.id.backBtn)
         val addToCartBtn: LinearLayout = findViewById(R.id.addToCartBtn)
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
+        val priceTextView: TextView = findViewById(R.id.priceTextView)
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -73,6 +74,7 @@ class ProductScreenActivity : AppCompatActivity() {
         productStock.text = "Stock Available: $stock"
         productBrand.text = "Brand: $brand"
         productPrice.text = "₱ $price"
+        priceTextView.text = "PHP: $price"
 
         Picasso.get().load(imageUrl).into(productImage)
 

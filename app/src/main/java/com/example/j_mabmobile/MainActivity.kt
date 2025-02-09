@@ -32,9 +32,16 @@ class MainActivity : AppCompatActivity() {
             openFragment(HomeFragment())
         }
 
-        // Set the BottomNavigationView listener
         binding.bottomNavigation.setOnItemSelectedListener { item ->
-            updateBottomNavState(item)
+            // Reset all icons to white first
+            for (i in 0 until binding.bottomNavigation.menu.size()) {
+                val menuItem = binding.bottomNavigation.menu.getItem(i)
+                menuItem.icon?.setTint(resources.getColor(R.color.white, theme))
+            }
+
+            // Set the selected item's icon to dark blue
+            item.icon?.setTint(resources.getColor(R.color.j_mab_blue, theme))
+
             when (item.itemId) {
                 R.id.home_btn -> {
                     openFragment(HomeFragment())
@@ -56,19 +63,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Set the initial state for icons when the app starts
+
         setInitialIconsState()
     }
 
     override fun onBackPressed() {
-        // Check if the current fragment is NOT HomeFragment
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
         if (currentFragment !is HomeFragment) {
-            // Navigate to HomeFragment
             openFragment(HomeFragment())
             binding.bottomNavigation.selectedItemId = R.id.home_btn
         } else {
-            // If already in HomeFragment, allow the default behavior (exit the app)
             AlertDialog.Builder(this)
                 .setTitle("Log Out")
                 .setMessage("Are you sure you want close the app?")
@@ -85,55 +89,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateBottomNavState(item: MenuItem) {
-        // Loop through all items to reset size for unselected items
         for (i in 0 until binding.bottomNavigation.menu.size()) {
             val menuItem = binding.bottomNavigation.menu.getItem(i)
             val icon = menuItem.icon
             if (menuItem.itemId == item.itemId) {
-                // For the selected item, increase the icon size
-                scaleIcon(icon, 36) // Larger icon size
+                scaleIcon(icon, 36)
             } else {
-                // For unselected items, decrease the icon size
-                scaleIcon(icon, 24) // Smaller icon size
+                scaleIcon(icon, 24)
             }
         }
     }
 
     private fun scaleIcon(icon: Drawable?, size: Int) {
-        // Set the icon size using bounds (scale the drawable)
         val width = size
         val height = size
         icon?.setBounds(0, 0, width, height)
     }
 
     private fun setInitialIconsState() {
-        // Initialize all icons to be small on start
         for (i in 0 until binding.bottomNavigation.menu.size()) {
             val menuItem = binding.bottomNavigation.menu.getItem(i)
             val icon = menuItem.icon
-            scaleIcon(icon, 24) // Smaller icon size
+            scaleIcon(icon, 24)
         }
     }
 
-    // Check if the token is saved and valid
     private fun isTokenValid(): Boolean {
         val sharedPreferences = getSharedPreferences("myAppPrefs", MODE_PRIVATE)
         val token = sharedPreferences.getString("jwt_token", null)
         val tokenExpiryTime = sharedPreferences.getLong("token_expiry_time", 0L)
 
-        // Check if token exists and if it has expired
         if (token != null && tokenExpiryTime > System.currentTimeMillis()) {
-            // Token is valid
             return true
         }
-        // Token is either missing or expired
         return false
     }
 
-    // Navigate to the SignInActivity if the token is invalid
     private fun navigateToSignIn() {
         val intent = Intent(this, SignInActivity::class.java)
         startActivity(intent)
-        finish() // Close the MainActivity so the user cannot go back to it
+        finish()
     }
 }
