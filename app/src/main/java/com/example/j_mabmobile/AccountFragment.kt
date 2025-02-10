@@ -64,25 +64,30 @@ class AccountFragment : Fragment() {
             UsernameTV.text = "Welcome, User"
         }
 
-        toPayBtn.setOnClickListener({
+        toPayBtn.setOnClickListener {
             val intent = Intent(activity, MyPurchasesActivity::class.java)
+            intent.putExtra("ACTIVE_TAB", "TO_PAY")
             startActivity(intent)
-        })
+        }
 
-        toShipBtn.setOnClickListener({
+        toShipBtn.setOnClickListener {
             val intent = Intent(activity, MyPurchasesActivity::class.java)
+            intent.putExtra("ACTIVE_TAB", "TO_SHIP")
             startActivity(intent)
-        })
+        }
 
-        toReceiveBtn.setOnClickListener({
+        toReceiveBtn.setOnClickListener {
             val intent = Intent(activity, MyPurchasesActivity::class.java)
+            intent.putExtra("ACTIVE_TAB", "TO_RECEIVE")
             startActivity(intent)
-        })
+        }
 
-        toRateBtn.setOnClickListener({
+        toRateBtn.setOnClickListener {
             val intent = Intent(activity, MyPurchasesActivity::class.java)
+            intent.putExtra("ACTIVE_TAB", "TO_RATE")
             startActivity(intent)
-        })
+        }
+
 
         account_and_sec_btn.setOnClickListener {
             val intent = Intent(activity, AccountAndSecurityActivity::class.java)

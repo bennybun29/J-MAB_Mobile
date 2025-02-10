@@ -134,10 +134,11 @@ class SignInActivity : AppCompatActivity() {
                     startActivity(Intent(this@SignInActivity, MainActivity::class.java))
                     finishAffinity()
                 } else {
-                    // Handle failure response
                     try {
                         val errorResponse = response.errorBody()?.string()
-                        val errorMessage = JSONObject(errorResponse).getString("message")
+                        val jsonObject = JSONObject(errorResponse)
+                        val errorMessage = jsonObject.optString("message", "Invalid email or password.")  // Fix: Read `message`
+
                         Toast.makeText(this@SignInActivity, errorMessage, Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
                         Toast.makeText(this@SignInActivity, "An unknown error occurred", Toast.LENGTH_SHORT).show()

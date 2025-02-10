@@ -10,7 +10,7 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.UnderlineSpan
-import android.util.Log
+import android.util.Patterns
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -18,7 +18,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.j_mabmobile.SignInActivity
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
@@ -30,12 +29,12 @@ import retrofit2.Response
 
 class SignUpActivity : AppCompatActivity() {
 
-    private lateinit var emailTextField : EditText
-    private lateinit var lastNameTextField : EditText
-    private lateinit var firstNameTextField : EditText
-    private lateinit var passwordTextField : EditText
+    private lateinit var emailTextField: EditText
+    private lateinit var lastNameTextField: EditText
+    private lateinit var firstNameTextField: EditText
+    private lateinit var passwordTextField: EditText
     private lateinit var confirmPasswordTextField: EditText
-    private lateinit var signUpBtn : Button
+    private lateinit var signUpBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +44,6 @@ class SignUpActivity : AppCompatActivity() {
         // Check if token is already present and valid
         val token = getToken()
         if (token != null && isTokenValid()) {
-            // If valid token exists, go to MainActivity
             val intent = Intent(this@SignUpActivity, MainActivity::class.java)
             startActivity(intent)
             finish()
@@ -62,12 +60,11 @@ class SignUpActivity : AppCompatActivity() {
         signUpBtn.isEnabled = false
         signUpBtn.setBackgroundColor(Color.LTGRAY)
 
-        emailTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
-        firstNameTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
-        lastNameTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
-        passwordTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
-        confirmPasswordTextField.addTextChangedListener(SimpleTextWatcher { checkFields() })
-
+        emailTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        firstNameTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        lastNameTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        passwordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        confirmPasswordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
 
         val tvSignInHere = findViewById<TextView>(R.id.tvSignInHere)
         val text = "Already have an account? Sign in"
@@ -83,14 +80,7 @@ class SignUpActivity : AppCompatActivity() {
         val signInEnd = signInStart + "Sign in".length
 
         spannableString.setSpan(clickableSpan, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-
-        spannableString.setSpan(
-            ForegroundColorSpan(Color.rgb(2,37,75)),
-            signInStart,
-            signInEnd,
-            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-
+        spannableString.setSpan(ForegroundColorSpan(Color.rgb(2, 37, 75)), signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannableString.setSpan(object : UnderlineSpan() {
             override fun updateDrawState(ds: android.text.TextPaint) {
                 ds.isUnderlineText = false
@@ -101,17 +91,46 @@ class SignUpActivity : AppCompatActivity() {
         tvSignInHere.movementMethod = LinkMovementMethod.getInstance()
 
         signUpBtn.setOnClickListener {
-            val email = emailTextField.text.toString()
-            val firstName = firstNameTextField.text.toString()
-            val lastName = lastNameTextField.text.toString()
-            val password = passwordTextField.text.toString()
+            val email = emailTextField.text.toString().trim()
+            val firstName = firstNameTextField.text.toString().trim()
+            val lastName = lastNameTextField.text.toString().trim()
+            val password = passwordTextField.text.toString().trim()
+            val confirmPassword = confirmPasswordTextField.text.toString().trim()
 
-            if (email.isNotEmpty() && firstName.isNotEmpty() && lastName.isNotEmpty() && password.isNotEmpty()) {
-                val signUpRequest = SignUpRequest(firstName, lastName, email, password)
-                signUpUser(signUpRequest)
-            } else {
+            // Validate fields on button click
+            if (email.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (password.length < 8) {
+                Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!password.any { it.isDigit() }) {
+                Toast.makeText(this, "Password must contain at least one number", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!password.any { it.isUpperCase() }) {
+                Toast.makeText(this, "Password must contain at least one uppercase letter", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (password != confirmPassword) {
+                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // If all validations pass, proceed with sign-up request
+            val signUpRequest = SignUpRequest(firstName, lastName, email, password)
+            signUpUser(signUpRequest)
         }
     }
 
@@ -129,12 +148,9 @@ class SignUpActivity : AppCompatActivity() {
                             val intent = Intent(this@SignUpActivity, MainActivity::class.java)
                             startActivity(intent)
                             finishAffinity()
-                        } else {
-                            Toast.makeText(this@SignUpActivity, "Unexpected success response", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } else {
-                    // Show the error message returned by the backend
                     try {
                         val errorResponse = response.errorBody()?.string()
                         val errorMessage = JSONObject(errorResponse).getString("message")
@@ -162,24 +178,19 @@ class SignUpActivity : AppCompatActivity() {
         return System.currentTimeMillis() < expiryTime
     }
 
-    private fun checkFields() {
-        val email = emailTextField.text.toString().trim()
-        val firstName = firstNameTextField.text.toString().trim()
-        val lastName = lastNameTextField.text.toString().trim()
-        val password = passwordTextField.text.toString().trim()
-        val confirmPassword = confirmPasswordTextField.text.toString().trim()
-
-        val allFieldsFilled = email.isNotEmpty() && firstName.isNotEmpty() &&
-                lastName.isNotEmpty() && password.isNotEmpty() &&
-                confirmPassword.isNotEmpty()
+    private fun toggleSignUpButton() {
+        val allFieldsFilled = emailTextField.text.isNotEmpty() &&
+                firstNameTextField.text.isNotEmpty() &&
+                lastNameTextField.text.isNotEmpty() &&
+                passwordTextField.text.isNotEmpty() &&
+                confirmPasswordTextField.text.isNotEmpty()
 
         if (allFieldsFilled) {
             signUpBtn.isEnabled = true
-            signUpBtn.setBackgroundColor(Color.parseColor("#02254B")) // Original color
+            signUpBtn.setBackgroundColor(Color.parseColor("#02254B"))
         } else {
             signUpBtn.isEnabled = false
-            signUpBtn.setBackgroundColor(Color.LTGRAY) // Greyed out when not clickable
+            signUpBtn.setBackgroundColor(Color.LTGRAY)
         }
     }
-
 }

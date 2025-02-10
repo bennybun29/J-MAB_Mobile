@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageButton
@@ -210,6 +211,7 @@
 
 
         <Button
+            android:id="@+id/buyNowBtn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

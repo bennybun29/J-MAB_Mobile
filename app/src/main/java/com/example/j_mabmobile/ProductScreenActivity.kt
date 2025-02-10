@@ -46,6 +46,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val addToCartBtn: LinearLayout = findViewById(R.id.addToCartBtn)
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
+        val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -54,6 +55,12 @@ class ProductScreenActivity : AppCompatActivity() {
         cartBtn.setOnClickListener({
             onPause()
             val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
+        })
+
+        buyNowBtn.setOnClickListener({
+            onPause()
+            val intent = Intent(this, CheckoutActivity::class.java)
             startActivity(intent)
         })
 
