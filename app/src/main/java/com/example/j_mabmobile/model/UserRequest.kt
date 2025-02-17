@@ -1,16 +1,18 @@
 package com.example.j_mabmobile.model
 
 data class ApiResponse(
+    val success: Boolean,
     val message: String,
     val token: String?,
     val expiresIn: Long?,
-    val user: User?
+    val user: User?,
 )
 
 data class User(
     val first_name: String?,
     val last_name: String?,
-    val id: Int
+    val id: Int,
+    val email: String,
 )
 
 data class SignUpRequest(
@@ -64,7 +66,8 @@ data class CartItem(
     val product_image: String,
     val product_price: Double,
     val productStock: Int,
-    var quantity: Int
+    var quantity: Int,
+    val product_brand: String
 ) {
     val total_price: Double
         get() = quantity * product_price

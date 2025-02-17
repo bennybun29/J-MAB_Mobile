@@ -96,7 +96,7 @@ class SignInActivity : AppCompatActivity() {
 
         spannableString.setSpan(object : UnderlineSpan() {
             override fun updateDrawState(ds: android.text.TextPaint) {
-                ds.isUnderlineText = false
+                ds.isUnderlineText = true
             }
         }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
@@ -117,6 +117,7 @@ class SignInActivity : AppCompatActivity() {
                     val lastName = apiResponse?.user?.last_name
                     val userId = apiResponse?.user?.id
                     val expiresIn = apiResponse?.expiresIn ?: 3600L
+                    val email = apiResponse?.user?.email
 
                     if (token != null) {
                         saveToken(token, expiresIn)
@@ -128,6 +129,10 @@ class SignInActivity : AppCompatActivity() {
 
                     if (userId != null) {
                         saveUserId(userId)
+                    }
+
+                    if (email != null) {
+                        saveEmail(email)
                     }
 
                     Toast.makeText(this@SignInActivity, apiResponse?.message ?: "Login successful", Toast.LENGTH_SHORT).show()
@@ -178,6 +183,15 @@ class SignInActivity : AppCompatActivity() {
         editor.apply()
 
         Log.d("UserID", "User ID saved: $userId")
+    }
+
+    private fun saveEmail(userEmail:String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("user_email", userEmail)
+        editor.apply()
+
+        Log.d("Email", "Email saved: $userEmail")
     }
 
 

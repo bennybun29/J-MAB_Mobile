@@ -63,7 +63,7 @@ class HomeFragment : Fragment() {
                 val selectedItem = parent.getItemAtPosition(position).toString()
 
                 when (selectedItem) {
-                    "Recently Added" -> fetchProducts() // Modify this function if needed
+                    "Recently Added" -> filterProducts(currentCategory, currentBrand)
                     "Price: High to Low" -> sortProductsByPrice(descending = true)
                     "Price: Low to High" -> sortProductsByPrice(descending = false)
                 }
@@ -230,14 +230,13 @@ class HomeFragment : Fragment() {
 
 
     private fun sortProductsByPrice(descending: Boolean) {
-        filteredProducts = if (descending) {
-            filteredProducts.sortedByDescending { it.price }
-        } else {
-            filteredProducts.sortedBy { it.price }
-        }
+        filteredProducts = allProducts.filter {
+            currentCategory == "All" || it.category.equals(currentCategory, ignoreCase = true)
+        }.sortedWith(compareBy<Product> { it.price }.let { if (descending) it.reversed() else it })
 
         updateRecyclerView()
     }
+
 
 
     private fun updateRecyclerView() {

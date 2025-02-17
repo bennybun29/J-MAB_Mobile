@@ -64,7 +64,7 @@ object RetrofitClient {
     }
 
     fun getApiService(context: Context): ApiService {
-        return createRetrofit(context).create(ApiService::class.java)
+        return getRetrofitInstance(context).create(ApiService::class.java)
     }
 }
 

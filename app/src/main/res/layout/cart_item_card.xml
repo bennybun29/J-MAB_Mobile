@@ -12,6 +12,46 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
+        <LinearLayout
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginRight="5dp">
+
+            <TextView
+                android:id="@+id/minusBtn"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:text="-"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="@color/j_mab_blue"
+                android:background="@drawable/bottom_options_border" />
+
+            <TextView
+                android:id="@+id/quantityText"
+                android:layout_width="40dp"
+                android:layout_height="25dp"
+                android:gravity="center"
+                android:text="1"
+                android:textSize="16sp"
+                android:textColor="@color/j_mab_blue"
+                android:background="@drawable/bottom_options_border"/>
+
+            <TextView
+                android:id="@+id/plusBtn"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:text="+"
+                android:gravity="center"
+                android:textSize="16sp"
+                android:textColor="@color/j_mab_blue"
+                android:background="@drawable/bottom_options_border" />
+        </LinearLayout>
+
         <CheckBox
             android:id="@+id/cartItemCheckBox"
             android:layout_width="wrap_content"
@@ -35,25 +75,25 @@
             android:id="@+id/item_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="23dp"
+            android:layout_marginTop="10dp"
             android:fontFamily="@font/dmsans"
             android:layout_marginLeft="10dp"
             app:layout_constraintLeft_toRightOf="@id/item_image"
             app:layout_constraintTop_toTopOf="parent"
             android:text="Sample Text"
             android:textColor="@color/j_mab_blue"
-            android:textSize="20sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/item_brand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/quantity"
-            android:fontFamily="@font/dmsans"
-            android:text="Quantity:"
-            app:layout_constraintLeft_toRightOf="@id/item_image"
             app:layout_constraintTop_toBottomOf="@id/item_text"
-            android:layout_marginLeft="10dp"/>
+            android:text="Brand"
+            android:textSize="10sp"
+            android:layout_marginLeft="10dp"
+            app:layout_constraintLeft_toRightOf="@id/item_image"/>
 
         <TextView
             android:id="@+id/productPriceTV"
@@ -61,10 +101,11 @@
             android:layout_height="wrap_content"
             android:text="Price:"
             android:fontFamily="@font/dmsans"
-            app:layout_constraintTop_toBottomOf="@id/quantity"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/item_image"
             android:layout_marginLeft="10dp"
             android:textColor="@color/j_mab_blue"
+            android:layout_marginBottom="5dp"
             android:textStyle="bold"/>
 
         <ImageButton

@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +31,8 @@ class AccountFragment : Fragment() {
     lateinit var toShipBtn: ImageButton
     lateinit var toReceiveBtn: ImageButton
     lateinit var toRateBtn: ImageButton
+    lateinit var emailAddressTV: TextView
+    lateinit var userIdTV: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,14 +57,30 @@ class AccountFragment : Fragment() {
         toShipBtn = view.findViewById(R.id.toShipBtn)
         toReceiveBtn = view.findViewById(R.id.toReceiveBtn)
         toRateBtn = view.findViewById(R.id.toRateBtn)
+        emailAddressTV = view.findViewById(R.id.emailAddressTV)
+        userIdTV = view.findViewById(R.id.userIDNumberTV)
 
         val firstName = getUserFirstName()
         val lastName = getUserLastName()
+        val email = getEmailAddress()
+        val userId = getUserId()
 
         if (firstName != null && lastName != null) {
             UsernameTV.text = "$firstName $lastName"
         } else {
             UsernameTV.text = "Welcome, User"
+        }
+
+        if (email != null) {
+            emailAddressTV.text = "$email"
+        } else {
+            emailAddressTV.text = "Email Address"
+        }
+
+        if (userId != null) {
+            userIdTV.text = "ID: $userId"
+        } else {
+            userIdTV.text = "User ID"
         }
 
         toPayBtn.setOnClickListener {
@@ -144,6 +163,18 @@ class AccountFragment : Fragment() {
     private fun getUserLastName(): String? {
         val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("last_name", null)
+    }
+
+    private fun getEmailAddress(): String? {
+        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val email = sharedPreferences.getString("user_email", null)
+        Log.d("Email", "Retrieved email: $email")  // Log the email value
+        return email
+    }
+
+    private fun getUserId(): Int {
+        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getInt("user_id", 1)
     }
 
 

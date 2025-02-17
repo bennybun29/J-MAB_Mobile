@@ -83,14 +83,11 @@ class SignUpActivity : AppCompatActivity() {
 
         spannableString.setSpan(clickableSpan, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         spannableString.setSpan(ForegroundColorSpan(Color.rgb(2, 37, 75)), signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        spannableString.setSpan(object : UnderlineSpan() {
-            override fun updateDrawState(ds: android.text.TextPaint) {
-                ds.isUnderlineText = false
-            }
-        }, signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), signInStart, signInEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
         tvSignInHere.text = spannableString
         tvSignInHere.movementMethod = LinkMovementMethod.getInstance()
+
 
         signUpBtn.setOnClickListener {
             val email = emailTextField.text.toString().trim()
