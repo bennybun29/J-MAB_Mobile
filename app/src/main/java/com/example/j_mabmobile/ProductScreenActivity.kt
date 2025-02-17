@@ -28,6 +28,10 @@ import kotlinx.coroutines.launch
 class ProductScreenActivity : AppCompatActivity() {
 
     private lateinit var apiService: ApiService
+    private lateinit var minusBtn: TextView
+    private lateinit var plusBtn: TextView
+    private lateinit var quantityText: TextView
+    private var quantity = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,12 +45,15 @@ class ProductScreenActivity : AppCompatActivity() {
         val productStock: TextView = findViewById(R.id.stock_text)
         val productBrand: TextView = findViewById(R.id.brand_text)
         val productVariation: TextView = findViewById(R.id.variationTV)
-        val productPrice: TextView = findViewById(R.id.item_price)
         val backBtn: ImageButton = findViewById(R.id.backBtn)
         val addToCartBtn: LinearLayout = findViewById(R.id.addToCartBtn)
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
+
+        minusBtn = findViewById(R.id.minusBtn)
+        plusBtn = findViewById(R.id.plusBtn)
+        quantityText = findViewById(R.id.quantityText)
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -80,7 +87,6 @@ class ProductScreenActivity : AppCompatActivity() {
         productDescription.text = description
         productStock.text = "Stock Available: $stock"
         productBrand.text = "Brand: $brand"
-        productPrice.text = "₱ $price"
         priceTextView.text = "PHP: $price"
 
         Picasso.get().load(imageUrl).into(productImage)
@@ -93,9 +99,26 @@ class ProductScreenActivity : AppCompatActivity() {
             productVariation.text = "Voltage: " + intent.getStringExtra("voltage")
         }
 
+        plusBtn.setOnClickListener {
+            if (quantity < stock) {
+                quantity++
+                quantityText.text = quantity.toString()
+            } else {
+                Toast.makeText(this, "Max stock reached", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        minusBtn.setOnClickListener {
+            if (quantity > 1) {
+                quantity--
+                quantityText.text = quantity.toString()
+            }
+        }
+
+
         addToCartBtn.setOnClickListener {
             token?.let {
-                addToCart(userId, product_id, 1, it) // Assuming quantity = 1 for simplicity
+                addToCart(userId, product_id, quantity, it)
             }
 
             animateCartEffect()
@@ -162,7 +185,6 @@ class ProductScreenActivity : AppCompatActivity() {
     private fun addToCart(userId: Int, productId: Int, quantity: Int, token: String) {
         val cartRequest = CartRequest(userId, productId, quantity)
 
-        // Make the network call using Retrofit
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 val response = apiService.addToCart("Bearer $token", cartRequest)
@@ -170,7 +192,7 @@ class ProductScreenActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val cartResponse = response.body()
                     if (cartResponse?.success == true) {
-                        Toast.makeText(this@ProductScreenActivity, "Product added to cart!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@ProductScreenActivity, "Added $quantity to cart!", Toast.LENGTH_SHORT).show()
                     } else {
                         val errorMessage = cartResponse?.errors?.get(0) ?: "Unknown error"
                         Toast.makeText(this@ProductScreenActivity, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
@@ -183,6 +205,7 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
     }
+
 }
 
 

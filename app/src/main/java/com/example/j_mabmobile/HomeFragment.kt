@@ -7,12 +7,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.widget.SearchView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,21 +31,50 @@ class HomeFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var emptyMessage: View
+    private lateinit var dimView: View
+    private lateinit var searchView: SearchView
+
     private var allProducts: List<Product> = listOf()
     private var filteredProducts: List<Product> = listOf()
-    private lateinit var searchView: SearchView
     private var currentCategory: String = "All"
     private var userId: Int = -1
+    private var currentBrand: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-
-        // Retrieve user_id from SharedPreferences
+        val spinner: Spinner = view.findViewById(R.id.spinner_options)
         val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", MODE_PRIVATE)
-        userId = sharedPreferences.getInt("user_id", -1) // Default to -1 if not found
+
+        val adapter = ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.spinner_filter,
+            android.R.layout.simple_spinner_item
+        )
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinner.adapter = adapter
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedItem = parent.getItemAtPosition(position).toString()
+
+                when (selectedItem) {
+                    "Recently Added" -> fetchProducts() // Modify this function if needed
+                    "Price: High to Low" -> sortProductsByPrice(descending = true)
+                    "Price: Low to High" -> sortProductsByPrice(descending = false)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+
+            }
+        }
+
+        userId = sharedPreferences.getInt("user_id", -1)
 
         if (userId != -1) {
             Log.d("UserID", "Retrieved User ID: $userId")
@@ -57,7 +82,6 @@ class HomeFragment : Fragment() {
             Log.d("UserID", "No User ID found")
         }
 
-        // Initialize views
         cartIcon = view.findViewById(R.id.cart_icon)
         allBtn = view.findViewById(R.id.allBtn)
         tiresButton = view.findViewById(R.id.tiresButton)
@@ -68,74 +92,65 @@ class HomeFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
         emptyMessage = view.findViewById(R.id.emptyMessage)
         searchView = view.findViewById(R.id.searchView)
+        dimView = view.findViewById(R.id.dimView)
 
-        // Ensure the SearchView is collapsed initially
         searchView.setIconified(true)
         searchView.clearFocus()
         searchView.isFocusable = false
 
-        // Search functionality
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (!query.isNullOrBlank()) {
-                    searchProducts(query, currentCategory)
+                    searchProducts(query, currentCategory, currentBrand)
                 }
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrBlank()) {
-                    filterProducts(currentCategory)
+                    filterProducts(currentCategory, currentBrand)
                 } else {
-                    searchProducts(newText, currentCategory)
+                    searchProducts(newText, currentCategory, currentBrand)
                 }
                 return true
             }
         })
-
-
 
         val buttons = listOf(allBtn, tiresButton, oilsButton, batteryButton, lubricantButton)
         for (button in buttons) {
             button.setOnClickListener {
                 buttons.forEach { it.isSelected = false }
                 it.isSelected = true
-                when (button) {
-                    allBtn -> {
-                        currentCategory = "All"
-                        filterProducts("All")
-                    }
-                    tiresButton -> {
-                        currentCategory = "Tires"
-                        filterProducts("Tires")
-                    }
-                    oilsButton -> {
-                        currentCategory = "Oils"
-                        filterProducts("Oils")
-                    }
-                    batteryButton -> {
-                        currentCategory = "Batteries"
-                        filterProducts("Batteries")
-                    }
-                    lubricantButton -> {
-                        currentCategory = "Lubricants"
-                        filterProducts("Lubricants")
-                    }
+                currentCategory = when (button) {
+                    allBtn -> "All"
+                    tiresButton -> "Tires"
+                    oilsButton -> "Oils"
+                    batteryButton -> "Batteries"
+                    lubricantButton -> "Lubricants"
+                    else -> "All"
                 }
+                filterProducts(currentCategory, currentBrand)
             }
         }
-        allBtn.isSelected = true // Default category
-
+        allBtn.isSelected = true
 
         cartIcon.setOnClickListener {
-            val intent = Intent(activity, CartActivity::class.java)
-            startActivity(intent)
+            progressBar.visibility = View.VISIBLE
+            dimView.visibility = View.VISIBLE
+
+            Toast.makeText(requireContext(), "Opening cart...", Toast.LENGTH_SHORT).show()
+
+            cartIcon.postDelayed({
+                progressBar.visibility = View.GONE
+                dimView.visibility = View.GONE
+                val intent = Intent(activity, CartActivity::class.java)
+                startActivity(intent)
+            }, 300)
         }
 
-        // RecyclerView setup
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        // Fetch products
+
         fetchProducts()
 
         return view
@@ -152,8 +167,8 @@ class HomeFragment : Fragment() {
                 if (response.isSuccessful && response.body() != null) {
                     val productResponse = response.body()!!
                     if (productResponse.success) {
-                        allProducts = productResponse.products
-                        filterProducts("All")
+                        allProducts = productResponse.products.reversed()
+                        filterProducts("All", "")
                     } else {
                         Toast.makeText(requireContext(), "Failed to load products", Toast.LENGTH_SHORT).show()
                     }
@@ -164,23 +179,72 @@ class HomeFragment : Fragment() {
 
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
                 progressBar.visibility = View.GONE
-                emptyMessage.visibility = View.VISIBLE
-                emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = "Error fetching products. Please try again."
+                showErrorMessage("Error fetching products. Please try again.")
                 Log.e("HomeFragment", "Error fetching products", t)
             }
         })
     }
 
-    private fun filterProducts(category: String) {
-        filteredProducts = if (category == "All") {
-            allProducts
-        } else {
-            allProducts.filter { it.category.equals(category, ignoreCase = true) }
+    private fun filterProducts(category: String, brand: String) {
+        filteredProducts = allProducts.filter {
+            (category == "All" || it.category.equals(category, ignoreCase = true)) &&
+                    (brand.isEmpty() || it.brand?.equals(brand, ignoreCase = true) == true)
         }
 
+        updateRecyclerView()
+    }
+
+    private fun searchProducts(query: String, category: String, brand: String) {
+        progressBar.visibility = View.VISIBLE
+        emptyMessage.visibility = View.GONE
+        recyclerView.visibility = View.GONE
+
+        val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
+        apiService.getProducts().enqueue(object : Callback<ProductResponse> { // Fetch all products first
+            override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
+                progressBar.visibility = View.GONE
+
+                if (response.isSuccessful && response.body() != null) {
+                    val allProducts = response.body()!!.products
+
+                    // Now filter locally based on multiple fields
+                    filteredProducts = allProducts.filter {
+                        // Ensure product matches query AND belongs to the selected category
+                        (category == "All" || it.category.equals(category, ignoreCase = true)) &&
+                                (it.name.contains(query, ignoreCase = true) ||
+                                        it.brand?.contains(query, ignoreCase = true) == true)
+                    }
+
+                    updateRecyclerView()
+                } else {
+                    showErrorMessage("No products found for \"$query\" in $category category.")
+                }
+            }
+
+            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
+                progressBar.visibility = View.GONE
+                showErrorMessage("Error: ${t.message}")
+            }
+        })
+    }
+
+
+    private fun sortProductsByPrice(descending: Boolean) {
+        filteredProducts = if (descending) {
+            filteredProducts.sortedByDescending { it.price }
+        } else {
+            filteredProducts.sortedBy { it.price }
+        }
+
+        updateRecyclerView()
+    }
+
+
+    private fun updateRecyclerView() {
         if (filteredProducts.isEmpty()) {
             recyclerView.visibility = View.GONE
             emptyMessage.visibility = View.VISIBLE
+            emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = "No products found."
         } else {
             recyclerView.visibility = View.VISIBLE
             emptyMessage.visibility = View.GONE
@@ -188,41 +252,10 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun searchProducts(query: String, category: String) {
-        progressBar.visibility = View.VISIBLE
-        emptyMessage.visibility = View.GONE
-
-        val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
-        apiService.searchProducts(name = query).enqueue(object : Callback<ProductResponse> {
-            override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
-                progressBar.visibility = View.GONE
-                if (response.isSuccessful && response.body() != null) {
-                    val productResponse = response.body()!!
-                    filteredProducts = if (category == "All") {
-                        productResponse.products.filter { it.name.contains(query, ignoreCase = true) }
-                    } else {
-                        productResponse.products.filter {
-                            it.category.equals(category, ignoreCase = true) && it.name.contains(query, ignoreCase = true)
-                        }
-                    }
-
-                    if (filteredProducts.isEmpty()) {
-                        recyclerView.visibility = View.GONE
-                        emptyMessage.visibility = View.VISIBLE
-                    } else {
-                        recyclerView.visibility = View.VISIBLE
-                        emptyMessage.visibility = View.GONE
-                        recyclerView.adapter = RecyclerAdapter(filteredProducts, userId)
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "No products found", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
-                progressBar.visibility = View.GONE
-                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+    private fun showErrorMessage(message: String) {
+        recyclerView.visibility = View.GONE
+        emptyMessage.visibility = View.VISIBLE
+        emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = message
     }
+
 }

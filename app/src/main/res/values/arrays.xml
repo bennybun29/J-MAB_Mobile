@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinner_filter">
+        <item>Recently Added</item>
+        <item>Price: High to Low</item>
+        <item>Price: Low to High</item>
+    </string-array>
+</resources>

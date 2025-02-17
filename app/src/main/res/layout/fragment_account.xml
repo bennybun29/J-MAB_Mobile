@@ -73,6 +73,19 @@
             app:layout_constraintTop_toBottomOf="@+id/userPhoneNumberTV" />
 
         <TextView
+            android:id="@+id/emailAddressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:fontFamily="@font/dmsans"
+            android:text="Email Address"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintTop_toBottomOf="@+id/userFullAddressTV" />
+
+        <TextView
             android:id="@+id/userIDNumberTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -83,7 +96,7 @@
             android:textSize="14sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="@+id/UsernameTV"
-            app:layout_constraintTop_toBottomOf="@+id/userFullAddressTV" />
+            app:layout_constraintTop_toBottomOf="@+id/emailAddressTV" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewMyPurchases"
@@ -182,6 +195,7 @@
                         android:text="To Receive"
                         android:fontFamily="@font/dmsans"
                         android:textStyle="bold"
+                        android:layout_marginTop="3dp"
                         app:layout_constraintTop_toBottomOf="@id/toReceiveBtn"
                         app:layout_constraintStart_toStartOf="@id/toReceiveBtn"/>
 
@@ -194,7 +208,7 @@
                         app:layout_constraintTop_toBottomOf="@id/toRateBtn"
                         app:layout_constraintStart_toStartOf="@id/toRateBtn"
                         android:layout_marginTop="5dp"
-                        android:layout_marginLeft="5dp"/>
+                        android:layout_marginLeft="3dp"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>

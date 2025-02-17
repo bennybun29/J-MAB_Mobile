@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Looper
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -26,6 +27,7 @@ import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.logging.Handler
 
 class SignUpActivity : AppCompatActivity() {
 
@@ -108,18 +110,23 @@ class SignUpActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            val errors = mutableListOf<String>()
+
             if (password.length < 8) {
-                Toast.makeText(this, "Password must be at least 8 characters", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                errors.add("at least 8 characters")
             }
 
             if (!password.any { it.isDigit() }) {
-                Toast.makeText(this, "Password must contain at least one number", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+                errors.add("at least one number")
             }
 
             if (!password.any { it.isUpperCase() }) {
-                Toast.makeText(this, "Password must contain at least one uppercase letter", Toast.LENGTH_SHORT).show()
+                errors.add("at least one uppercase letter")
+            }
+
+            if (errors.isNotEmpty()) {
+                val toast = Toast.makeText(this, "Password must contain ${errors.joinToString(", ")}", Toast.LENGTH_LONG)
+                toast.show()
                 return@setOnClickListener
             }
 
