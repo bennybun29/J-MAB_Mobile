@@ -8,16 +8,17 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.j_mabmobile.R
 import com.example.j_mabmobile.model.CartItem
 import com.squareup.picasso.Picasso
-import org.w3c.dom.Text
 
-class CartAdapter(private val cartItems: List<CartItem>, private val totalPriceTV: TextView, val selectAllChkBox: CheckBox, private val onItemRemoved: (CartItem) -> Unit) :
+class CartAdapter(private val cartItems: List<CartItem>,
+                  private val totalPriceTV: TextView,
+                  val selectAllChkBox: CheckBox,
+                  private val onItemRemoved: (CartItem) -> Unit,
+                  private val onQuantityUpdated: (cartId: Int, quantity: Int) -> Unit) :
     RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
     private val selectedItems = mutableSetOf<CartItem>()
-
 
     class CartViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cartCheckBox: CheckBox = itemView.findViewById(R.id.cartItemCheckBox)
@@ -41,7 +42,10 @@ class CartAdapter(private val cartItems: List<CartItem>, private val totalPriceT
 
         holder.itemName.text = cartItem.product_name
         holder.itemQuantity.text = "${cartItem.quantity}"
-        holder.productPrice.text = "Price: ₱${cartItem.total_price}"
+
+        val updatedPrice = cartItem.product_price * cartItem.quantity
+        holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
+
         holder.brand.text = "Brand: ${cartItem.product_brand}"
 
         Picasso.get()
@@ -62,6 +66,7 @@ class CartAdapter(private val cartItems: List<CartItem>, private val totalPriceT
             }
             updateTotalPrice()
 
+            // Ensure selectAllChkBox is updated based on selection
             selectAllChkBox.setOnCheckedChangeListener(null)
             selectAllChkBox.isChecked = selectedItems.size == cartItems.size
             selectAllChkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -73,33 +78,37 @@ class CartAdapter(private val cartItems: List<CartItem>, private val totalPriceT
             if (cartItem.quantity > 1) {
                 cartItem.quantity--
                 holder.itemQuantity.text = "${cartItem.quantity}"
+                val updatedPrice = cartItem.product_price * cartItem.quantity
+                holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
                 updateTotalPrice()
+                onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
             }
         }
 
         holder.plusBtn.setOnClickListener {
             cartItem.quantity++
             holder.itemQuantity.text = "${cartItem.quantity}"
+            val updatedPrice = cartItem.product_price * cartItem.quantity
+            holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
             updateTotalPrice()
+            onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
         }
 
         holder.removeFromCartBtn.setOnClickListener {
             onItemRemoved(cartItem)
         }
-
     }
-
 
     override fun getItemCount(): Int {
         return cartItems.size
     }
 
     private fun updateTotalPrice() {
-        val total = selectedItems.sumOf { it.total_price }
+        val total = selectedItems.sumOf { it.product_price * it.quantity }
         totalPriceTV.text = "Total: ₱ ${"%.2f".format(total)}"
     }
 
-
+    // Select or deselect all items based on the checkbox state
     fun selectAllItems(selectAll: Boolean) {
         selectedItems.clear()
         if (selectAll) {
@@ -109,6 +118,8 @@ class CartAdapter(private val cartItems: List<CartItem>, private val totalPriceT
         updateTotalPrice()
     }
 
-
+    // Get all selected cart IDs as a comma-separated string
+    fun getSelectedCartIds(): String {
+        return selectedItems.joinToString(",") { it.cart_id.toString() }
+    }
 }
-

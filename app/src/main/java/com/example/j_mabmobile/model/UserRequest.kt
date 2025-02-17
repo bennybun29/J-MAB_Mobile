@@ -49,6 +49,10 @@ data class Product(
 data class CartRequest(
     val user_id: Int,
     val product_id: Int,
+    val quantity: Int,
+)
+
+data class UpdateCartRequest(
     val quantity: Int
 )
 

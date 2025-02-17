@@ -6,13 +6,17 @@ import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.LogInRequest
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.SignUpRequest
+import com.example.j_mabmobile.model.UpdateCartRequest
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ApiService {
@@ -43,6 +47,14 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Query("cart_id") cartIds: String
     ): Call<ApiResponse>
+
+    @PUT("cart/updateCart")
+    fun updateCartItem(
+        @Header("Authorization") token: String,
+        @Query("cart_id") cartId: Int,
+        @Body updateRequest: UpdateCartRequest
+    ): Call<ApiResponse>
+
 
 
 }

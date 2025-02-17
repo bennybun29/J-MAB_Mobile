@@ -17,6 +17,7 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CartResponse
+import com.example.j_mabmobile.model.UpdateCartRequest
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -31,6 +32,7 @@ class CartActivity : AppCompatActivity() {
     private lateinit var selectAllChkBox: CheckBox
     private lateinit var emptyIcon: ImageView
     private lateinit var noOrdersYetTV: TextView
+    private lateinit var deleteTV: TextView
 
     private val cartItems = mutableListOf<CartItem>()
 
@@ -47,6 +49,7 @@ class CartActivity : AppCompatActivity() {
         selectAllChkBox = findViewById(R.id.selectAllChkBox)
         emptyIcon = findViewById(R.id.empytIcon)
         noOrdersYetTV = findViewById(R.id.noOrdersYetTV)
+        deleteTV = findViewById(R.id.deleteTV)
 
 
         backBtn.setOnClickListener {
@@ -54,9 +57,12 @@ class CartActivity : AppCompatActivity() {
         }
 
 
-        cartAdapter = CartAdapter(cartItems, totalPriceTV, selectAllChkBox,) {
-            cartItem -> deleteCartItem(cartItem.cart_id)
-        }
+        cartAdapter = CartAdapter(cartItems, totalPriceTV, selectAllChkBox, { cartItem ->
+            deleteCartItem(cartItem.cart_id)
+        }, { cartId, quantity ->
+            updateCartItem(cartId, quantity)
+        })
+
         recyclerViewCart.layoutManager = LinearLayoutManager(this)
         recyclerViewCart.adapter = cartAdapter
 
@@ -70,6 +76,15 @@ class CartActivity : AppCompatActivity() {
             fetchCartItems()
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+        }
+
+        deleteTV.setOnClickListener {
+            val selectedCartIds = cartAdapter.getSelectedCartIds()
+            if (selectedCartIds.isNotEmpty()) {
+                deleteMultipleItems(selectedCartIds)
+            } else {
+                Toast.makeText(this, "No items selected", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -166,6 +181,75 @@ class CartActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateCartItem(cartId: Int, quantity: Int) {
+        if (authToken == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val updateRequest = UpdateCartRequest(quantity)
+
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.getApiService(this@CartActivity)
+                    .updateCartItem(authToken!!, cartId, updateRequest)
+
+                response.enqueue(object : Callback<ApiResponse> {
+                    override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            // Quantity updated successfully
+                            Toast.makeText(this@CartActivity, "Quantity updated", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@CartActivity, "Failed to update quantity", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                        Log.e("UpdateCartItemError", "Error: ${t.message}", t)
+                        Toast.makeText(this@CartActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("UpdateCartItemError", "Error: ${e.message}", e)
+                Toast.makeText(this@CartActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun deleteMultipleItems(cartIds: String) {
+        if (authToken == null) {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.getApiService(this@CartActivity)
+                    .deleteCartItem(authToken!!, cartIds)
+
+                response.enqueue(object : Callback<ApiResponse> {
+                    override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            // Remove the deleted items from the local list
+                            cartItems.removeAll { item -> cartIds.split(",").contains(item.cart_id.toString()) }
+                            cartAdapter.notifyDataSetChanged()
+                            Toast.makeText(this@CartActivity, "Items removed from cart", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@CartActivity, "Failed to remove items", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                        Log.e("DeleteCartItemsError", "Error: ${t.message}")
+                        Toast.makeText(this@CartActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            } catch (e: Exception) {
+                Log.e("DeleteCartItemsError", "Error: ${e.message}", e)
+                Toast.makeText(this@CartActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
 
 }
