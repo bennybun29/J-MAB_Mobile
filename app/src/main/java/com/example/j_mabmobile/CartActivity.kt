@@ -1,9 +1,11 @@
 package com.example.j_mabmobile
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -33,6 +35,7 @@ class CartActivity : AppCompatActivity() {
     private lateinit var emptyIcon: ImageView
     private lateinit var noOrdersYetTV: TextView
     private lateinit var deleteTV: TextView
+    private lateinit var checkoutBtn: Button
 
     private val cartItems = mutableListOf<CartItem>()
 
@@ -50,7 +53,13 @@ class CartActivity : AppCompatActivity() {
         emptyIcon = findViewById(R.id.empytIcon)
         noOrdersYetTV = findViewById(R.id.noOrdersYetTV)
         deleteTV = findViewById(R.id.deleteTV)
+        checkoutBtn = findViewById(R.id.checkoutBtn)
 
+        checkoutBtn.setOnClickListener({
+            onPause()
+            val intent = Intent(this, CheckoutActivity::class.java)
+            startActivity(intent)
+        })
 
         backBtn.setOnClickListener {
             onBackPressed()

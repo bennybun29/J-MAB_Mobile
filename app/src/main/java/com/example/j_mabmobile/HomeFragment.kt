@@ -39,6 +39,11 @@ class HomeFragment : Fragment() {
     private var currentCategory: String = "All"
     private var userId: Int = -1
     private var currentBrand: String = ""
+    private var productNames: List<String> = listOf()
+    private lateinit var listPopupWindow: ListPopupWindow
+    private var suggestionList: List<String> = listOf()
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -168,6 +173,8 @@ class HomeFragment : Fragment() {
                     val productResponse = response.body()!!
                     if (productResponse.success) {
                         allProducts = productResponse.products.reversed()
+                        productNames = allProducts.map { it.name } // Store product names
+                        setupSearchView() // Initialize suggestions
                         filterProducts("All", "")
                     } else {
                         Toast.makeText(requireContext(), "Failed to load products", Toast.LENGTH_SHORT).show()
@@ -177,6 +184,7 @@ class HomeFragment : Fragment() {
                 }
             }
 
+
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
                 progressBar.visibility = View.GONE
                 showErrorMessage("Error fetching products. Please try again.")
@@ -184,6 +192,64 @@ class HomeFragment : Fragment() {
             }
         })
     }
+
+    private fun setupSearchView() {
+        listPopupWindow = ListPopupWindow(requireContext())
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                listPopupWindow.dismiss()
+                if (!query.isNullOrBlank()) {
+                    searchProducts(query, currentCategory, currentBrand)
+                }
+                searchView.clearFocus()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText.isNullOrBlank()) {
+                    filteredProducts = allProducts
+                    updateRecyclerView()
+                    listPopupWindow.dismiss()
+                    return true
+                }
+
+                suggestionList = productNames.filter { it.contains(newText, ignoreCase = true) }
+
+                if (suggestionList.isNotEmpty()) {
+                    showSuggestions()
+                } else {
+                    listPopupWindow.dismiss()
+                }
+                return true
+            }
+        })
+    }
+
+
+    private fun showSuggestions() {
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, suggestionList)
+
+        listPopupWindow.setAdapter(adapter)
+        listPopupWindow.anchorView = searchView
+        listPopupWindow.width = searchView.width
+        listPopupWindow.height = ListPopupWindow.WRAP_CONTENT
+        listPopupWindow.isModal = false
+
+        listPopupWindow.setOnItemClickListener { _, _, position, _ ->
+            val selectedItem = suggestionList[position]
+            searchView.setQuery(selectedItem, false)
+            listPopupWindow.dismiss()
+
+            searchView.requestFocus()
+        }
+
+        listPopupWindow.show()
+    }
+
+
+
+
 
     private fun filterProducts(category: String, brand: String) {
         filteredProducts = allProducts.filter {

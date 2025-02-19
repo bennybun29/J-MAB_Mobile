@@ -71,7 +71,6 @@ class ProductScreenActivity : AppCompatActivity() {
             startActivity(intent)
         })
 
-        // Get data from intent
         val product_id = intent.getIntExtra("product_id", 0)
         val imageUrl = intent.getStringExtra("product_image_url")
         val name = intent.getStringExtra("product_name")
