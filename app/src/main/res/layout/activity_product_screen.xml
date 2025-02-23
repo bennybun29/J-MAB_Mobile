@@ -26,8 +26,9 @@
         android:background="@null"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/cartBtn"
-        android:layout_marginTop="15dp"
-        android:elevation="10dp" />
+        android:layout_marginTop="20dp"
+        android:elevation="10dp"
+        android:layout_marginRight="15dp"/>
 
     <ImageButton
         android:id="@+id/cartBtn"
@@ -37,8 +38,9 @@
         android:background="@null"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toLeftOf="@+id/helpBtn"
-        android:layout_marginTop="15dp"
-        android:elevation="10dp" />
+        android:layout_marginTop="20dp"
+        android:elevation="10dp"
+        android:layout_marginRight="15dp"/>
 
     <ImageButton
         android:id="@+id/helpBtn"
@@ -48,9 +50,9 @@
         android:background="@null"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:elevation="10dp"
-        android:layout_marginRight="10dp"/>
+        android:layout_marginRight="15dp"/>
 
 
     <ImageView
@@ -239,8 +241,8 @@
             <ImageView
                 android:id="@+id/shopping_cart_image"
                 android:layout_width="64dp"
-                android:layout_height="14dp"
-                android:src="@drawable/shopping_cart_colored" />
+                android:layout_height="24dp"
+                android:src="@drawable/cart_product_screen_icon" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -259,6 +261,130 @@
             android:background="@drawable/bottom_options_border"
             android:text="BUY NOW"/>
     </LinearLayout>
+
+    <!-- Overlay Background -->
+    <View
+        android:id="@+id/overlayBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:elevation="20dp"/>
+
+    <!-- Add to Cart Overlay -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/addToCartOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="20dp"
+        android:background="@android:color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Success Message -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/cart_success"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/successMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Item added to cart successfully!"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/j_mab_blue"/>
+            </LinearLayout>
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shimmer_auto_start="true"
+                app:shimmer_duration="1000">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:background="#ADADAD" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="10dp"
+                        android:background="#ADADAD" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+            <!-- Recommended Products List -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recommendedProductsRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:layout_marginTop="15dp"
+                />
+
+            <!-- Buttons -->
+            <LinearLayout
+                android:id="@+id/horizontal_linear_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/backButton"
+                    android:layout_width="0dp"
+                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bottom_options_border"
+                    android:fontFamily="@font/dmsans"
+                    android:text="BACK"/>
+
+                <Button
+                    android:id="@+id/goToCartButton"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/dmsans"
+                    android:background="@drawable/bottom_options_border"
+                    android:text="GO TO CART"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+
 
 
 

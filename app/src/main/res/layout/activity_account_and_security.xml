@@ -81,7 +81,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:fontFamily="@font/dmsans"
+                        android:fontFamily="@font/dmsans_bold"
                         android:text="PERSONAL INFO"
                         android:textStyle="bold"/>
 
@@ -153,7 +153,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="@font/dmsans"
+                    android:fontFamily="@font/dmsans_bold"
                     android:text="SECURITY"
                     android:textStyle="bold"/>
 
@@ -214,7 +214,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:fontFamily="@font/dmsans"
+                    android:fontFamily="@font/dmsans_bold"
                     android:text="CONTACT INFO"
                     android:textStyle="bold"/>
 

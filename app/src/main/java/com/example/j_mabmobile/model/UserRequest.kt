@@ -13,6 +13,12 @@ data class User(
     val last_name: String?,
     val id: Int,
     val email: String,
+    val profile_picture: String,
+)
+
+data class UserProfileResponse(
+    val success: Boolean,
+    val user: User
 )
 
 data class SignUpRequest(
@@ -69,12 +75,23 @@ data class CartItem(
     val product_name: String,
     val product_image: String,
     val product_price: Double,
-    val productStock: Int,
+    val product_brand: String,
+    val product_description: String,
+    val product_stock: Int,
     var quantity: Int,
-    val product_brand: String
+
+
 ) {
     val total_price: Double
         get() = quantity * product_price
 }
+
+data class UpdateProfileRequest(
+    val id: Int,
+    val profile_picture: String,
+    val phone_number: String,
+    val address: String
+)
+
 
 

@@ -13,6 +13,7 @@
         android:padding="8dp">
 
         <LinearLayout
+            android:id="@+id/addminusLinear"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_width="wrap_content"
@@ -73,17 +74,21 @@
 
         <TextView
             android:id="@+id/item_text"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:fontFamily="@font/dmsans"
             android:layout_marginLeft="10dp"
             app:layout_constraintLeft_toRightOf="@id/item_image"
+            app:layout_constraintRight_toLeftOf="@id/addminusLinear"
             app:layout_constraintTop_toTopOf="parent"
             android:text="Sample Text"
             android:textColor="@color/j_mab_blue"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
 
         <TextView
             android:id="@+id/item_brand"

@@ -84,12 +84,47 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="25dp"
-                android:text="In case of Emergency call us:\n  GLOBE: 0977 769 3620\n  SMART: 0946 289 6767"
+                android:text="In case of Emergency call us:"
                 android:fontFamily="@font/dmsans"
                 android:textColor="@color/j_mab_blue"
                 android:lineSpacingExtra="4dp"
                 android:gravity="center"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvGlobeNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="GLOBE: 0977 769 3620"
+                android:fontFamily="@font/dmsans"
+                android:textColor="@color/j_mab_blue"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/call_icon"/>
+
+            <TextView
+                android:id="@+id/tvSmartNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SMART: 0946 289 6767"
+                android:fontFamily="@font/dmsans"
+                android:textColor="@color/j_mab_blue"
+                android:lineSpacingExtra="4dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/call_icon"/>
+
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

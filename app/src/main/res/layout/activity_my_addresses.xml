@@ -28,7 +28,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans"
-        android:text="My Address"
+        android:text="MY ADDRESSES"
         android:textColor="@color/white"
         android:textSize="30sp"
         android:textStyle="bold"
@@ -78,7 +78,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/dmsans"
+                        android:fontFamily="@font/dmsans_bold"
                         android:text="Example Address #1"
                         android:textStyle="bold"
                         android:layout_marginBottom="5dp"/>
@@ -146,7 +146,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/dmsans"
+                        android:fontFamily="@font/dmsans_bold"
                         android:text="Example Address #2"
                         android:textStyle="bold"
                         android:layout_marginBottom="5dp"/>
@@ -188,6 +188,7 @@
     </LinearLayout>
 
     <Button
+        android:id="@+id/addAddressBtn"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/myAddresses"
@@ -212,7 +213,7 @@
             android:gravity="center"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="@drawable/border"
+            android:background="@drawable/bottom_options_border"
             android:text="DISCARD"/>
 
         <Button
@@ -220,7 +221,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/border"
+            android:background="@drawable/bottom_options_border"
             android:text="SAVE"/>
 
     </LinearLayout>

@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +37,7 @@ class CartActivity : AppCompatActivity() {
     private lateinit var noOrdersYetTV: TextView
     private lateinit var deleteTV: TextView
     private lateinit var checkoutBtn: Button
+    private lateinit var horizontal_linear_layout: LinearLayout
 
     private val cartItems = mutableListOf<CartItem>()
 
@@ -54,6 +56,7 @@ class CartActivity : AppCompatActivity() {
         noOrdersYetTV = findViewById(R.id.noOrdersYetTV)
         deleteTV = findViewById(R.id.deleteTV)
         checkoutBtn = findViewById(R.id.checkoutBtn)
+        horizontal_linear_layout = findViewById(R.id.horizontal_linear_layout)
 
         checkoutBtn.setOnClickListener({
             onPause()
@@ -89,13 +92,34 @@ class CartActivity : AppCompatActivity() {
 
         deleteTV.setOnClickListener {
             val selectedCartIds = cartAdapter.getSelectedCartIds()
+
             if (selectedCartIds.isNotEmpty()) {
-                deleteMultipleItems(selectedCartIds)
+                val cartIdsString = selectedCartIds
+                showDeleteConfirmationDialog(cartIdsString)
             } else {
                 Toast.makeText(this, "No items selected", Toast.LENGTH_SHORT).show()
             }
         }
+
     }
+
+    private fun showDeleteConfirmationDialog(cartIds: String) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Confirm Deletion")
+        builder.setMessage("Are you sure you want to delete the selected items?")
+
+        builder.setPositiveButton("Delete") { _, _ ->
+            deleteMultipleItems(cartIds) // Pass String
+        }
+
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+    }
+
 
     private fun getUserDataFromPreferences() {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
@@ -122,24 +146,17 @@ class CartActivity : AppCompatActivity() {
                             cartItems.clear()
                             cartItems.addAll(cartResponse.cart)
                             cartAdapter.notifyDataSetChanged()
-                            emptyIcon.visibility = View.GONE
-                            noOrdersYetTV.visibility = View.GONE
-                            recyclerViewCart.visibility = View.VISIBLE
+                            updateEmptyCartUI(false)
                         } else {
-                            // Handle empty cart scenario without an error message
-                            emptyIcon.visibility = View.VISIBLE
-                            noOrdersYetTV.visibility = View.VISIBLE
-                            recyclerViewCart.visibility = View.GONE
+                            updateEmptyCartUI(true)
                         }
                     } else if (response.code() == 404) {
-                        // If the cart is empty (404), just show the empty state UI and don't show a toast
-                        emptyIcon.visibility = View.VISIBLE
-                        noOrdersYetTV.visibility = View.VISIBLE
-                        recyclerViewCart.visibility = View.GONE
+                        updateEmptyCartUI(true)
                     } else {
                         Toast.makeText(applicationContext, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
+
 
 
                 override fun onFailure(call: Call<CartResponse>, t: Throwable) {
@@ -164,11 +181,16 @@ class CartActivity : AppCompatActivity() {
                 response.enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                         if (response.isSuccessful && response.body()?.success == true) {
-                            // Remove the item from the local list and notify the adapter
                             val itemToRemove = cartItems.find { it.cart_id == cartId }
                             if (itemToRemove != null) {
                                 cartItems.remove(itemToRemove)
                                 cartAdapter.notifyDataSetChanged()
+                                cartAdapter.updateTotalPrice()
+
+                                if (cartItems.isEmpty()) {
+                                    updateEmptyCartUI(true)
+                                }
+
                                 Toast.makeText(this@CartActivity, "Item removed from cart", Toast.LENGTH_SHORT).show()
                             }
                         } else {
@@ -207,7 +229,7 @@ class CartActivity : AppCompatActivity() {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                         if (response.isSuccessful && response.body()?.success == true) {
                             // Quantity updated successfully
-                            Toast.makeText(this@CartActivity, "Quantity updated", Toast.LENGTH_SHORT).show()
+                            Log.d("CartActivity", "Quantity Updated")
                         } else {
                             Toast.makeText(this@CartActivity, "Failed to update quantity", Toast.LENGTH_SHORT).show()
                         }
@@ -225,6 +247,25 @@ class CartActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateEmptyCartUI(isEmpty: Boolean) {
+        if (isEmpty) {
+            emptyIcon.visibility = View.VISIBLE
+            noOrdersYetTV.visibility = View.VISIBLE
+            deleteTV.visibility = View.GONE
+            horizontal_linear_layout.visibility = View.GONE
+        } else {
+            emptyIcon.visibility = View.GONE
+            noOrdersYetTV.visibility = View.GONE
+            recyclerViewCart.visibility = View.VISIBLE
+            selectAllChkBox.visibility = View.VISIBLE
+            deleteTV.visibility = View.VISIBLE
+            checkoutBtn.visibility = View.VISIBLE
+            deleteTV.visibility = View.VISIBLE
+            horizontal_linear_layout.visibility = View.VISIBLE
+        }
+    }
+
+
     private fun deleteMultipleItems(cartIds: String) {
         if (authToken == null) {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
@@ -239,9 +280,17 @@ class CartActivity : AppCompatActivity() {
                 response.enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                         if (response.isSuccessful && response.body()?.success == true) {
-                            // Remove the deleted items from the local list
                             cartItems.removeAll { item -> cartIds.split(",").contains(item.cart_id.toString()) }
                             cartAdapter.notifyDataSetChanged()
+                            cartAdapter.selectedItems.removeAll { item -> cartIds.split(",").contains(item.cart_id.toString()) }
+                            cartAdapter.updateTotalPrice()
+                            cartAdapter.updateTotalPrice()
+
+                            if (cartItems.isEmpty()) {
+                                updateEmptyCartUI(true)
+                            }
+
+
                             Toast.makeText(this@CartActivity, "Items removed from cart", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(this@CartActivity, "Failed to remove items", Toast.LENGTH_SHORT).show()

@@ -5,10 +5,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -17,13 +19,22 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.core.os.postDelayed
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartRequest
+import com.example.j_mabmobile.model.Product
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.logging.Handler
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -32,6 +43,14 @@ class ProductScreenActivity : AppCompatActivity() {
     private lateinit var plusBtn: TextView
     private lateinit var quantityText: TextView
     private var quantity = 1
+    private lateinit var overlayBackground: View
+    private lateinit var addToCartOverlay: CardView
+    private lateinit var recommendedProductsRecycler: RecyclerView
+    private lateinit var recyclerAdapter: RecyclerAdapter
+    private var recommendedProducts = listOf<Product>()
+    private var userId: Int = 0
+    private lateinit var shimmerLayout: com.facebook.shimmer.ShimmerFrameLayout
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +69,15 @@ class ProductScreenActivity : AppCompatActivity() {
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
+        val backButton: TextView = findViewById(R.id.backButton)
+        val goToCartButton: Button= findViewById(R.id.goToCartButton)
+        overlayBackground = findViewById(R.id.overlayBackground)
+        addToCartOverlay = findViewById(R.id.addToCartOverlay)
+        recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
+        recommendedProductsRecycler.layoutManager = GridLayoutManager(this,2)
+        userId = intent.getIntExtra("user_id", 0)
+        shimmerLayout = findViewById(R.id.shimmerLayout)
+
 
         minusBtn = findViewById(R.id.minusBtn)
         plusBtn = findViewById(R.id.plusBtn)
@@ -81,6 +109,8 @@ class ProductScreenActivity : AppCompatActivity() {
         val price = intent.getDoubleExtra("product_price", 0.0)
         val token = intent.getStringExtra("jwt_token")
         val userId = intent.getIntExtra("user_id", 0)
+
+        Log.d("DEBUG", "Received token: $token")
 
         productName.text = name
         productDescription.text = description
@@ -121,6 +151,21 @@ class ProductScreenActivity : AppCompatActivity() {
             }
 
             animateCartEffect()
+            showAddToCartOverlay()
+            fetchRecommendedProducts(userId)
+        }
+
+        backButton.setOnClickListener {
+            hideAddToCartOverlay()
+        }
+
+        overlayBackground.setOnClickListener{
+            hideAddToCartOverlay()
+        }
+
+        goToCartButton.setOnClickListener {
+            val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
         }
 
 
@@ -174,7 +219,6 @@ class ProductScreenActivity : AppCompatActivity() {
             })
         }
 
-        // Apply scale animation
         val scaleAnim = AnimationUtils.loadAnimation(this, R.anim.cart_animation)
         cartIcon.startAnimation(scaleAnim)
 
@@ -182,6 +226,11 @@ class ProductScreenActivity : AppCompatActivity() {
     }
 
     private fun addToCart(userId: Int, productId: Int, quantity: Int, token: String) {
+
+        Log.d("DEBUG", "Token being sent: $token")
+        Log.d("DEBUG", "User ID: $userId, Product ID: $productId, Quantity: $quantity")
+
+
         val cartRequest = CartRequest(userId, productId, quantity)
 
         CoroutineScope(Dispatchers.Main).launch {
@@ -191,7 +240,7 @@ class ProductScreenActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val cartResponse = response.body()
                     if (cartResponse?.success == true) {
-                        Toast.makeText(this@ProductScreenActivity, "Added $quantity to cart!", Toast.LENGTH_SHORT).show()
+                        //Toast.makeText(this@ProductScreenActivity, "Added $quantity to cart!", Toast.LENGTH_SHORT).show()
                     } else {
                         val errorMessage = cartResponse?.errors?.get(0) ?: "Unknown error"
                         Toast.makeText(this@ProductScreenActivity, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
@@ -204,6 +253,75 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showAddToCartOverlay() {
+        overlayBackground.visibility = View.VISIBLE
+        addToCartOverlay.visibility = View.VISIBLE
+
+        recommendedProductsRecycler.visibility = View.GONE
+
+        shimmerLayout.visibility = View.VISIBLE
+        shimmerLayout.startShimmer()
+
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(2000)
+
+            shimmerLayout.stopShimmer()
+            shimmerLayout.visibility = View.GONE
+
+            fetchRecommendedProducts(userId)
+        }
+    }
+
+
+
+
+    private fun hideAddToCartOverlay() {
+        overlayBackground.visibility = View.GONE
+        addToCartOverlay.visibility = View.GONE
+    }
+
+    private fun fetchRecommendedProducts(userId: Int) {
+        Log.d("API_DEBUG", "Fetching recommended products for userId: $userId")
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = apiService.getProducts().execute()
+                Log.d("API_DEBUG", "Response Code: ${response.code()}")
+
+                if (response.isSuccessful && response.body() != null) {
+                    val allProducts = response.body()!!.products
+                    Log.d("API_DEBUG", "Products fetched: ${allProducts.size}")
+
+                    val recommended = allProducts.shuffled().take(10)
+
+                    launch(Dispatchers.Main) {
+                        recommendedProducts = recommended
+                        recyclerAdapter = RecyclerAdapter(recommendedProducts, userId)
+                        recommendedProductsRecycler.adapter = recyclerAdapter
+
+                        recommendedProductsRecycler.postDelayed({
+                            recommendedProductsRecycler.alpha = 0f
+                            recommendedProductsRecycler.visibility = View.VISIBLE
+                            recommendedProductsRecycler.animate()
+                                .alpha(1f)
+                                .setDuration(500)
+                                .setInterpolator(DecelerateInterpolator())
+                                .start()
+                        }, 1000)
+                    }
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("API_DEBUG", "Failed to fetch recommended products. Error: $errorBody")
+                }
+            } catch (e: Exception) {
+                Log.e("API_DEBUG", "Error fetching recommended products", e)
+            }
+        }
+    }
+
+
+
 
 }
 

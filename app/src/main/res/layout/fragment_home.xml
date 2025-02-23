@@ -54,7 +54,7 @@
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:text="CATEGORIES"
-                    android:fontFamily="@font/dmsans"
+                    android:fontFamily="@font/dmsans_bold"
                     android:textStyle="bold"
                     android:textColor="@color/j_mab_blue"
                     android:textSize="14sp"
@@ -89,7 +89,7 @@
                             android:text="ALL"
                             android:drawableTop="@drawable/all_icon"
                             android:drawablePadding="5dp"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="10dp"
                             android:fontFamily="@font/dmsans"
                             android:drawableTint="@color/icon_tint_selector"
                             android:textStyle="bold"
@@ -102,7 +102,7 @@
                             android:layout_height="wrap_content"
                             android:text="TIRES"
                             android:drawableTop="@drawable/tires_icon"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="10dp"
                             android:fontFamily="@font/dmsans"
                             android:drawableTint="@color/icon_tint_selector"
                             android:textStyle="bold"
@@ -118,7 +118,7 @@
                             android:drawableTop="@drawable/oil_icon"
                             android:drawableTint="@color/icon_tint_selector"
                             android:text="OILS"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="10dp"
                             android:fontFamily="@font/dmsans"
                             android:textStyle="bold"/>
 
@@ -131,7 +131,7 @@
                             android:drawableTop="@drawable/battery_icon"
                             android:drawableTint="@color/icon_tint_selector"
                             android:text="BATTERY"
-                            android:layout_marginLeft="5dp"
+                            android:layout_marginLeft="10dp"
                             android:fontFamily="@font/dmsans"
                             android:textStyle="bold"/>
 
@@ -143,8 +143,8 @@
                             android:layout_height="wrap_content"
                             android:drawableTop="@drawable/lubricant"
                             android:drawableTint="@color/icon_tint_selector"
-                            android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
                             android:text="LUBRICANT"
                             android:fontFamily="@font/dmsans"
                             android:textStyle="bold"/>
@@ -160,7 +160,7 @@
                     app:layout_constraintTop_toBottomOf="@id/categoryHorizontalScrollView"
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:layout_marginLeft="15dp"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="20dp"
                     android:fontFamily="@font/dmsans"
                     android:textColor="@color/j_mab_blue"
                     android:textSize="12sp"/>
@@ -168,7 +168,7 @@
                 <RelativeLayout
                     app:layout_constraintTop_toBottomOf="@id/categoryHorizontalScrollView"
                     app:layout_constraintLeft_toRightOf="@id/sortByTV"
-                    android:layout_marginTop="7dp"
+                    android:layout_marginTop="15dp"
                     android:layout_marginLeft="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
@@ -204,7 +204,7 @@
                     android:background="#E7E7E7"
                     app:layout_constraintTop_toBottomOf="@id/sortByTV"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="20dp"
                     android:paddingBottom="80dp"
                     tools:listitem="@layout/item_card"/>
 

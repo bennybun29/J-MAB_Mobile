@@ -63,7 +63,7 @@
             android:fontFamily="@font/cabin"
             android:textStyle="italic"
             android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="15dp"
             android:inputType="textEmailAddress"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"/>
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="15dp"
             app:endIconMode="password_toggle"
             app:endIconTint="@color/j_mab_blue"
             app:hintEnabled="false">
