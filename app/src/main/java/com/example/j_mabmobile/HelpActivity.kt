@@ -2,8 +2,12 @@ package com.example.j_mabmobile
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.UnderlineSpan
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -29,6 +33,9 @@ class HelpActivity : AppCompatActivity() {
 
         tvGlobeNumber.setOnClickListener { showOptionsDialog("09777693620") }
         tvSmartNumber.setOnClickListener { showOptionsDialog("09462896767") }
+
+        underlineTextView(tvGlobeNumber, "GLOBE: 0977 769 3620", "0977 769 3620")
+        underlineTextView(tvSmartNumber, "SMART: 0946 289 6767", "0946 289 6767")
     }
 
     private fun showOptionsDialog(phoneNumber: String) {
@@ -57,4 +64,17 @@ class HelpActivity : AppCompatActivity() {
         intent.data = Uri.parse("sms:$phoneNumber")
         startActivity(intent)
     }
+
+    private fun underlineTextView(textView: TextView, fullText: String, phoneNumber: String) {
+        val spannable = SpannableString(fullText)
+        val startIndex = fullText.indexOf(phoneNumber)
+
+        if (startIndex != -1) {
+            spannable.setSpan(UnderlineSpan(), startIndex, startIndex + phoneNumber.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        textView.text = spannable
+        textView.setTextColor(Color.BLUE)
+    }
+
 }

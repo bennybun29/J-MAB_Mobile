@@ -58,22 +58,19 @@ class CartActivity : AppCompatActivity() {
         checkoutBtn = findViewById(R.id.checkoutBtn)
         horizontal_linear_layout = findViewById(R.id.horizontal_linear_layout)
 
-        checkoutBtn.setOnClickListener({
-            onPause()
-            val intent = Intent(this, CheckoutActivity::class.java)
-            startActivity(intent)
-        })
-
         backBtn.setOnClickListener {
             onBackPressed()
         }
 
 
-        cartAdapter = CartAdapter(cartItems, totalPriceTV, selectAllChkBox, { cartItem ->
-            deleteCartItem(cartItem.cart_id)
-        }, { cartId, quantity ->
-            updateCartItem(cartId, quantity)
-        })
+        cartAdapter = CartAdapter(
+            cartItems,
+            totalPriceTV,
+            selectAllChkBox,
+            { cartItem -> deleteCartItem(cartItem.cart_id) },
+            { cartId, quantity -> updateCartItem(cartId, quantity) },
+            { isEnabled -> updateCheckoutButton(isEnabled) }
+        )
 
         recyclerViewCart.layoutManager = LinearLayoutManager(this)
         recyclerViewCart.adapter = cartAdapter
@@ -101,6 +98,20 @@ class CartActivity : AppCompatActivity() {
             }
         }
 
+        checkoutBtn.setOnClickListener {
+            val selectedItems = cartAdapter.getSelectedItems()
+
+            if (selectedItems.isEmpty()) {
+                Toast.makeText(this, "No items selected for checkout", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val intent = Intent(this, CheckoutActivity::class.java)
+            intent.putParcelableArrayListExtra("selected_items", ArrayList(selectedItems))
+            startActivity(intent)
+        }
+
+        updateCheckoutButton(false)
     }
 
     private fun showDeleteConfirmationDialog(cartIds: String) {
@@ -109,7 +120,7 @@ class CartActivity : AppCompatActivity() {
         builder.setMessage("Are you sure you want to delete the selected items?")
 
         builder.setPositiveButton("Delete") { _, _ ->
-            deleteMultipleItems(cartIds) // Pass String
+            deleteMultipleItems(cartIds)
         }
 
         builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -309,5 +320,10 @@ class CartActivity : AppCompatActivity() {
         }
     }
 
+    fun updateCheckoutButton(isEnabled: Boolean) {
+        Log.d("CartActivity", "updateCheckoutButton called with isEnabled = $isEnabled")
+        checkoutBtn.isEnabled = isEnabled
+        checkoutBtn.setBackgroundColor(if (isEnabled) getColor(R.color.j_mab_blue) else getColor(R.color.LTGRAY))
+    }
 
 }

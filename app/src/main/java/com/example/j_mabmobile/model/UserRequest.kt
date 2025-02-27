@@ -1,5 +1,9 @@
 package com.example.j_mabmobile.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+
 data class ApiResponse(
     val success: Boolean,
     val message: String,
@@ -14,6 +18,10 @@ data class User(
     val id: Int,
     val email: String,
     val profile_picture: String,
+    val phone_number: String,
+    val user_address: String,
+    val birthday: String,
+    val gender: String
 )
 
 data class UserProfileResponse(
@@ -68,6 +76,7 @@ data class CartResponse(
     val errors: List<String>
 )
 
+@Parcelize
 data class CartItem(
     val cart_id: Int,
     val user_id: Int,
@@ -81,16 +90,52 @@ data class CartItem(
     var quantity: Int,
 
 
-) {
+    ) : Parcelable {
     val total_price: Double
         get() = quantity * product_price
 }
 
 data class UpdateProfileRequest(
     val id: Int,
-    val profile_picture: String,
-    val phone_number: String,
-    val address: String
+    val first_name: String?,
+    val last_name: String?,
+    val profile_picture: String?,
+    val email: String?,
+    val phone_number: String?,
+    val address: String?,
+    val gender: String?,
+    val birthday: String?
+)
+
+data class UpdateProfileResponse(
+    val success: Boolean,
+    val errors: List<String>
+)
+
+data class CheckoutRequest(
+    val cart_ids: List<Int>,
+    val payment_method: String
+)
+
+data class CheckoutResponse(
+    val success: Boolean,
+    val message: String,
+    val payment_link: String?
+)
+
+data class OrderResponse(
+    val success: Boolean,
+    val orders: List<Order>?
+)
+
+data class Order(
+    val order_id: Int,
+    val user_id: Int,
+    val total_price: Double,
+    val payment_method: String,
+    val status: String,
+    val reference_number: String,
+    val created_at: String
 )
 
 

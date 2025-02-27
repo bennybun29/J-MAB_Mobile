@@ -4,8 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.text.format.DateUtils
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -20,8 +18,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
-
+        window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
 
         // Check if the token is valid and handle authentication
         if (!isTokenValid()) {
@@ -29,7 +26,7 @@ class MainActivity : AppCompatActivity() {
             navigateToSignIn()
         } else {
             // Set the first fragment (default)
-            openFragment(HomeFragment())
+            navigateToHome()
         }
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -62,7 +59,6 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
-
 
         setInitialIconsState()
     }
@@ -129,5 +125,14 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SignInActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    fun navigateToHome() {
+        supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE) // ✅ Clears back stack
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, HomeFragment())
+            .commit()
+
+        binding.bottomNavigation.selectedItemId = R.id.home_btn
     }
 }

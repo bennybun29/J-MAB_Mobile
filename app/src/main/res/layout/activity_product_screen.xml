@@ -6,70 +6,138 @@
     android:fitsSystemWindows="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageButton
-        android:id="@+id/backBtn"
+    <androidx.cardview.widget.CardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/back_btn_product_screen"
-        android:background="@null"
+        app:cardCornerRadius="25dp"
+        android:layout_marginTop="15dp"
+        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="10dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/back_btn_product_screen"
+            android:background="@null"
+            android:scaleType="centerInside"/>
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/favoriteCV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:elevation="10dp"
-        android:layout_marginLeft="10dp"/>
-
-    <ImageButton
-        android:id="@+id/favoriteBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/favorite"
-        android:background="@null"
+        android:layout_marginRight="10dp"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/cartBtn"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:layout_marginRight="15dp"/>
+        app:layout_constraintRight_toLeftOf="@id/cartCV"
+        app:cardBackgroundColor="@android:color/white">
 
-    <ImageButton
-        android:id="@+id/cartBtn"
+        <ImageButton
+            android:id="@+id/favoriteBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/favorite"
+            android:background="@null"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/cartBtn"
+            android:elevation="10dp"
+            android:layout_margin="8dp"/>
+
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cartCV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/cart_product_screen_icon"
-        android:background="@null"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="10dp"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/helpBtn"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:layout_marginRight="15dp"/>
+        app:layout_constraintRight_toLeftOf="@id/helpCV"
+        app:cardBackgroundColor="@android:color/white">
 
-    <ImageButton
-        android:id="@+id/helpBtn"
+        <ImageButton
+            android:id="@+id/cartBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/cart_product_screen_icon"
+            android:background="@null"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/helpCV"
+            android:layout_margin="8dp"
+            android:elevation="10dp" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/helpCV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/question_mark_icon"
-        android:background="@null"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="10dp"
+        app:cardCornerRadius="25dp"
+        app:cardElevation="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="20dp"
-        android:elevation="10dp"
-        android:layout_marginRight="15dp"/>
+        app:cardBackgroundColor="@android:color/white">
+
+        <ImageButton
+            android:id="@+id/helpBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/question_mark_icon"
+            android:layout_margin="8dp"
+            android:background="@null"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:elevation="10dp" />
 
 
-    <ImageView
-        android:id="@+id/item_image"
-        android:layout_width="300dp"
+    </androidx.cardview.widget.CardView>
+
+
+
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/image_carousel"
+        android:layout_width="match_parent"
         android:layout_height="300dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_marginTop="70dp"/>
 
+    <TextView
+        app:layout_constraintBottom_toBottomOf="@id/image_carousel"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:id="@+id/image_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="1/1"
+        android:fontFamily="@font/dmsans_bold"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:background="@color/j_mab_blue"
+        android:padding="8dp"/>
+
+
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_image"
+        app:layout_constraintTop_toBottomOf="@+id/image_carousel"
         app:cardCornerRadius="26dp"
         app:cardElevation="10dp"
         android:layout_marginTop="20dp"

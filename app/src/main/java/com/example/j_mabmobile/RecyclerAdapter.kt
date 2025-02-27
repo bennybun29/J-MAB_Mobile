@@ -10,6 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Product
 import com.squareup.picasso.Picasso
+import java.text.NumberFormat
+import java.util.Locale
 
 class RecyclerAdapter(private val products: List<Product>, private val userId: Int) :
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
@@ -22,14 +24,14 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val product = products[position]
         holder.textView.text = product.name
-        holder.priceView.text = "₱${product.price}"
+        holder.priceView.text = "₱${formatPrice(product.price)}"
 
 
         // Load image using Picasso
         Picasso.get()
             .load(product.image_url)
             .placeholder(R.drawable.jmab_fab) // Use a placeholder drawable
-            .error(R.drawable.jmab_fab) // Use an error drawable if loading fails
+            .error(R.drawable.jmab_fab)
             .into(holder.imageView)
 
         holder.itemView.setOnClickListener {
@@ -64,5 +66,13 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         val imageView: ImageView = itemView.findViewById(R.id.item_image)
         val textView: TextView = itemView.findViewById(R.id.item_text)
         val priceView: TextView = itemView.findViewById(R.id.item_price)
+    }
+
+    private fun formatPrice(price: Double): String {
+        return if (price > 100) {
+            NumberFormat.getNumberInstance(Locale.US).format(price)
+        } else {
+            "%.2f".format(price)
+        }
     }
 }

@@ -1,10 +1,13 @@
 package com.example.j_mabmobile
 
+import android.graphics.Rect
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.LinearLayout
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -21,6 +24,9 @@ class MessagesFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private lateinit var chatInputLayout: LinearLayout
+    private lateinit var etMessage: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -33,8 +39,31 @@ class MessagesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_messages, container, false)
+        val view = inflater.inflate(R.layout.fragment_messages, container, false)
+
+        chatInputLayout = view.findViewById(R.id.chat_input_layout)
+        etMessage = view.findViewById(R.id.et_message)
+
+        setupKeyboardListener(view)
+
+        return view
+    }
+
+    private fun setupKeyboardListener(rootView: View) {
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = rootView.height
+            val keypadHeight = screenHeight - rect.bottom
+
+            if (keypadHeight > screenHeight * 0.15) {
+                // Keyboard is open, move the chat input field up
+                chatInputLayout.translationY = -keypadHeight.toFloat()
+            } else {
+                // Keyboard is closed, reset position
+                chatInputLayout.translationY = 0f
+            }
+        }
     }
 
     companion object {

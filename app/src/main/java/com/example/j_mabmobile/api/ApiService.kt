@@ -3,11 +3,14 @@ package com.example.j_mabmobile.api
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.CartResponse
+import com.example.j_mabmobile.model.CheckoutRequest
+import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.LogInRequest
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
 import com.example.j_mabmobile.model.UpdateProfileRequest
+import com.example.j_mabmobile.model.UpdateProfileResponse
 import com.example.j_mabmobile.model.UserProfileResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -25,15 +28,29 @@ import retrofit2.http.Query
 
 interface ApiService {
 
+    //Users Methods HAHAHAH
     @POST("user/register")
     fun register(@Body userRequest: SignUpRequest): Call<ApiResponse>
 
     @POST("user/login")
     fun login(@Body userRequest: LogInRequest): Call<ApiResponse>
 
+    @GET("user/user")
+    fun getUserProfile(@Query("id") userId: Int): Call<UserProfileResponse>
+
+    @PUT("user/update")
+    fun updateProfilePicture(
+        @Header("Authorization") token: String,
+        @Body request: UpdateProfileRequest
+    ): Call<UpdateProfileResponse>
+
+
+    //Product Methods
     @GET("product/products")
     fun getProducts(): Call<ProductResponse>
 
+
+    //Cart Methods
     @POST("cart/createCart")
     suspend fun addToCart(
         @Header("Authorization") token: String,
@@ -59,14 +76,13 @@ interface ApiService {
         @Body updateRequest: UpdateCartRequest
     ): Call<ApiResponse>
 
-    @PUT("user/update")
-    fun updateProfilePicture(
-        @Header("Authorization") token: String,
-        @Body request: UpdateProfileRequest
-    ): Call<ApiResponse>
 
-    @GET("user/user")
-    fun getUserProfile(@Query("id") userId: Int): Call<UserProfileResponse>
+    //Checkout Methods
+    @POST("checkout")
+    fun checkout(
+        @Header("Authorization") token: String,
+        @Body checkoutRequest: CheckoutRequest
+    ): Call<CheckoutResponse>
 
 }
 

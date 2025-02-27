@@ -118,6 +118,10 @@ class SignInActivity : AppCompatActivity() {
                     val userId = apiResponse?.user?.id
                     val expiresIn = apiResponse?.expiresIn ?: 3600L
                     val email = apiResponse?.user?.email
+                    val phone_number = apiResponse?.user?.phone_number
+                    val user_address = apiResponse?.user?.user_address
+                    val birthday = apiResponse?.user?.birthday
+                    val gender = apiResponse?.user?.gender
 
                     if (token != null) {
                         saveToken(token, expiresIn)
@@ -135,24 +139,46 @@ class SignInActivity : AppCompatActivity() {
                         saveEmail(email)
                     }
 
+                    if (phone_number != null) {
+                        savePhoneNumber(phone_number)
+                    }
+
+                    if (user_address != null) {
+                        saveUserAddress(user_address)
+                    }
+
+                    if (gender != null) {
+                        saveGender(gender)
+                    }
+
+                    if (birthday != null) {
+                        saveBirthday(birthday)
+                    }
+
                     Toast.makeText(this@SignInActivity, apiResponse?.message ?: "Login successful", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this@SignInActivity, MainActivity::class.java))
                     finishAffinity()
                 } else {
                     try {
                         val errorResponse = response.errorBody()?.string()
-                        val jsonObject = JSONObject(errorResponse)
-                        val errorMessage = jsonObject.optString("message", "Invalid email or password.")  // Fix: Read `message`
-
-                        Toast.makeText(this@SignInActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                        errorResponse?.let {
+                            val jsonObject = JSONObject(it)
+                            val errorMessage = jsonObject.optString("message", "Invalid email or password.")
+                            Toast.makeText(this@SignInActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                        } ?: run {
+                            Toast.makeText(this@SignInActivity, "Invalid email or password.", Toast.LENGTH_SHORT).show()
+                        }
                     } catch (e: Exception) {
-                        Toast.makeText(this@SignInActivity, "An unknown error occurred", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignInActivity, "Error parsing response", Toast.LENGTH_SHORT).show()
+                        Log.e("SignInError", "Error parsing JSON", e)
                     }
+
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Toast.makeText(this@SignInActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                Log.e("LoginError", "Network error: ${t.message}", t)
+                Toast.makeText(this@SignInActivity, "Invalid email or password.", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -183,6 +209,42 @@ class SignInActivity : AppCompatActivity() {
         editor.apply()
 
         Log.d("UserID", "User ID saved: $userId")
+    }
+
+    private fun savePhoneNumber(phoneNumber: String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("phone_number", phoneNumber)
+        editor.apply()
+
+        Log.d("Phone Number", "Phone Number saved: $phoneNumber")
+    }
+
+    private fun saveUserAddress(userAddress: String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("user_address", userAddress)
+        editor.apply()
+
+        Log.d("User Address", "User Address saved: $userAddress")
+    }
+
+    private fun saveGender(gender: String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("gender", gender)
+        editor.apply()
+
+        Log.d("User Gender", "User Gender saved: $gender")
+    }
+
+    private fun saveBirthday(birthday: String) {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("birthday", birthday)
+        editor.apply()
+
+        Log.d("User Birthday", "User Birthday saved: $birthday")
     }
 
     private fun saveEmail(userEmail:String) {

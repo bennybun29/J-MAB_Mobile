@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="5dp"
-            android:fontFamily="@font/dmsans"
+            android:fontFamily="@font/dmsans_bold"
             android:text="Username Example"
             android:textColor="@color/white"
             android:textSize="20sp"
@@ -132,7 +132,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/j_mab_blue"
-                    android:fontFamily="@font/dmsans"
+                    android:fontFamily="@font/dmsans_bold"
                     android:gravity="center"
                     android:layout_marginLeft="15dp"
                     android:layout_marginBottom="8dp"/>

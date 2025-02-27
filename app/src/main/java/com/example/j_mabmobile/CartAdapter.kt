@@ -13,13 +13,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.CartItem
 import com.squareup.picasso.Picasso
+import java.text.NumberFormat
+import java.util.Locale
 
-class CartAdapter(private val cartItems: List<CartItem>,
-                  private val totalPriceTV: TextView,
-                  val selectAllChkBox: CheckBox,
-                  private val onItemRemoved: (CartItem) -> Unit,
-                  private val onQuantityUpdated: (cartId: Int, quantity: Int) -> Unit) :
-    RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
+class CartAdapter(
+    private val cartItems: List<CartItem>,
+    private val totalPriceTV: TextView,
+    val selectAllChkBox: CheckBox,
+    private val onItemRemoved: (CartItem) -> Unit,
+    private val onQuantityUpdated: (cartId: Int, quantity: Int) -> Unit,
+    private val onSelectionChanged: (Boolean) -> Unit
+) : RecyclerView.Adapter<CartAdapter.CartViewHolder>() {
 
     val selectedItems = mutableSetOf<CartItem>()
 
@@ -45,12 +49,12 @@ class CartAdapter(private val cartItems: List<CartItem>,
         val userId = getUserId(holder.itemView.context)
         val token = getToken(holder.itemView.context)
 
-
         holder.itemName.text = cartItem.product_name
         holder.itemQuantity.text = "${cartItem.quantity}"
 
         val updatedPrice = cartItem.product_price * cartItem.quantity
-        holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
+        val formattedPrice = formatPrice(updatedPrice)
+        holder.productPrice.text = "Price: ₱$formattedPrice"
         holder.brand.text = "Brand: ${cartItem.product_brand}"
 
         Picasso.get()
@@ -73,7 +77,6 @@ class CartAdapter(private val cartItems: List<CartItem>,
 
         checkIfAllSelected()
 
-        // Set click listener for the entire item view
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
@@ -96,7 +99,7 @@ class CartAdapter(private val cartItems: List<CartItem>,
                 cartItem.quantity--
                 holder.itemQuantity.text = "${cartItem.quantity}"
                 val updatedPrice = cartItem.product_price * cartItem.quantity
-                holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
+                holder.productPrice.text = "Price: ₱${formatPrice(updatedPrice)}"
                 updateTotalPrice()
                 onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
             }
@@ -106,7 +109,7 @@ class CartAdapter(private val cartItems: List<CartItem>,
             cartItem.quantity++
             holder.itemQuantity.text = "${cartItem.quantity}"
             val updatedPrice = cartItem.product_price * cartItem.quantity
-            holder.productPrice.text = "Price: ₱${"%.2f".format(updatedPrice)}"
+            holder.productPrice.text = "Price: ₱${formatPrice(updatedPrice)}"
             updateTotalPrice()
             onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
         }
@@ -126,14 +129,12 @@ class CartAdapter(private val cartItems: List<CartItem>,
         }
     }
 
-
-    override fun getItemCount(): Int {
-        return cartItems.size
-    }
+    override fun getItemCount(): Int = cartItems.size
 
     fun updateTotalPrice() {
         val total = selectedItems.sumOf { it.product_price * it.quantity }
-        totalPriceTV.text = "Total: ₱ ${"%.2f".format(total)}"
+        totalPriceTV.text = "Total: ₱${formatPrice(total)}"
+        onSelectionChanged(selectedItems.isNotEmpty())
     }
 
     fun selectAllItems(selectAll: Boolean) {
@@ -165,6 +166,18 @@ class CartAdapter(private val cartItems: List<CartItem>,
         selectAllChkBox.setOnCheckedChangeListener { _, isChecked ->
             selectAllItems(isChecked)
         }
+        onSelectionChanged(selectedItems.isNotEmpty())
     }
 
+    fun getSelectedItems(): List<CartItem> {
+        return selectedItems.toList()
+    }
+
+    private fun formatPrice(price: Double): String {
+        return if (price > 100) {
+            NumberFormat.getNumberInstance(Locale.US).format(price)
+        } else {
+            "%.2f".format(price)
+        }
+    }
 }

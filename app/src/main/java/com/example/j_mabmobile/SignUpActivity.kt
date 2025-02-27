@@ -155,15 +155,34 @@ class SignUpActivity : AppCompatActivity() {
                         }
                     }
                 } else {
-                    try {
-                        val errorResponse = response.errorBody()?.string()
-                        val errorMessage = JSONObject(errorResponse).getString("message")
-                        Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
+                    val errorBody = response.errorBody()?.string()
+                    if (errorBody != null) {
+                        try {
+                            val jsonObject = JSONObject(errorBody)
+
+                            // Extract error message from "errors" array
+                            val errorsArray = jsonObject.optJSONArray("errors")
+                            val errorMessage = if (errorsArray != null && errorsArray.length() > 0) {
+                                errorsArray.getString(0)  // Get the first error message
+                            } else {
+                                "An unknown error occurred"
+                            }
+
+                            // Check if the error is specifically about email registration
+                            if (errorMessage.contains("Email is already registered", ignoreCase = true)) {
+                                Toast.makeText(this@SignUpActivity, "This email is already in use. Please sign in.", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@SignUpActivity, "An error occurred while processing your request.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
                         Toast.makeText(this@SignUpActivity, "An unknown error occurred", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
+
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Toast.makeText(this@SignUpActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()

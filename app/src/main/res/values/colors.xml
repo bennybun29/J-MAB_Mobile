@@ -8,4 +8,5 @@
     <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
     <color name="j_mab_blue">#02254B</color>
+    <color name="LTGRAY">#808080</color>
 </resources>

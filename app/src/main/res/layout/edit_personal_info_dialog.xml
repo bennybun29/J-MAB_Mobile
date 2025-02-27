@@ -31,28 +31,58 @@
             android:layout_gravity="center"/>
 
         <EditText
-            android:id="@+id/editName"
+            android:id="@+id/editFirstName"
             android:layout_width="match_parent"
             android:fontFamily="@font/dmsans"
             android:layout_height="wrap_content"
-            android:hint="Enter Name"
+            android:hint="Enter First Name"
             android:inputType="text"/>
 
         <EditText
-            android:id="@+id/editGender"
+            android:id="@+id/editLastName"
+            android:layout_width="match_parent"
+            android:fontFamily="@font/dmsans"
+            android:layout_height="wrap_content"
+            android:hint="Enter Last Name"
+            android:inputType="text"/>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Gender"
-            android:fontFamily="@font/dmsans"
-            android:inputType="text"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Spinner
+                android:id="@+id/editGender"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="Select Gender"
+                android:fontFamily="@font/dmsans"
+                android:background="@null"
+                android:spinnerMode="dialog"/>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/black"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"/>
 
         <EditText
             android:id="@+id/editBirthday"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:focusable="false"
+            android:clickable="true"
             android:fontFamily="@font/dmsans"
-            android:hint="Enter Birthday"
-            android:inputType="date"/>
+            android:hint="Select Birthday"
+            android:drawableEnd="@drawable/calendar_icon"
+            android:drawablePadding="10dp"/>
+
 
         <Button
             android:id="@+id/saveChangesButton"
@@ -63,6 +93,15 @@
             android:backgroundTint="@color/j_mab_blue"
             android:textColor="@android:color/white"
             android:layout_marginTop="10dp"/>
+
+        <TextView
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/dmsans_bold"/>
     </LinearLayout>
     </androidx.cardview.widget.CardView>
 

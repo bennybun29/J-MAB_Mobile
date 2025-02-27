@@ -26,7 +26,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent" />
 
         <TextView
             android:id="@+id/noOrdersYetTV"
@@ -39,6 +39,16 @@
             android:textColor="@color/j_mab_blue"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
+
+        <Button
+            android:id="@+id/continueShoppingBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Continue Shopping"
+            app:layout_constraintTop_toBottomOf="@id/noOrdersYetTV"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
