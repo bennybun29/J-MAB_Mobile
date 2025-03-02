@@ -77,6 +77,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val goToCartButton: Button= findViewById(R.id.goToCartButton)
         val imageCountTextView: TextView = findViewById(R.id.image_count)
         val imageCarousel: ViewPager2 = findViewById(R.id.image_carousel)
+        val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         overlayBackground = findViewById(R.id.overlayBackground)
         addToCartOverlay = findViewById(R.id.addToCartOverlay)
         recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
@@ -93,12 +94,17 @@ class ProductScreenActivity : AppCompatActivity() {
             onBackPressed()
         }
 
-        cartBtn.setOnClickListener({
+        cartBtn.setOnClickListener{
             onPause()
             val intent = Intent(this, CartActivity::class.java)
             startActivity(intent)
-        })
+        }
 
+        helpBtn.setOnClickListener{
+            onPause()
+            val intent = Intent(this, HelpActivity::class.java)
+            startActivity(intent)
+        }
         val product_id = intent.getIntExtra("product_id", 0)
         val imageUrl = intent.getStringExtra("product_image_url")
         val name = intent.getStringExtra("product_name")
@@ -266,7 +272,7 @@ class ProductScreenActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val response = apiService.addToCart("Bearer $token", cartRequest)
+                val response = apiService.addToCart(cartRequest)
 
                 if (response.isSuccessful) {
                     val cartResponse = response.body()
@@ -292,22 +298,15 @@ class ProductScreenActivity : AppCompatActivity() {
         addToCartOverlay.visibility = View.VISIBLE
 
         recommendedProductsRecycler.visibility = View.GONE
-
         shimmerLayout.visibility = View.VISIBLE
         shimmerLayout.startShimmer()
 
         GlobalScope.launch(Dispatchers.Main) {
-            delay(2000)
-
-            shimmerLayout.stopShimmer()
-            shimmerLayout.visibility = View.GONE
+            delay(5000)
 
             fetchRecommendedProducts(userId)
         }
     }
-
-
-
 
     private fun hideAddToCartOverlay() {
         overlayBackground.visibility = View.GONE
@@ -333,15 +332,16 @@ class ProductScreenActivity : AppCompatActivity() {
                         recyclerAdapter = RecyclerAdapter(recommendedProducts, userId)
                         recommendedProductsRecycler.adapter = recyclerAdapter
 
-                        recommendedProductsRecycler.postDelayed({
-                            recommendedProductsRecycler.alpha = 0f
-                            recommendedProductsRecycler.visibility = View.VISIBLE
-                            recommendedProductsRecycler.animate()
-                                .alpha(1f)
-                                .setDuration(500)
-                                .setInterpolator(DecelerateInterpolator())
-                                .start()
-                        }, 1000)
+                        shimmerLayout.stopShimmer()
+                        shimmerLayout.visibility = View.GONE
+                        recommendedProductsRecycler.visibility = View.VISIBLE
+
+                        recommendedProductsRecycler.alpha = 0f
+                        recommendedProductsRecycler.animate()
+                            .alpha(1f)
+                            .setDuration(500)
+                            .setInterpolator(DecelerateInterpolator())
+                            .start()
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()

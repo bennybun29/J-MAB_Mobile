@@ -148,34 +148,32 @@ class CartActivity : AppCompatActivity() {
             return
         }
 
-        RetrofitClient.getApiService(this).getCartItems(authToken!!, userId)
+        RetrofitClient.getApiService(this).getCartItems(userId)
             .enqueue(object : Callback<CartResponse> {
                 override fun onResponse(call: Call<CartResponse>, response: Response<CartResponse>) {
                     if (response.isSuccessful && response.body() != null) {
                         val cartResponse = response.body()
-                        if (cartResponse?.success == true && cartResponse.cart.isNotEmpty()) {
+                        if (cartResponse?.success == true) {
                             cartItems.clear()
                             cartItems.addAll(cartResponse.cart)
                             cartAdapter.notifyDataSetChanged()
-                            updateEmptyCartUI(false)
+                            updateEmptyCartUI(cartItems.isEmpty())
+
                         } else {
                             updateEmptyCartUI(true)
                         }
-                    } else if (response.code() == 404) {
-                        updateEmptyCartUI(true)
-                    } else {
-                        Toast.makeText(applicationContext, "Error: ${response.code()}", Toast.LENGTH_SHORT).show()
                     }
                 }
-
-
 
                 override fun onFailure(call: Call<CartResponse>, t: Throwable) {
                     Log.e("API_ERROR", "Error: ${t.message}")
                     Toast.makeText(applicationContext, "API request failed", Toast.LENGTH_SHORT).show()
+                    updateEmptyCartUI(true)
                 }
             })
     }
+
+
 
     private fun deleteCartItem(cartId: Int) {
         if (authToken == null) {
@@ -187,7 +185,7 @@ class CartActivity : AppCompatActivity() {
             try {
                 // Use Call<ApiResponse> instead of Response<ApiResponse>
                 val response = RetrofitClient.getApiService(this@CartActivity)
-                    .deleteCartItem(authToken!!, cartId.toString())
+                    .deleteCartItem(cartId.toString())
 
                 response.enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
@@ -234,7 +232,7 @@ class CartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = RetrofitClient.getApiService(this@CartActivity)
-                    .updateCartItem(authToken!!, cartId, updateRequest)
+                    .updateCartItem(cartId, updateRequest)
 
                 response.enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
@@ -286,7 +284,7 @@ class CartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = RetrofitClient.getApiService(this@CartActivity)
-                    .deleteCartItem(authToken!!, cartIds)
+                    .deleteCartItem(cartIds)
 
                 response.enqueue(object : Callback<ApiResponse> {
                     override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {

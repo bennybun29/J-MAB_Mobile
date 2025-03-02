@@ -290,7 +290,7 @@ class AccountFragment : Fragment() {
         val token = getToken()
         if (token != null) {
             val call = RetrofitClient.getApiService(requireContext()).updateProfilePicture(
-                "Bearer $token", request
+                 request
             )
 
             call.enqueue(object : Callback<UpdateProfileResponse> {
@@ -440,6 +440,13 @@ class AccountFragment : Fragment() {
     }
 
     private fun decodeBase64ToBitmap(base64String: String): Bitmap? {
+        Log.d("AccountFragment", "Base64 String: $base64String")
+
+        if (base64String.isNullOrEmpty() || base64String.length < 10) {
+            Log.e("AccountFragment", "Base64 string is empty or too short")
+            return null
+        }
+
         return try {
             val cleanBase64 = base64String.replace("data:image/jpeg;base64,", "")
                 .replace("data:image/png;base64,", "")

@@ -137,9 +137,7 @@ class EditContactInfoDialog : DialogFragment() {
             birthday = null
         )
 
-        val token = sharedPreferences.getString("jwt_token", "") ?: ""
-
-        apiService.updateProfilePicture("Bearer $token", updateRequest)
+        apiService.updateProfilePicture(updateRequest)
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
                     if (response.isSuccessful && response.body()?.success == true) {

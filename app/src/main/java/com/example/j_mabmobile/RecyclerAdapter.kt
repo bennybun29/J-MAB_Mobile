@@ -30,8 +30,8 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         // Load image using Picasso
         Picasso.get()
             .load(product.image_url)
-            .placeholder(R.drawable.jmab_fab) // Use a placeholder drawable
-            .error(R.drawable.jmab_fab)
+            .placeholder(R.drawable.jmab_logo) // Use a placeholder drawable
+            .error(R.drawable.jmab_logo) // Use an error drawable if loading fails
             .into(holder.imageView)
 
         holder.itemView.setOnClickListener {

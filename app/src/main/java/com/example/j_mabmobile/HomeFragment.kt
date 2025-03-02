@@ -3,6 +3,7 @@ package com.example.j_mabmobile
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,15 +11,19 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.Product
 import com.example.j_mabmobile.model.ProductResponse
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.logging.Handler
 
 class HomeFragment : Fragment() {
 
@@ -42,6 +47,7 @@ class HomeFragment : Fragment() {
     private var productNames: List<String> = listOf()
     private lateinit var listPopupWindow: ListPopupWindow
     private var suggestionList: List<String> = listOf()
+    private lateinit var cartBadge: TextView
 
 
 
@@ -98,10 +104,13 @@ class HomeFragment : Fragment() {
         emptyMessage = view.findViewById(R.id.emptyMessage)
         searchView = view.findViewById(R.id.searchView)
         dimView = view.findViewById(R.id.dimView)
+        cartBadge = view.findViewById(R.id.cart_badge)
 
         searchView.setIconified(true)
         searchView.clearFocus()
         searchView.isFocusable = false
+
+        updateCartBadge(5)
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -156,7 +165,12 @@ class HomeFragment : Fragment() {
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
 
-        fetchProducts()
+        lifecycleScope.launch {
+            delay(200)
+            fetchProducts()
+        }
+
+
 
         return view
     }
@@ -321,6 +335,15 @@ class HomeFragment : Fragment() {
         recyclerView.visibility = View.GONE
         emptyMessage.visibility = View.VISIBLE
         emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = message
+    }
+
+    private fun updateCartBadge(count: Int) {
+        if (count > 0) {
+            cartBadge.visibility = View.VISIBLE
+            cartBadge.text = if (count > 10) "10+" else count.toString()
+        } else {
+            cartBadge.visibility = View.GONE
+        }
     }
 
 }

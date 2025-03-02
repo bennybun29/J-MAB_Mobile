@@ -16,7 +16,7 @@
                 <ImageView
                     android:id="@+id/imageView3"
                     android:layout_width="match_parent"
-                    android:layout_height="120dp"
+                    android:layout_height="100dp"
                     android:src="@drawable/top_background_gradient"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -27,26 +27,47 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="20dp"
                     android:layout_marginEnd="10dp"
                     app:iconifiedByDefault="false"
                     android:background="@drawable/search_view_bg"
-                    app:layout_constraintEnd_toStartOf="@+id/cart_icon"
+                    app:layout_constraintEnd_toStartOf="@+id/cartFL"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:queryHint="Search" />
 
 
-                <ImageButton
-                    android:id="@+id/cart_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/cart_icon"
-                    android:background="@null"
-                    android:layout_marginTop="40dp"
-                    android:layout_marginEnd="30dp"
+                <FrameLayout
+                    android:id="@+id/cartFL"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="30dp">
+
+                    <!-- Cart Icon -->
+                    <ImageButton
+                        android:id="@+id/cart_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/cart_icon"
+                        android:background="@null" />
+
+                    <!-- Cart Badge -->
+                    <TextView
+                        android:id="@+id/cart_badge"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/badge_background"
+                        android:textColor="@android:color/white"
+                        android:textSize="10sp"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:textStyle="bold"
+                        android:layout_gravity="top|end" />
+                </FrameLayout>
+
 
 
                 <TextView

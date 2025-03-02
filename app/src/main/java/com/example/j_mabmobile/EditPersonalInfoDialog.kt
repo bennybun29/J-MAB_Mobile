@@ -226,9 +226,7 @@ class EditPersonalInfoDialog : DialogFragment() {
             birthday = birthday.ifEmpty { null }
         )
 
-        val token = sharedPreferences.getString("jwt_token", "") ?: ""
-
-        apiService.updateProfilePicture("Bearer $token", updateRequest)
+        apiService.updateProfilePicture(updateRequest)
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(
                     call: Call<UpdateProfileResponse>,

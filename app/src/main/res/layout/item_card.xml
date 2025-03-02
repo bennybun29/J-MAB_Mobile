@@ -7,52 +7,48 @@
     app:cardCornerRadius="20dp"
     app:cardElevation="4dp">
 
-    <LinearLayout
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_gravity="center"
+        android:id="@+id/item_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/gulong" />
+
+    <TextView
+        android:id="@+id/item_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:fontFamily="@font/dmsans"
+        android:gravity="left"
+        android:text="Sample Text"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-        <ImageView
-            android:layout_gravity="center"
-            android:id="@+id/item_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/gulong" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_price"
+        android:fontFamily="@font/dmsans"
+        android:text="Sample Price"
+        android:layout_gravity="left" />
 
-        <TextView
-            android:id="@+id/item_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginLeft="10dp"
-            android:fontFamily="@font/dmsans"
-            android:gravity="left"
-            android:text="Sample Text"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/item_price"
-            android:fontFamily="@font/dmsans"
-            android:text="Sample Price"
-            android:layout_gravity="left"
-            android:layout_marginLeft="10dp"/>
-
-        <TextView
-            android:id="@+id/ratingsTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="  0 RATINGS"
-            android:fontFamily="@font/dmsans"
-            android:drawableLeft="@drawable/star"
-            android:layout_marginLeft="10dp"/>
-
-
+    <TextView
+        android:id="@+id/ratingsTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  0 RATINGS"
+        android:fontFamily="@font/dmsans"
+        android:drawableLeft="@drawable/star"
+        android:paddingBottom="8dp"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -114,7 +114,8 @@ data class UpdateProfileResponse(
 
 data class CheckoutRequest(
     val cart_ids: List<Int>,
-    val payment_method: String
+    val payment_method: String,
+    val user_id: Int
 )
 
 data class CheckoutResponse(

@@ -6,6 +6,7 @@ import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.CheckoutRequest
 import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.LogInRequest
+import com.example.j_mabmobile.model.OrderResponse
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
@@ -20,6 +21,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -40,7 +42,6 @@ interface ApiService {
 
     @PUT("user/update")
     fun updateProfilePicture(
-        @Header("Authorization") token: String,
         @Body request: UpdateProfileRequest
     ): Call<UpdateProfileResponse>
 
@@ -53,37 +54,31 @@ interface ApiService {
     //Cart Methods
     @POST("cart/createCart")
     suspend fun addToCart(
-        @Header("Authorization") token: String,
         @Body cartRequest: CartRequest
     ): Response<CartResponse>
 
     @GET("cart/cart")
     fun getCartItems(
-        @Header("Authorization") token: String,
         @Query("user_id") userId: Int
     ): Call<CartResponse>
 
     @DELETE("cart/deleteCart")
     fun deleteCartItem(
-        @Header("Authorization") token: String,
         @Query("cart_id") cartIds: String
     ): Call<ApiResponse>
 
     @PUT("cart/updateCart")
     fun updateCartItem(
-        @Header("Authorization") token: String,
         @Query("cart_id") cartId: Int,
         @Body updateRequest: UpdateCartRequest
     ): Call<ApiResponse>
 
 
     //Checkout Methods
-    @POST("checkout")
+    @POST("order/checkout")
     fun checkout(
-        @Header("Authorization") token: String,
-        @Body checkoutRequest: CheckoutRequest
+        @Body request: CheckoutRequest
     ): Call<CheckoutResponse>
-
 }
 
 

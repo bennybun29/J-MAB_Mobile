@@ -32,11 +32,10 @@
         android:id="@+id/checkoutTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:text="CHECKOUT"
         android:textColor="@color/white"
         android:textSize="36sp"
-        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -121,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/dmsans"
                 android:text="Cash On Delivery (COD)"
-                android:drawableStart="@drawable/dollar_sign"
+                android:drawableStart="@drawable/peso_sign"
                 android:drawablePadding="5dp"
                 app:layout_constraintTop_toBottomOf="@id/paymentMethodTV"
                 app:layout_constraintStart_toStartOf="parent"
@@ -209,6 +208,7 @@
             android:paddingRight="5dp"/>
 
         <Button
+            android:id="@+id/checkoutBtn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -232,6 +232,7 @@
         app:cardElevation="10dp"
         android:backgroundTint="@color/white"
         android:padding="20dp"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -293,6 +294,82 @@
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/orderPlacedCardview"
+        android:layout_width="250dp"
+        android:layout_height="200dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="10dp"
+        android:backgroundTint="@color/white"
+        android:padding="20dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ORDER PLACED!"
+                android:textColor="@color/j_mab_blue"
+                android:fontFamily="@font/dmsans_bold"
+                android:textSize="25sp"
+                android:layout_marginBottom="10dp"
+                android:textStyle="bold"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="italic"
+                android:textColor="@color/j_mab_blue"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:paddingBottom="10dp"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:text="Please wait for the confirmation of your order."/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginRight="30dp"
+                android:layout_marginLeft="30dp"
+                android:gravity="center">
+
+                <Button
+                    android:id="@+id/doneBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/dmsans_bold"
+                    android:text="DONE"/>
+            </LinearLayout>
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toTopOf="@id/horizontal_linear_layout"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
     <TextView
         android:id="@+id/noOrdersYetTV"
@@ -28,7 +28,7 @@
         android:textColor="@color/j_mab_blue"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
 
 
@@ -54,7 +54,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:text="MY CART"
         android:textColor="@color/white"
         android:textSize="36sp"
@@ -70,7 +70,8 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans"
         android:textColor="@color/j_mab_blue"
-        android:text="DELETE MULTIPLE"
+        android:text="DELETE"
+        android:visibility="gone"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imageView3"
         android:layout_marginTop="15dp"
@@ -80,6 +81,7 @@
         android:drawablePadding="5dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
         android:id="@+id/recyclerViewCart"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -91,6 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <CheckBox
@@ -98,6 +101,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:fontFamily="@font/dmsans_bold"
             android:background="@drawable/bottom_options_border"
             android:text="Select All"
             android:paddingStart="10dp"/>
@@ -116,6 +120,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:fontFamily="@font/dmsans_bold"
             android:background="@drawable/bottom_options_border"
             android:text="CHECK OUT"/>
 

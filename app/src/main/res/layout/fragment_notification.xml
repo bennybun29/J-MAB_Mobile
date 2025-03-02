@@ -22,11 +22,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/dmsans"
+            android:fontFamily="@font/dmsans_bold"
             android:text="NOTIFICATIONS"
             android:textColor="@color/white"
             android:textSize="36sp"
-            android:textStyle="bold"
             android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
