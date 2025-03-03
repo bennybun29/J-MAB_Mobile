@@ -6,6 +6,7 @@
     android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context=".SignUpActivity">
 
     <ImageView
@@ -173,7 +174,7 @@
         android:backgroundTint="#02254B"
         android:text="Sign Up"
         android:textSize="15sp"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

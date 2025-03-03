@@ -13,72 +13,64 @@ import com.example.j_mabmobile.model.UpdateCartRequest
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
 import com.example.j_mabmobile.model.UserProfileResponse
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Headers
-import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
-import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
 
-    //Users Methods HAHAHAH
-    @POST("user/register")
+    // Users Methods
+    @POST("users/register")
     fun register(@Body userRequest: SignUpRequest): Call<ApiResponse>
 
-    @POST("user/login")
+    @POST("users/login")
     fun login(@Body userRequest: LogInRequest): Call<ApiResponse>
 
-    @GET("user/user")
-    fun getUserProfile(@Query("id") userId: Int): Call<UserProfileResponse>
+    @GET("users/{id}")
+    fun getUserProfile(@Path("id") userId: Int): Call<UserProfileResponse>
 
-    @PUT("user/update")
+    @PUT("users/{id}")
     fun updateProfilePicture(
+        @Path("id") userId: Int,
         @Body request: UpdateProfileRequest
     ): Call<UpdateProfileResponse>
 
-
-    //Product Methods
-    @GET("product/products")
+    // Product Methods
+    @GET("products")
     fun getProducts(): Call<ProductResponse>
 
-
-    //Cart Methods
-    @POST("cart/createCart")
+    // Cart Methods
+    @POST("carts")
     suspend fun addToCart(
         @Body cartRequest: CartRequest
     ): Response<CartResponse>
 
-    @GET("cart/cart")
+    @GET("carts/{user_id}")
     fun getCartItems(
-        @Query("user_id") userId: Int
+        @Path("user_id") userId: Int
     ): Call<CartResponse>
 
-    @DELETE("cart/deleteCart")
+    @DELETE("carts/{cart_id}")
     fun deleteCartItem(
-        @Query("cart_id") cartIds: String
+        @Path("cart_id") cartIds: String // Supports comma-separated IDs (e.g., "1,2,3")
     ): Call<ApiResponse>
 
-    @PUT("cart/updateCart")
+    @PUT("carts/{cart_id}")
     fun updateCartItem(
-        @Query("cart_id") cartId: Int,
+        @Path("cart_id") cartId: Int,
         @Body updateRequest: UpdateCartRequest
     ): Call<ApiResponse>
 
-
-    //Checkout Methods
-    @POST("order/checkout")
+    // Checkout Methods
+    @POST("orders/{user_id}")
     fun checkout(
+        @Path("user_id") userId: Int,
         @Body request: CheckoutRequest
     ): Call<CheckoutResponse>
 }
-
-

@@ -9,8 +9,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,19 +18,18 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.example.j_mabmobile.api.RetrofitClient
-import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.UpdateProfileRequest
+import com.example.j_mabmobile.model.UpdateProfileResponse
+import com.example.j_mabmobile.model.UserProfileResponse
 import com.github.dhaval2404.imagepicker.ImagePicker
+import de.hdodenhof.circleimageview.CircleImageView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.File
 import java.io.FileInputStream
-import android.util.Base64
-import com.example.j_mabmobile.model.UpdateProfileResponse
-import com.example.j_mabmobile.model.UserProfileResponse
-
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -52,7 +51,7 @@ class AccountFragment : Fragment() {
     lateinit var toRateBtn: ImageButton
     lateinit var emailAddressTV: TextView
     lateinit var userIdTV: TextView
-    lateinit var changeProfilePicBtn: ImageButton
+    lateinit var changeProfilePicBtn: CircleImageView
     lateinit var userPhoneNumberTV: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,12 +81,11 @@ class AccountFragment : Fragment() {
         userIdTV = view.findViewById(R.id.userIDNumberTV)
         changeProfilePicBtn = view.findViewById(R.id.ProfilePictureButton)
         userPhoneNumberTV = view.findViewById(R.id.userPhoneNumberTV)
+
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
-                "first_name", "last_name", "user_email", "phone_number" -> {
-                    updateUI()
-                }
+                "first_name", "last_name", "user_email", "phone_number" -> updateUI()
             }
         }
 
@@ -99,112 +97,71 @@ class AccountFragment : Fragment() {
         val userId = getUserId()
         val phoneNumber = getPhoneNumber()
 
-        if (firstName != null && lastName != null) {
-            UsernameTV.text = "$firstName $lastName"
-        } else {
-            UsernameTV.text = "Welcome, User"
-        }
+        UsernameTV.text = if (firstName != null && lastName != null) "$firstName $lastName" else "Welcome, User"
+        emailAddressTV.text = email ?: "Email Address"
+        userIdTV.text = if (userId != -1) "ID: $userId" else "User ID"
+        userPhoneNumberTV.text = if (phoneNumber.isNullOrEmpty()) "(09##) ### ####" else phoneNumber
 
-        if (email != null) {
-            emailAddressTV.text = "$email"
-        } else {
-            emailAddressTV.text = "Email Address"
-        }
-
-        if (userId != null) {
-            userIdTV.text = "ID: $userId"
-        } else {
-            userIdTV.text = "User ID"
-        }
-
-        if (phoneNumber.isNullOrEmpty()) {
-            userPhoneNumberTV.text = "(09##) ### ####"
-        } else {
-            userPhoneNumberTV.text = phoneNumber
-        }
-
-
-        toPayBtn.setOnClickListener {
-            val intent = Intent(activity, MyPurchasesActivity::class.java)
-            intent.putExtra("ACTIVE_TAB", "TO_PAY")
-            startActivity(intent)
-        }
-
-        toShipBtn.setOnClickListener {
-            val intent = Intent(activity, MyPurchasesActivity::class.java)
-            intent.putExtra("ACTIVE_TAB", "TO_SHIP")
-            startActivity(intent)
-        }
-
-        toReceiveBtn.setOnClickListener {
-            val intent = Intent(activity, MyPurchasesActivity::class.java)
-            intent.putExtra("ACTIVE_TAB", "TO_RECEIVE")
-            startActivity(intent)
-        }
-
-        toRateBtn.setOnClickListener {
-            val intent = Intent(activity, MyPurchasesActivity::class.java)
-            intent.putExtra("ACTIVE_TAB", "TO_RATE")
-            startActivity(intent)
-        }
-
-        account_and_sec_btn.setOnClickListener {
-            val intent = Intent(activity, AccountAndSecurityActivity::class.java)
-            startActivity(intent)
-        }
-
-        my_addresses_btn.setOnClickListener {
-            val intent = Intent(activity, MyAddressesActivity::class.java)
-            startActivity(intent)
-        }
-
-        help_btn.setOnClickListener {
-            val intent = Intent(activity, HelpActivity::class.java)
-            startActivity(intent)
-        }
-
-        changeProfilePicBtn.setOnClickListener {
-            val options = arrayOf("Take a Picture", "Choose from Gallery")
-            AlertDialog.Builder(requireContext())
-                .setTitle("Change Profile Picture")
-                .setItems(options) { _, which ->
-                    when (which) {
-                        0 -> {
-                            ImagePicker.with(this)
-                                .cameraOnly()
-                                .cropSquare()
-                                .compress(1024)
-                                .start()
-                        }
-                        1 -> {
-                            ImagePicker.with(this)
-                                .galleryOnly()
-                                .cropSquare()
-                                .compress(1024)
-                                .start()
-                        }
-                    }
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-
-
-        log_out_btn.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Log Out")
-                .setMessage("Are you sure you want to log out?")
-                .setPositiveButton("Yes") { _, _ ->
-                    clearUserData()
-                    val intent = Intent(activity, SignInActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    startActivity(intent)
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
-
+        setupButtonListeners()
         return view
+    }
+
+    private fun setupButtonListeners() {
+        toPayBtn.setOnClickListener {
+            startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "TO_PAY"))
+        }
+        toShipBtn.setOnClickListener {
+            startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "TO_SHIP"))
+        }
+        toReceiveBtn.setOnClickListener {
+            startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "TO_RECEIVE"))
+        }
+        toRateBtn.setOnClickListener {
+            startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "TO_RATE"))
+        }
+        account_and_sec_btn.setOnClickListener {
+            startActivity(Intent(activity, AccountAndSecurityActivity::class.java))
+        }
+        my_addresses_btn.setOnClickListener {
+            startActivity(Intent(activity, MyAddressesActivity::class.java))
+        }
+        help_btn.setOnClickListener {
+            startActivity(Intent(activity, HelpActivity::class.java))
+        }
+        changeProfilePicBtn.setOnClickListener {
+            showImagePickerDialog()
+        }
+        log_out_btn.setOnClickListener {
+            showLogoutDialog()
+        }
+    }
+
+    private fun showImagePickerDialog() {
+        val options = arrayOf("Take a Picture", "Choose from Gallery")
+        AlertDialog.Builder(requireContext())
+            .setTitle("Change Profile Picture")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> ImagePicker.with(this).cameraOnly().cropSquare().compress(1024).start()
+                    1 -> ImagePicker.with(this).galleryOnly().cropSquare().compress(1024).start()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showLogoutDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Log Out")
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("Yes") { _, _ ->
+                clearUserData()
+                startActivity(Intent(activity, SignInActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun onResume() {
@@ -213,12 +170,10 @@ class AccountFragment : Fragment() {
         updateUI()
     }
 
-
     override fun onPause() {
         super.onPause()
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener)
     }
-
 
     private fun updateUI() {
         val firstName = getUserFirstName()
@@ -226,17 +181,15 @@ class AccountFragment : Fragment() {
         val email = getEmailAddress()
         val phoneNumber = getPhoneNumber()
 
-        UsernameTV.text = "$firstName $lastName"
-        emailAddressTV.text = email
-        userPhoneNumberTV.text = phoneNumber
+        UsernameTV.text = if (firstName != null && lastName != null) "$firstName $lastName" else "Welcome, User"
+        emailAddressTV.text = email ?: "Email Address"
+        userPhoneNumberTV.text = if (phoneNumber.isNullOrEmpty()) "(09##) ### ####" else phoneNumber
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (resultCode == Activity.RESULT_OK && data != null) {
-            val imageUri: Uri? = data.data
+            val imageUri = data.data
             if (imageUri != null) {
                 Log.d("AccountFragment", "Image URI: $imageUri")
                 uploadImage(imageUri)
@@ -250,7 +203,6 @@ class AccountFragment : Fragment() {
             Toast.makeText(requireContext(), "Task Cancelled", Toast.LENGTH_SHORT).show()
         }
     }
-
 
     private fun uploadImage(imageUri: Uri) {
         val filePath = getRealPathFromURI(imageUri)
@@ -267,40 +219,37 @@ class AccountFragment : Fragment() {
         }
 
         val userId = getUserId()
-        val firstName = getUserFirstName()
-        val lastName = getUserLastName()
-        val email = getEmailAddress()
-        val phoneNumber = getPhoneNumber()
-        val address = getAddress()
-        val gender = getGender()
-        val birthday = getBirthday()
+        if (userId == -1) {
+            Log.e("AccountFragment", "User ID not found")
+            Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        // Create request without id since it's in the URL
         val request = UpdateProfileRequest(
-            id = userId,
-            first_name = firstName,
-            last_name = lastName,
+            first_name = getUserFirstName(),
+            last_name = getUserLastName(),
             profile_picture = base64Image,
-            email = email,
-            phone_number = phoneNumber,
-            address = address,
-            gender = gender,
-            birthday = birthday
+            email = getEmailAddress(),
+            phone_number = getPhoneNumber(),
+            address = getAddress(),
+            gender = getGender(),
+            birthday = getBirthday()
         )
 
         val token = getToken()
         if (token != null) {
             val call = RetrofitClient.getApiService(requireContext()).updateProfilePicture(
-                 request
+                userId, // Pass userId as the first parameter (for @Path)
+                request // Pass request as the second parameter (for @Body)
             )
 
             call.enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
-
                         val bitmap = BitmapFactory.decodeFile(filePath)
                         changeProfilePicBtn.setImageBitmap(bitmap)
-
                         loadUserProfile()
                     } else {
                         Log.e("AccountFragment", "Error: ${response.errorBody()?.string()}")
@@ -318,27 +267,19 @@ class AccountFragment : Fragment() {
         }
     }
 
-
-
     private fun convertImageToBase64(filePath: String): String? {
         return try {
             val file = File(filePath)
             val inputStream = FileInputStream(file)
             val buffer = ByteArray(file.length().toInt())
-
             inputStream.read(buffer)
             inputStream.close()
-
             Base64.encodeToString(buffer, Base64.NO_WRAP)
         } catch (e: Exception) {
             Log.e("AccountFragment", "Base64 Encoding Error: ${e.message}")
             null
         }
     }
-
-
-
-
 
     private fun getRealPathFromURI(uri: Uri): String? {
         if ("content".equals(uri.scheme, ignoreCase = true)) {
@@ -355,62 +296,52 @@ class AccountFragment : Fragment() {
         return null
     }
 
-
     private fun getToken(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("jwt_token", null)
     }
 
     private fun clearUserData() {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().clear().apply()
     }
 
-
     private fun getUserFirstName(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("first_name", null)
     }
 
     private fun getUserLastName(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("last_name", null)
     }
 
     private fun getEmailAddress(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("user_email", null)
     }
 
     private fun getUserId(): Int {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getInt("user_id", 1)
+        return sharedPreferences.getInt("user_id", -1) // Default to -1 if not found
     }
 
     private fun getPhoneNumber(): String? {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        val phone = sharedPreferences.getString("phone_number", null)
-        return if (phone.isNullOrBlank()) "(09##) ### ####" else phone
+        return sharedPreferences.getString("phone_number", null)
     }
 
-
-    private fun getAddress(): String {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("user_address", "") ?: ""
+    private fun getAddress(): String? {
+        return sharedPreferences.getString("user_address", null)
     }
 
-    private fun getGender(): String {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("gender", "") ?: ""
+    private fun getGender(): String? {
+        return sharedPreferences.getString("gender", null)
     }
 
-    private fun getBirthday(): String {
-        val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("birthday", "") ?: ""
+    private fun getBirthday(): String? {
+        return sharedPreferences.getString("birthday", null)
     }
 
     private fun loadUserProfile() {
         val userId = getUserId()
+        if (userId == -1) {
+            Log.e("AccountFragment", "User ID not found for profile load")
+            return
+        }
 
         RetrofitClient.getApiService(requireContext()).getUserProfile(userId)
             .enqueue(object : Callback<UserProfileResponse> {
@@ -418,6 +349,11 @@ class AccountFragment : Fragment() {
                     if (response.isSuccessful && response.body() != null) {
                         val userProfile = response.body()
                         val base64Image = userProfile?.user?.profile_picture
+                        val phoneNumber = userProfile?.user?.phone_number ?: ""
+
+                        sharedPreferences.edit()
+                            .putString("phone_number", phoneNumber)
+                            .apply()
 
                         if (!base64Image.isNullOrEmpty()) {
                             val bitmap = decodeBase64ToBitmap(base64Image)
@@ -435,22 +371,18 @@ class AccountFragment : Fragment() {
                     Log.e("AccountFragment", "Failed to load profile: ${t.message}")
                 }
             })
-
         updateUI()
     }
 
     private fun decodeBase64ToBitmap(base64String: String): Bitmap? {
         Log.d("AccountFragment", "Base64 String: $base64String")
-
-        if (base64String.isNullOrEmpty() || base64String.length < 10) {
+        if (base64String.isEmpty() || base64String.length < 10) {
             Log.e("AccountFragment", "Base64 string is empty or too short")
             return null
         }
-
         return try {
             val cleanBase64 = base64String.replace("data:image/jpeg;base64,", "")
                 .replace("data:image/png;base64,", "")
-
             val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
             BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
         } catch (e: Exception) {

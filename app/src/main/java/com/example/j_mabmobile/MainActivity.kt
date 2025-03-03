@@ -3,8 +3,10 @@ package com.example.j_mabmobile
 import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.j_mabmobile.databinding.ActivityMainBinding
@@ -19,7 +21,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+        }
         // Check if the token is valid and handle authentication
         if (!isTokenValid()) {
             // If the token is not valid or expired, navigate to the SignInActivity

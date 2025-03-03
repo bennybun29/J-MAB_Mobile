@@ -21,22 +21,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
         jmabLogo = findViewById(R.id.jmabLogo)
 
-        // Rotate the image view as a wheel (360 degrees)
-        val rotateAnimator = ObjectAnimator.ofFloat(jmabLogo, "rotation", 0f, 360f)
-        rotateAnimator.duration = 2000 // Rotate for 2 seconds (you can adjust this duration)
-
-        // Move the wheel off the screen after 3 seconds
-        val translateAnimator = ObjectAnimator.ofFloat(jmabLogo, "translationX", 0f, 1000f) // Move 1000px off the screen
-        translateAnimator.duration = 1000 // Takes 1 second to move off screen
-
-        // Combine both animations
-        rotateAnimator.start()
-
-        // Wait for 2-3 seconds before starting to move off screen
-        Handler(Looper.getMainLooper()).postDelayed({
-            translateAnimator.start()
-        }, 2000) // Delay for 2 seconds before it starts translating off the screen
-
         // Show splash screen for at least 3 seconds
         Handler(Looper.getMainLooper()).postDelayed({
             checkUserLoginStatus()

@@ -214,8 +214,8 @@ class EditPersonalInfoDialog : DialogFragment() {
             return
         }
 
+        // Remove id from UpdateProfileRequest since it's in the URL
         val updateRequest = UpdateProfileRequest(
-            id = userId,
             first_name = firstName.ifEmpty { null },
             last_name = lastName.ifEmpty { null },
             profile_picture = null,
@@ -226,7 +226,8 @@ class EditPersonalInfoDialog : DialogFragment() {
             birthday = birthday.ifEmpty { null }
         )
 
-        apiService.updateProfilePicture(updateRequest)
+        // Corrected call with userId and updateRequest
+        apiService.updateProfilePicture(userId, updateRequest)
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(
                     call: Call<UpdateProfileResponse>,
@@ -250,11 +251,10 @@ class EditPersonalInfoDialog : DialogFragment() {
 
                         (activity as? AccountAndSecurityActivity)?.updateUserInfoUI()
                     } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Failed to update profile!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val errorBody = response.errorBody()?.string()
+                        val errorMessage = errorBody ?: "Failed to update profile!"
+                        Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+                        Log.e("EditPersonalInfo", "API error: $errorMessage")
                     }
                 }
 
@@ -264,7 +264,7 @@ class EditPersonalInfoDialog : DialogFragment() {
                         "Network error: ${t.message}",
                         Toast.LENGTH_SHORT
                     ).show()
-                    Log.e("Edit Personal Info", "API call failed", t)
+                    Log.e("EditPersonalInfo", "API call failed", t)
                 }
             })
     }

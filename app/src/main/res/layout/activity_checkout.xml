@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="#FBFCF8"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Top Background Image -->
@@ -277,18 +278,22 @@
                 android:orientation="horizontal"
                 android:gravity="center">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/confirmExitBtn"
                     android:layout_width="120dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:text="Leave"
-                    android:backgroundTint="@color/LTGRAY"
+                    android:fontFamily="@font/dmsans"
+                    android:background="@drawable/button_border"
+                    android:textColor="@color/j_mab_blue"
+                    android:gravity="center"
                     android:layout_marginEnd="10dp"/>
 
                 <Button
                     android:id="@+id/cancelExitBtn"
                     android:layout_width="120dp"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/dmsans"
                     android:text="Checkout"/>
             </LinearLayout>
         </LinearLayout>
@@ -360,16 +365,20 @@
 
     </androidx.cardview.widget.CardView>
 
-    <ProgressBar
+    <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="246dp"
+        android:layout_height="246dp"
+        android:visibility="visible"
+        android:elevation="10dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:lottie_rawRes="@raw/loading_car_animation"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

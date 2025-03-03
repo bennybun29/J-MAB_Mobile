@@ -2,17 +2,15 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Active state -->
     <item android:state_selected="true">
-        <shape android:shape="rectangle">
-            <solid android:color="#295789" /><!-- Active button color -->
-            <corners android:radius="20dp" /> <!-- Rounded corners -->
-            <stroke android:width="2dp" android:color="#295789" /> <!-- Border color matches background -->
+        <shape android:shape="oval">
+            <solid android:color="@color/j_mab_blue" /><!-- Active button color -->
+            <stroke android:width="2dp" android:color="@color/j_mab_blue" /> <!-- Border color matches background -->
         </shape>
     </item>
     <!-- Default state -->
     <item>
-        <shape android:shape="rectangle">
-            <solid android:color="@android:color/transparent" /> <!-- Transparent background -->
-            <corners android:radius="20dp" /> <!-- Rounded corners -->
+        <shape android:shape="oval">
+            <solid android:color="#E7E7E7" /> <!-- Transparent background -->
             <stroke android:width="2dp" android:color="#295789" /> <!-- Blue border -->
         </shape>
     </item>

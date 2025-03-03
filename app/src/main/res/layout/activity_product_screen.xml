@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="#FBFCF8"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.cardview.widget.CardView
@@ -24,32 +25,6 @@
             android:src="@drawable/back_btn_product_screen"
             android:background="@null"
             android:scaleType="centerInside"/>
-    </androidx.cardview.widget.CardView>
-
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/favoriteCV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="10dp"
-        app:cardCornerRadius="25dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/cartCV"
-        app:cardBackgroundColor="@android:color/white">
-
-        <ImageButton
-            android:id="@+id/favoriteBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/favorite"
-            android:background="@null"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/cartBtn"
-            android:elevation="10dp"
-            android:layout_margin="8dp"/>
-
     </androidx.cardview.widget.CardView>
 
 
@@ -155,11 +130,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="13dp"
                 android:layout_marginLeft="20dp"
-                android:fontFamily="@font/dmsans"
+                android:fontFamily="@font/dmsans_bold"
                 android:text="Sample Text"
                 android:textColor="@color/j_mab_blue"
                 android:textSize="30sp"
-                android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
 

@@ -1,29 +1,19 @@
 package com.example.j_mabmobile
 
 import ImageCarouselAdapter
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
-import androidx.core.os.postDelayed
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.j_mabmobile.api.ApiService
@@ -31,7 +21,6 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.Product
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -39,7 +28,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
-import java.util.logging.Handler
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -144,7 +132,7 @@ class ProductScreenActivity : AppCompatActivity() {
         productDescription.text = description
         productStock.text = "Stock Available: $stock"
         productBrand.text = "Brand: $brand"
-        priceTextView.text = "PHP: ${formatPrice(price)}"
+        priceTextView.text = "₱ ${formatPrice(price)}"
 
         if (category == "Tires") {
             productVariation.visibility = View.VISIBLE

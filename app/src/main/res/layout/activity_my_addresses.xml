@@ -3,6 +3,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
+    android:background="#FBFCF8"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView
@@ -34,7 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="25dp"/>
+        android:layout_marginTop="28dp"/>
 
     <LinearLayout
         android:id="@+id/myAddresses"
@@ -59,7 +60,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginBottom="10dp"
             app:cardCornerRadius="15dp"
-            android:backgroundTint="#D9D9D9">
+            android:backgroundTint="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -127,7 +128,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginBottom="10dp"
             app:cardCornerRadius="15dp"
-            android:backgroundTint="#D9D9D9">
+            android:backgroundTint="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"

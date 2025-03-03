@@ -20,7 +20,11 @@ class ImageCarouselAdapter(private val imageUrls: List<String>) :
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
-        Picasso.get().load(imageUrls[position]).into(holder.imageView)
+        Picasso.get()
+            .load(imageUrls[position])
+            .placeholder(R.drawable.jmab_logo) // Placeholder image while loading
+            .error(R.drawable.jmab_logo) // Error image if loading fails
+            .into(holder.imageView)
     }
 
     override fun getItemCount(): Int = imageUrls.size

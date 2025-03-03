@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@color/white"
+    android:background="#FBFCF8"
     tools:context=".MainActivity">
 
     <RelativeLayout
@@ -39,10 +39,10 @@
                     android:background="@android:color/transparent"
                     app:itemTextAppearanceActive="@style/BottomNavTextActive"
                     app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
-                    app:itemIconSize="24dp"
+                    app:itemIconSize="28dp"
                     app:itemIconTint="@color/bottom_nav_color"
                     app:itemTextColor="@color/white"
-                    app:itemRippleColor="@android:color/transparent"
+                    app:itemActiveIndicatorStyle="@android:color/transparent"
                     app:labelVisibilityMode="labeled" />
 
 

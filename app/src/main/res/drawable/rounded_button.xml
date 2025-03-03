@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Pressed state -->
+    <item android:state_pressed="true">
+        <layer-list>
+            <!-- Shadow -->
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp"/>
+                    <solid android:color="@android:color/transparent"/>
+                    <padding android:left="2dp" android:top="4dp" android:right="2dp" android:bottom="6dp"/>
+                </shape>
+            </item>
+
+            <!-- Button background (darker for pressed state) -->
+            <item android:top="2dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp"/>
+                    <solid android:color="@color/black_overlay"/> <!-- Change to a slightly darker color -->
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default state -->
+    <item>
+        <layer-list>
+            <!-- Shadow -->
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp"/>
+                    <solid android:color="@android:color/transparent"/>
+                    <padding android:left="2dp" android:top="4dp" android:right="2dp" android:bottom="6dp"/>
+                </shape>
+            </item>
+
+            <!-- Button background -->
+            <item android:top="2dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="16dp"/>
+                    <solid android:color="@color/white"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+</selector>

@@ -69,22 +69,6 @@ object RetrofitClient {
             .build()
     }
 
-    private fun createRetrofit(context: Context): Retrofit {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .addInterceptor(authInterceptor(context))
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
 
     fun getApiService(context: Context): ApiService {
         return getRetrofitInstance(context).create(ApiService::class.java)

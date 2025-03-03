@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
@@ -16,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CheckoutRequest
@@ -40,7 +42,7 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var checkoutBtn: Button
     private var selectedPaymentMethod: String? = null
     private lateinit var orderPlacedCardView: View
-    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: LottieAnimationView
     private lateinit var doneBtn: Button
     private lateinit var overlayBackground: View
 
@@ -177,18 +179,17 @@ class CheckoutActivity : AppCompatActivity() {
         val token = getToken()
 
         if (token == null) {
-            android.util.Log.e("CHECKOUT_ERROR", "Token is null! Cannot proceed.")
+            Log.e("CHECKOUT_ERROR", "Token is null! Cannot proceed.")
             Toast.makeText(this, "Authentication error: No token found", Toast.LENGTH_SHORT).show()
             return
         }
 
         val cartIds = selectedCartItems.map { it.cart_id }
-
-        android.util.Log.d("CHECKOUT_DEBUG", "Selected Cart Items: $selectedCartItems")
-        android.util.Log.d("CHECKOUT_DEBUG", "Cart IDs: $cartIds")
+        Log.d("CHECKOUT_DEBUG", "Selected Cart Items: $selectedCartItems")
+        Log.d("CHECKOUT_DEBUG", "Cart IDs: $cartIds")
 
         if (cartIds.isEmpty()) {
-            android.util.Log.e("CHECKOUT_ERROR", "No cart items selected.")
+            Log.e("CHECKOUT_ERROR", "No cart items selected.")
             Toast.makeText(this, "No items selected for checkout", Toast.LENGTH_SHORT).show()
             return
         }
@@ -200,7 +201,7 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         if (selectedPaymentMethod == null) {
-            android.util.Log.e("CHECKOUT_ERROR", "No payment method selected.")
+            Log.e("CHECKOUT_ERROR", "No payment method selected.")
             Toast.makeText(this, "Please select a payment method", Toast.LENGTH_SHORT).show()
             return
         }
@@ -215,16 +216,22 @@ class CheckoutActivity : AppCompatActivity() {
         if (selectedPaymentMethod == "cod") {
             overlayBackground.visibility = View.VISIBLE
             orderPlacedCardView.visibility = View.VISIBLE
-
         }
 
         val userId = getUserID()
-        val request = CheckoutRequest(cartIds, selectedPaymentMethod!!, userId)
-        android.util.Log.d("CHECKOUT_DEBUG", "Request Payload: $request")
+        if (userId == -1) { // Assuming -1 is an invalid ID; adjust if your default differs
+            Log.e("CHECKOUT_ERROR", "User ID not found.")
+            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val request = CheckoutRequest(cartIds, selectedPaymentMethod!!)
+        Log.d("CHECKOUT_DEBUG", "Request Payload: $request")
 
         val apiService = RetrofitClient.getApiService(this)
 
-        apiService.checkout(request).enqueue(object : Callback<CheckoutResponse> {
+        // Corrected call with userId and request
+        apiService.checkout(userId, request).enqueue(object : Callback<CheckoutResponse> {
             override fun onResponse(call: Call<CheckoutResponse>, response: Response<CheckoutResponse>) {
                 // Hide progressBar after response
                 if (selectedPaymentMethod == "gcash") {
@@ -238,19 +245,19 @@ class CheckoutActivity : AppCompatActivity() {
                         checkoutResponse.payment_link?.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
                             startActivity(intent)
-                        } ?:  run {
+                        } ?: run {
                             if (selectedPaymentMethod == "cod") {
                                 overlayBackground.visibility = View.VISIBLE
                                 orderPlacedCardView.visibility = View.VISIBLE
                             }
                         }
                     } else {
-                        android.util.Log.e("CHECKOUT_ERROR", "Checkout failed: ${checkoutResponse?.message}")
+                        Log.e("CHECKOUT_ERROR", "Checkout failed: ${checkoutResponse?.message}")
                         Toast.makeText(this@CheckoutActivity, "Checkout failed: ${checkoutResponse?.message}", Toast.LENGTH_LONG).show()
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    android.util.Log.e("CHECKOUT_ERROR", "Server error response: $errorBody")
+                    Log.e("CHECKOUT_ERROR", "Server error response: $errorBody")
                     Toast.makeText(this@CheckoutActivity, "Server error: $errorBody", Toast.LENGTH_LONG).show()
                 }
             }
@@ -261,7 +268,7 @@ class CheckoutActivity : AppCompatActivity() {
                     progressBar.visibility = View.GONE
                 }
 
-                android.util.Log.e("CHECKOUT_ERROR", "Network error: ${t.message}")
+                Log.e("CHECKOUT_ERROR", "Network error: ${t.message}")
                 Toast.makeText(this@CheckoutActivity, "Network error: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })

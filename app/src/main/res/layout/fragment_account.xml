@@ -19,31 +19,29 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/ProfilePictureButton"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:layout_marginLeft="40dp"
-            android:layout_marginTop="25dp"
-            android:background="@drawable/circle_background"
-            android:scaleType="centerCrop"
-            android:adjustViewBounds="true"
+            android:layout_marginTop="24dp"
             android:src="@drawable/profile_picture_btn"
+            app:civ_border_color="#FFFFFF"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-
+            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <TextView
             android:id="@+id/UsernameTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="28dp"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/dmsans_bold"
             android:text="Username Example"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:layout_marginLeft="50dp"
             android:textStyle="bold"
             app:layout_constraintLeft_toRightOf="@+id/ProfilePictureButton"
@@ -113,7 +111,6 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:cardBackgroundColor="#D9D9D9"
             app:cardElevation="8dp">
 
             <LinearLayout
@@ -243,47 +240,93 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/cardViewMyPurchases"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="36dp"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp">
+            android:gravity="center">
 
-            <Button
-                android:id="@+id/account_and_security_btn"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Account &amp; Security"
-                android:backgroundTint="#D9D9D9"
-                android:textColor="@color/j_mab_blue"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_vertical|left"
-                android:paddingStart="15dp"
-                android:drawableEnd="@drawable/arrow" />
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="8dp">
 
-            <Button
-                android:id="@+id/my_addresses_btn"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="My Addresses"
-                android:backgroundTint="#D9D9D9"
-                android:textColor="@color/j_mab_blue"
-                android:layout_marginBottom="5dp"
-                android:gravity="center_vertical|left"
-                android:paddingStart="15dp"
-                android:drawableEnd="@drawable/arrow" />
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/account_and_security_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:padding="12dp"
+                    android:text="Account &amp; Security"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/j_mab_blue"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical|left"
+                    android:paddingStart="16dp"
+                    android:background="@drawable/rounded_button"
+                    android:drawableEnd="@drawable/arrow" />
 
-            <Button
-                android:id="@+id/help_btn"
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:text="Help"
-                android:backgroundTint="#D9D9D9"
-                android:textColor="@color/j_mab_blue"
-                android:layout_marginBottom="15dp"
-                android:gravity="center_vertical|left"
-                android:paddingStart="15dp"
-                android:drawableEnd="@drawable/arrow" />
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="8dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/my_addresses_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="My Addresses"
+                    android:padding="12dp"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/j_mab_blue"
+                    android:layout_marginBottom="5dp"
+                    android:background="@drawable/rounded_button"
+                    android:gravity="center_vertical|left"
+                    android:paddingStart="15dp"
+                    android:drawableEnd="@drawable/arrow" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="6dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="20dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/help_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="Help"
+                    android:padding="12dp"
+                    android:background="@drawable/rounded_button"
+                    android:backgroundTint="@color/white"
+                    android:textColor="@color/j_mab_blue"
+                    android:gravity="center_vertical|left"
+                    android:paddingStart="15dp"
+                    android:drawableEnd="@drawable/arrow" />
+
+            </androidx.cardview.widget.CardView>
+
 
             <Button
                 android:id="@+id/log_out_btn"

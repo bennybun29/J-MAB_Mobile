@@ -96,7 +96,6 @@ data class CartItem(
 }
 
 data class UpdateProfileRequest(
-    val id: Int,
     val first_name: String?,
     val last_name: String?,
     val profile_picture: String?,
@@ -115,7 +114,7 @@ data class UpdateProfileResponse(
 data class CheckoutRequest(
     val cart_ids: List<Int>,
     val payment_method: String,
-    val user_id: Int
+    //val user_id: Int
 )
 
 data class CheckoutResponse(
@@ -138,6 +137,3 @@ data class Order(
     val reference_number: String,
     val created_at: String
 )
-
-
-

@@ -10,15 +10,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SearchView
+import androidx.constraintlayout.helper.widget.Carousel
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.Product
 import com.example.j_mabmobile.model.ProductResponse
+import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,17 +32,23 @@ import java.util.logging.Handler
 
 class HomeFragment : Fragment() {
 
-    private lateinit var allBtn: Button
-    private lateinit var tiresButton: Button
-    private lateinit var oilsButton: Button
-    private lateinit var batteryButton: Button
-    private lateinit var lubricantButton: Button
+    private lateinit var allBtn: ImageButton
+    private lateinit var tiresButton: ImageButton
+    private lateinit var oilsButton: ImageButton
+    private lateinit var batteryButton: ImageButton
+    private lateinit var lubricantButton: ImageButton
     private lateinit var cartIcon: ImageButton
     private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: LottieAnimationView
     private lateinit var emptyMessage: View
     private lateinit var dimView: View
     private lateinit var searchView: SearchView
+    private lateinit var dotsIndicator: WormDotsIndicator
+    private lateinit var viewPager: ViewPager2
+    private lateinit var bannerAdapter: BannerAdapter
+    private val handler = android.os.Handler(Looper.getMainLooper())
+    private var currentPage = 0
+
 
     private var allProducts: List<Product> = listOf()
     private var filteredProducts: List<Product> = listOf()
@@ -48,6 +59,7 @@ class HomeFragment : Fragment() {
     private lateinit var listPopupWindow: ListPopupWindow
     private var suggestionList: List<String> = listOf()
     private lateinit var cartBadge: TextView
+    private lateinit var userNameHomeTV: TextView
 
 
 
@@ -59,10 +71,33 @@ class HomeFragment : Fragment() {
         val spinner: Spinner = view.findViewById(R.id.spinner_options)
         val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", MODE_PRIVATE)
 
+        val imageUrls = listOf(
+            R.drawable.battery_banner,
+            R.drawable.tire_banner,
+            R.drawable.oil_lubricant_banner
+        )
+
+        bannerAdapter = BannerAdapter(imageUrls)
+        viewPager = view.findViewById(R.id.carouselBanner)
+        viewPager.adapter = bannerAdapter
+        dotsIndicator = view.findViewById(R.id.dotsIndicator)
+        dotsIndicator.attachTo(viewPager)
+
+        lifecycleScope.launch {
+            while (isActive) {
+                delay(15000)
+                if (isAdded) {
+                    currentPage = (currentPage + 1) % bannerAdapter.itemCount
+                    viewPager.setCurrentItem(currentPage, true)
+                }
+            }
+        }
+
+
         val adapter = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.spinner_filter,
-            android.R.layout.simple_spinner_item
+            android.R.layout.simple_spinner_dropdown_item
         )
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -96,19 +131,25 @@ class HomeFragment : Fragment() {
         cartIcon = view.findViewById(R.id.cart_icon)
         allBtn = view.findViewById(R.id.allBtn)
         tiresButton = view.findViewById(R.id.tiresButton)
-        oilsButton = view.findViewById(R.id.oilsButton)
+        oilsButton = view.findViewById(R.id.oilsBtn)
         batteryButton = view.findViewById(R.id.batteryButton)
         lubricantButton = view.findViewById(R.id.lubricantButton)
         recyclerView = view.findViewById(R.id.recyclerView)
         progressBar = view.findViewById(R.id.progressBar)
         emptyMessage = view.findViewById(R.id.emptyMessage)
-        searchView = view.findViewById(R.id.searchView)
+        searchView = view.findViewById(R.id.imageView3)
         dimView = view.findViewById(R.id.dimView)
         cartBadge = view.findViewById(R.id.cart_badge)
+        userNameHomeTV = view.findViewById(R.id.userNameHomeTV)
 
         searchView.setIconified(true)
         searchView.clearFocus()
         searchView.isFocusable = false
+
+        val firstName = sharedPreferences.getString("first_name", "") ?: ""
+        val lastName = sharedPreferences.getString("last_name", "") ?: ""
+
+        userNameHomeTV.text = "$firstName $lastName"
 
         updateCartBadge(5)
 
@@ -152,14 +193,12 @@ class HomeFragment : Fragment() {
             progressBar.visibility = View.VISIBLE
             dimView.visibility = View.VISIBLE
 
-            Toast.makeText(requireContext(), "Opening cart...", Toast.LENGTH_SHORT).show()
-
             cartIcon.postDelayed({
                 progressBar.visibility = View.GONE
                 dimView.visibility = View.GONE
                 val intent = Intent(activity, CartActivity::class.java)
                 startActivity(intent)
-            }, 300)
+            }, 400)
         }
 
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)

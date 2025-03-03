@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="#FBFCF8"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
@@ -34,7 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="25dp"/>
+        android:layout_marginTop="28dp"/>
 
     <HorizontalScrollView
         android:id="@+id/categoryHorizontalScrollView"

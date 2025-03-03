@@ -126,7 +126,6 @@ class EditContactInfoDialog : DialogFragment() {
         }
 
         val updateRequest = UpdateProfileRequest(
-            id = userId,
             first_name = null,
             last_name = null,
             profile_picture = null,
@@ -137,7 +136,8 @@ class EditContactInfoDialog : DialogFragment() {
             birthday = null
         )
 
-        apiService.updateProfilePicture(updateRequest)
+        // Corrected call with userId and updateRequest
+        apiService.updateProfilePicture(userId, updateRequest)
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
                     if (response.isSuccessful && response.body()?.success == true) {

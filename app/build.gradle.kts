@@ -50,6 +50,12 @@ dependencies {
     implementation("com.google.android.material:material:1.9.0")
     implementation("com.github.dhaval2404:imagepicker:2.1")
     implementation("com.facebook.shimmer:shimmer:0.5.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation("com.github.LottieFiles:dotlottie-android:0.4.1")
+    implementation("com.airbnb.android:lottie:6.0.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.tbuonomo:dotsindicator:4.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

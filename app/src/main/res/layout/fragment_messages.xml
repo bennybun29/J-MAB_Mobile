@@ -30,7 +30,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="20dp"
-            android:layout_marginLeft="50dp" />
+            android:layout_marginLeft="68dp" />
 
         <TextView
             android:id="@+id/jmab_name"
