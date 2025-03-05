@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -113,6 +114,14 @@ class CartActivity : AppCompatActivity() {
 
         updateCheckoutButton(false)
     }
+
+    override fun onBackPressed() {
+        val result = Intent()
+        result.putExtra("cartUpdated", true)
+        setResult(Activity.RESULT_OK, result)
+        super.onBackPressed()
+    }
+
 
     private fun showDeleteConfirmationDialog(cartIds: String) {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)

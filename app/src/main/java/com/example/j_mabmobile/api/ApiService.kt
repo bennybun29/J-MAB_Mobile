@@ -21,7 +21,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
 
@@ -58,7 +57,7 @@ interface ApiService {
 
     @DELETE("carts/{cart_id}")
     fun deleteCartItem(
-        @Path("cart_id") cartIds: String // Supports comma-separated IDs (e.g., "1,2,3")
+        @Path("cart_id") cartIds: String
     ): Call<ApiResponse>
 
     @PUT("carts/{cart_id}")
@@ -67,10 +66,9 @@ interface ApiService {
         @Body updateRequest: UpdateCartRequest
     ): Call<ApiResponse>
 
-    // Checkout Methods
-    @POST("orders/{user_id}")
+    //Order Methods
+    @GET("orders/{user_id}")
     fun checkout(
         @Path("user_id") userId: Int,
-        @Body request: CheckoutRequest
-    ): Call<CheckoutResponse>
+    ): Call<OrderResponse>
 }

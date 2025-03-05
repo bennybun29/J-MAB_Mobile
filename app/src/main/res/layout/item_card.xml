@@ -20,18 +20,18 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop"
+        android:layout_marginTop="8dp"
         android:src="@drawable/gulong" />
 
     <TextView
         android:id="@+id/item_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:gravity="left"
         android:text="Sample Text"
-        android:textColor="@android:color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textColor="@color/j_mab_blue"
+        android:textSize="16sp" />
 
     <TextView
         android:layout_width="wrap_content"

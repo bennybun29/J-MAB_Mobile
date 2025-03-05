@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:layout_marginBottom="80dp"
+    android:layout_marginBottom="36dp"
     tools:context=".MessagesFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="J-MAB"
-            android:fontFamily="@font/dmsans"
+            android:fontFamily="@font/dmsans_bold"
             android:textColor="@color/white"
             android:textSize="32sp"
             app:layout_constraintLeft_toRightOf="@id/jmab_logo_message"
@@ -63,7 +63,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/j_mab_blue"
-            android:padding="10dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="48dp"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent">
 

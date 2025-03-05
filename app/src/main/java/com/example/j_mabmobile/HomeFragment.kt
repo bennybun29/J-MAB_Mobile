@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SearchView
-import androidx.constraintlayout.helper.widget.Carousel
+import androidx.fragment.app.viewModels
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,6 +21,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.Product
 import com.example.j_mabmobile.model.ProductResponse
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
@@ -39,6 +42,7 @@ class HomeFragment : Fragment() {
     private lateinit var lubricantButton: ImageButton
     private lateinit var cartIcon: ImageButton
     private lateinit var recyclerView: RecyclerView
+    private lateinit var nestedScrollView: NestedScrollView
     private lateinit var progressBar: LottieAnimationView
     private lateinit var emptyMessage: View
     private lateinit var dimView: View
@@ -47,7 +51,9 @@ class HomeFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
     private lateinit var bannerAdapter: BannerAdapter
     private val handler = android.os.Handler(Looper.getMainLooper())
+    private val cartViewModel: CartViewModel by viewModels()
     private var currentPage = 0
+    private var scrollYPosition = 0
 
 
     private var allProducts: List<Product> = listOf()
@@ -60,6 +66,8 @@ class HomeFragment : Fragment() {
     private var suggestionList: List<String> = listOf()
     private lateinit var cartBadge: TextView
     private lateinit var userNameHomeTV: TextView
+    private val CART_REQUEST_CODE = 1001
+
 
 
 
@@ -82,6 +90,8 @@ class HomeFragment : Fragment() {
         viewPager.adapter = bannerAdapter
         dotsIndicator = view.findViewById(R.id.dotsIndicator)
         dotsIndicator.attachTo(viewPager)
+        nestedScrollView = view.findViewById(R.id.nestedScrollView)
+        recyclerView = view.findViewById(R.id.recyclerView)
 
         lifecycleScope.launch {
             while (isActive) {
@@ -151,8 +161,6 @@ class HomeFragment : Fragment() {
 
         userNameHomeTV.text = "$firstName $lastName"
 
-        updateCartBadge(5)
-
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (!query.isNullOrBlank()) {
@@ -197,8 +205,19 @@ class HomeFragment : Fragment() {
                 progressBar.visibility = View.GONE
                 dimView.visibility = View.GONE
                 val intent = Intent(activity, CartActivity::class.java)
-                startActivity(intent)
+                startActivityForResult(intent, CART_REQUEST_CODE)
             }, 400)
+        }
+
+        userId = sharedPreferences.getInt("user_id", -1)
+
+        cartViewModel.cartItemCount.observe(viewLifecycleOwner) { count ->
+            updateCartBadge(count)
+        }
+
+        if (userId != -1) {
+            Log.d("UserID", "Retrieved User ID: $userId")
+            fetchCartItems() // Fetch cart items for the logged-in user
         }
 
         recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
@@ -209,10 +228,25 @@ class HomeFragment : Fragment() {
             fetchProducts()
         }
 
+        cartViewModel.fetchCartItems(userId, requireContext())
 
 
         return view
     }
+
+    override fun onResume() {
+        super.onResume()
+        cartViewModel.fetchCartItems(userId, requireContext())
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == CART_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            cartViewModel.fetchCartItems(userId, requireContext()) // Refresh cart count
+        }
+    }
+
 
     private fun fetchProducts() {
         progressBar.visibility = View.VISIBLE
@@ -384,5 +418,32 @@ class HomeFragment : Fragment() {
             cartBadge.visibility = View.GONE
         }
     }
+
+    private fun fetchCartItems() {
+        if (userId == -1) return
+
+        val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
+
+        apiService.getCartItems(userId).enqueue(object : Callback<CartResponse> {
+            override fun onResponse(call: Call<CartResponse>, response: Response<CartResponse>) {
+                if (response.isSuccessful && response.body() != null) {
+                    val cartResponse = response.body()!!
+                    if (cartResponse.success) {
+                        val cartCount = cartResponse.cart.size
+                        updateCartBadge(cartCount)
+                    } else {
+                        updateCartBadge(0)
+                    }
+                } else {
+                    Log.e("Cart Fetch", "Failed to fetch cart items")
+                }
+            }
+
+            override fun onFailure(call: Call<CartResponse>, t: Throwable) {
+                Log.e("Cart Fetch", "Error: ${t.message}")
+            }
+        })
+    }
+
 
 }

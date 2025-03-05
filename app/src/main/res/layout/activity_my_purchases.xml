@@ -59,7 +59,7 @@
                 android:layout_marginLeft="5dp"
                 android:fontFamily="@font/dmsans"
                 android:textStyle="bold"
-                android:background="@drawable/button_background_selector"
+                android:background="@drawable/my_purchases_button_background_selector"
                 android:textColor="@drawable/button_text_color_selector"/>
 
             <Button
@@ -70,12 +70,12 @@
                 android:layout_marginLeft="5dp"
                 android:fontFamily="@font/dmsans"
                 android:textStyle="bold"
-                android:background="@drawable/button_background_selector"
+                android:background="@drawable/my_purchases_button_background_selector"
                 android:textColor="@drawable/button_text_color_selector"/>
 
             <Button
                 android:id="@+id/toReceiveBtnFragment"
-                android:background="@drawable/button_background_selector"
+                android:background="@drawable/my_purchases_button_background_selector"
                 android:textColor="@drawable/button_text_color_selector"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
@@ -86,7 +86,7 @@
 
             <Button
                 android:id="@+id/toRateBtnFragment"
-                android:background="@drawable/button_background_selector"
+                android:background="@drawable/my_purchases_button_background_selector"
                 android:textColor="@drawable/button_text_color_selector"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
