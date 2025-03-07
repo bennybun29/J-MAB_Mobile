@@ -28,6 +28,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.activity.viewModels
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -43,6 +44,8 @@ class ProductScreenActivity : AppCompatActivity() {
     private var recommendedProducts = listOf<Product>()
     private var userId: Int = 0
     private lateinit var shimmerLayout: com.facebook.shimmer.ShimmerFrameLayout
+    private lateinit var cartBadge: TextView
+    private val cartViewModel: CartViewModel by viewModels()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,8 +73,15 @@ class ProductScreenActivity : AppCompatActivity() {
         addToCartOverlay = findViewById(R.id.addToCartOverlay)
         recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
         recommendedProductsRecycler.layoutManager = GridLayoutManager(this,2)
+        cartBadge = findViewById(R.id.cartBadge)
         userId = intent.getIntExtra("user_id", 0)
         shimmerLayout = findViewById(R.id.shimmerLayout)
+
+        cartViewModel.cartItemCount.observe(this) { count ->
+            updateCartBadge(count)
+        }
+
+        cartViewModel.fetchCartItems(userId, this)
 
 
         minusBtn = findViewById(R.id.minusBtn)
@@ -142,12 +152,18 @@ class ProductScreenActivity : AppCompatActivity() {
             productVariation.text = "Voltage: " + intent.getStringExtra("voltage")
         }
 
+        var hasShownMaxStockToast = false
+
         plusBtn.setOnClickListener {
             if (quantity < stock) {
                 quantity++
                 quantityText.text = quantity.toString()
+                hasShownMaxStockToast = false
             } else {
-                Toast.makeText(this, "Max stock reached", Toast.LENGTH_SHORT).show()
+                if (!hasShownMaxStockToast) {
+                    Toast.makeText(this, "Max stock reached", Toast.LENGTH_SHORT).show()
+                    hasShownMaxStockToast = true
+                }
             }
         }
 
@@ -202,6 +218,12 @@ class ProductScreenActivity : AppCompatActivity() {
         Log.d("ProductScreenActivity", "Product ID: $product_id")
     }
 
+    override fun onResume() {
+        super.onResume()
+        cartViewModel.fetchCartItems(userId, this) // Refresh cart badge when returning
+    }
+
+
     /*
     private fun animateCartEffect() {
         val rootLayout = findViewById<ViewGroup>(android.R.id.content)
@@ -252,6 +274,15 @@ class ProductScreenActivity : AppCompatActivity() {
         animator.start()
     }*/
 
+    private fun updateCartBadge(count: Int) {
+        if (count > 0) {
+            cartBadge.visibility = View.VISIBLE
+            cartBadge.text = if (count > 10) "10+" else count.toString()
+        } else {
+            cartBadge.visibility = View.GONE
+        }
+    }
+
     private fun addToCart(userId: Int, productId: Int, quantity: Int, token: String) {
         Log.d("DEBUG", "Token being sent: $token")
         Log.d("DEBUG", "User ID: $userId, Product ID: $productId, Quantity: $quantity")
@@ -260,13 +291,35 @@ class ProductScreenActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                val response = apiService.addToCart(cartRequest)
+                // Fetch the current cart items first
+                val cartResponse = apiService.getCartItemsSuspend(userId)
+                val productStock = intent.getIntExtra("product_stock", 0)
+                if (cartResponse.isSuccessful) {
+                    val cartItems = cartResponse.body()?.cart ?: emptyList()
+                    val existingCartItem = cartItems.find { it.product_id == productId }
+                    val existingQuantity = existingCartItem?.quantity ?: 0
 
+                    val totalQuantity = existingQuantity + quantity
+
+                    if (totalQuantity > productStock) {
+                        Toast.makeText(
+                            this@ProductScreenActivity,
+                            "Exceeds stock! Max: $productStock, In cart: $existingQuantity",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        return@launch
+                    }
+
+                }
+
+                // Now proceed with adding to cart
+                val response = apiService.addToCart(cartRequest)
                 if (response.isSuccessful) {
                     val cartResponse = response.body()
                     if (cartResponse?.success == true) {
                         showAddToCartOverlay()
                         fetchRecommendedProducts(userId)
+                        cartViewModel.fetchCartItems(userId, this@ProductScreenActivity)
                     } else {
                         val errorMessage = cartResponse?.errors?.get(0) ?: "Unknown error"
                         Toast.makeText(this@ProductScreenActivity, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
@@ -279,6 +332,8 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
 
     private fun showAddToCartOverlay() {

@@ -134,6 +134,19 @@ data class Order(
     val total_price: Double,
     val payment_method: String,
     val status: String,
+    val payment_status: String,
     val reference_number: String,
-    val created_at: String
+    val created_at: String,
+    val product_brand: String,
+    val product_name: String,
+    val quantity: Int,
+    val product_image: String
+)
+
+data class Address(
+    val title: String,
+    val street: String,
+    val barangay: String,
+    val city: String,
+    var isSelected: Boolean = false // To handle checkbox state
 )

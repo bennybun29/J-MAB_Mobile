@@ -23,8 +23,6 @@ object RetrofitClient {
         return token
     }
 
-
-    // Interceptor to add the Authorization header
     private fun authInterceptor(context: Context) = Interceptor { chain ->
         val token = getToken(context)
         val originalRequest = chain.request()
@@ -33,11 +31,6 @@ object RetrofitClient {
         if (!token.isNullOrBlank()) {
             requestBuilder.addHeader("Authorization", "Bearer $token")
 
-            // REMOVE OR COMMENT OUT THESE LINES:
-            // val urlWithToken = originalRequest.url.newBuilder()
-            //     .addQueryParameter("debug_token", token)
-            //     .build()
-            // requestBuilder.url(urlWithToken)
         } else {
             Log.e("RETROFIT_TOKEN", "No token found!")
         }
@@ -48,10 +41,6 @@ object RetrofitClient {
         chain.proceed(request)
     }
 
-
-
-
-    // Create OkHttpClient with interceptors
     fun getRetrofitInstance(context: Context): Retrofit {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY

@@ -31,4 +31,10 @@
         <item name="android:layout_height">24dp</item> <!-- Smaller icon size -->
         <item name="android:alpha">0.5</item> <!-- Lower opacity for inactive items -->
     </style>
+
+    <style name="NoUnderlineSearchView" parent="Widget.AppCompat.SearchView">
+        <item name="queryBackground">@null</item>
+    </style>
+
+
 </resources>

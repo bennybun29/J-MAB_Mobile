@@ -55,6 +55,7 @@
             android:layout_marginEnd="10dp"
             app:iconifiedByDefault="false"
             android:backgroundTint="#E7E7E7"
+            android:padding="6dp"
             android:background="@drawable/search_view_bg"
             app:layout_constraintEnd_toStartOf="@+id/cartFL"
             app:layout_constraintStart_toStartOf="parent"
@@ -94,6 +95,9 @@
             android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             app:layout_constraintTop_toBottomOf="@id/imageView3"
             app:layout_constraintBottom_toBottomOf="parent"
             android:fillViewport="true">
@@ -146,10 +150,11 @@
 
                 <HorizontalScrollView
                     android:id="@+id/categoryHorizontalScrollView"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:scrollbars="none">
+                    android:scrollbars="none"
+                    android:layout_gravity="center">
 
                     <LinearLayout
                         android:gravity="center"
@@ -169,7 +174,7 @@
                                 android:layout_height="56dp"
                                 android:src="@drawable/all_icon"
                                 android:layout_marginLeft="12dp"
-                                android:layout_marginRight="16dp"
+                                android:layout_marginRight="8dp"
                                 app:tint="@color/icon_tint_selector"
                                 android:background="@drawable/button_background_selector"/>
 
@@ -195,7 +200,7 @@
                                 android:layout_height="56dp"
                                 android:src="@drawable/tires_icon"
                                 android:layout_marginLeft="12dp"
-                                android:layout_marginRight="16dp"
+                                android:layout_marginRight="8dp"
                                 app:tint="@color/icon_tint_selector"
                                 android:background="@drawable/button_background_selector"/>
 
@@ -221,7 +226,7 @@
                                 android:layout_height="56dp"
                                 android:src="@drawable/oil_icon"
                                 android:layout_marginLeft="12dp"
-                                android:layout_marginRight="16dp"
+                                android:layout_marginRight="8dp"
                                 app:tint="@color/icon_tint_selector"
                                 android:background="@drawable/button_background_selector"/>
 
@@ -247,7 +252,7 @@
                                 android:layout_height="56dp"
                                 android:src="@drawable/battery_icon"
                                 android:layout_marginLeft="12dp"
-                                android:layout_marginRight="16dp"
+                                android:layout_marginRight="8dp"
                                 app:tint="@color/icon_tint_selector"
                                 android:background="@drawable/button_background_selector"/>
 
@@ -272,7 +277,7 @@
                                 android:layout_width="56dp"
                                 android:layout_height="56dp"
                                 android:layout_marginLeft="12dp"
-                                android:layout_marginRight="16dp"
+                                android:layout_marginRight="8dp"
                                 app:tint="@color/icon_tint_selector"
                                 android:background="@drawable/button_background_selector"
                                 android:src="@drawable/lubricant" />
@@ -340,7 +345,7 @@
             android:visibility="visible"
             android:elevation="10dp"
             app:layout_constraintTop_toBottomOf="@id/imageView3"
-            android:layout_marginTop="84dp"
+            android:layout_marginTop="134dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -355,11 +360,10 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:text="Unfortunately, we don't have a product for this category yet..."
             android:textSize="16sp"
             android:textColor="@android:color/black"
             android:visibility="visible"
-            android:layout_marginTop="128dp"
+            android:layout_marginTop="198dp"
             app:layout_constraintTop_toBottomOf="@id/imageView3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -369,7 +373,7 @@
             android:id="@+id/dimView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/j_mab_blue"
+            android:background="@color/black_overlay"
             android:alpha="0.5"
             android:visibility="gone"/>
 

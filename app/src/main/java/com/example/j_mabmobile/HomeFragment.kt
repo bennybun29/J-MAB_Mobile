@@ -95,7 +95,7 @@ class HomeFragment : Fragment() {
 
         lifecycleScope.launch {
             while (isActive) {
-                delay(15000)
+                delay(10000)
                 if (isAdded) {
                     currentPage = (currentPage + 1) % bannerAdapter.itemCount
                     viewPager.setCurrentItem(currentPage, true)
@@ -224,7 +224,7 @@ class HomeFragment : Fragment() {
 
 
         lifecycleScope.launch {
-            delay(200)
+            delay(800)
             fetchProducts()
         }
 
@@ -424,7 +424,7 @@ class HomeFragment : Fragment() {
 
         val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
 
-        apiService.getCartItems(userId).enqueue(object : Callback<CartResponse> {
+        apiService.getCartItemsCall(userId).enqueue(object : Callback<CartResponse> {
             override fun onResponse(call: Call<CartResponse>, response: Response<CartResponse>) {
                 if (response.isSuccessful && response.body() != null) {
                     val cartResponse = response.body()!!

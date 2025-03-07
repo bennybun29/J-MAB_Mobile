@@ -40,18 +40,40 @@
         app:layout_constraintRight_toLeftOf="@id/helpCV"
         app:cardBackgroundColor="@android:color/white">
 
-        <ImageButton
-            android:id="@+id/cartBtn"
+        <!-- FrameLayout for Cart Icon and Badge -->
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/cart_product_screen_icon"
-            android:background="@null"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/helpCV"
-            android:layout_margin="8dp"
-            android:elevation="10dp" />
+            android:layout_height="wrap_content">
+
+            <!-- Cart Icon -->
+            <ImageButton
+                android:id="@+id/cartBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/cart_product_screen_icon"
+                android:background="@null"
+                android:layout_margin="8dp"
+                android:elevation="10dp"/>
+
+            <!-- Cart Badge -->
+            <TextView
+                android:id="@+id/cartBadge"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/badge_background"
+                android:text="3"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="4dp"
+                android:elevation="12dp"
+                android:visibility="gone"/>
+        </FrameLayout>
 
     </androidx.cardview.widget.CardView>
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/helpCV"
@@ -214,6 +236,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="10dp"
+        android:background="@drawable/bottom_options_border"
         app:layout_constraintBottom_toBottomOf="parent"
         android:orientation="horizontal">
 
@@ -223,8 +246,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/bottom_options_border">
+            android:gravity="center">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -239,9 +261,15 @@
                     android:layout_marginEnd="5dp"
                     android:text="-"
                     android:gravity="center"
+                    android:textStyle="bold"
                     android:textSize="16sp"
-                    android:textColor="@color/j_mab_blue"
-                    android:background="@drawable/bottom_options_border" />
+                    android:textColor="@color/j_mab_blue" />
+
+                <!-- Divider Left -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/j_mab_blue" />
 
                 <TextView
                     android:id="@+id/quantityText"
@@ -249,9 +277,15 @@
                     android:layout_height="40dp"
                     android:gravity="center"
                     android:text="1"
-                    android:textSize="16sp"
-                    android:textColor="@color/j_mab_blue"
-                    android:background="@drawable/bottom_options_border"/>
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/j_mab_blue" />
+
+                <!-- Divider Right -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/j_mab_blue" />
 
                 <TextView
                     android:id="@+id/plusBtn"
@@ -260,11 +294,10 @@
                     android:text="+"
                     android:gravity="center"
                     android:textSize="16sp"
+                    android:textStyle="bold"
                     android:layout_marginStart="5dp"
-                    android:textColor="@color/j_mab_blue"
-                    android:background="@drawable/bottom_options_border" />
+                    android:textColor="@color/j_mab_blue" />
             </LinearLayout>
-
         </LinearLayout>
 
         <!-- Add to Cart Button -->

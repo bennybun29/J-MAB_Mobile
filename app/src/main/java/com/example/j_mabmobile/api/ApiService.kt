@@ -51,9 +51,15 @@ interface ApiService {
     ): Response<CartResponse>
 
     @GET("carts/{user_id}")
-    fun getCartItems(
+    suspend fun getCartItemsSuspend(
         @Path("user_id") userId: Int
-    ): Call<CartResponse>
+    ): Response<CartResponse>  // ✅ For coroutines
+
+    @GET("carts/{user_id}")
+    fun getCartItemsCall(
+        @Path("user_id") userId: Int
+    ): Call<CartResponse>  // ✅ For normal Retrofit calls
+
 
     @DELETE("carts/{cart_id}")
     fun deleteCartItem(
@@ -66,9 +72,16 @@ interface ApiService {
         @Body updateRequest: UpdateCartRequest
     ): Call<ApiResponse>
 
-    //Order Methods
-    @GET("orders/{user_id}")
+    //Checkout Methods
+    @POST("orders/{user_id}")
     fun checkout(
         @Path("user_id") userId: Int,
+        @Body request: CheckoutRequest
+    ): Call<CheckoutResponse>
+
+    //Order Methods
+    @GET("orders/{user_id}")
+    fun getOrders(
+        @Path("user_id") userId: Int
     ): Call<OrderResponse>
 }

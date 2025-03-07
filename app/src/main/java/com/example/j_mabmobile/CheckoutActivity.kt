@@ -2,8 +2,12 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -15,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieAnimationView
@@ -45,6 +50,8 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var progressBar: LottieAnimationView
     private lateinit var doneBtn: Button
     private lateinit var overlayBackground: View
+    private lateinit var cartViewModel: CartViewModel
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +69,8 @@ class CheckoutActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressBar)
         doneBtn = findViewById(R.id.doneBtn)
         overlayBackground = findViewById(R.id.overlayBackground)
+        cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
+
 
         progressBar.visibility = View.GONE
         orderPlacedCardView.visibility = View.GONE
@@ -172,7 +181,19 @@ class CheckoutActivity : AppCompatActivity() {
             "%.2f".format(totalPrice)
         }
 
-        totalPaymentTV.text = "Total: \n₱${formattedPrice}"
+        totalPaymentTV.text = getBoldText("Total: \n", "₱${formattedPrice}")
+    }
+
+    private fun getBoldText(label: String, value: String?): SpannableString {
+        val text = "$label$value"
+        val spannable = SpannableString(text)
+        spannable.setSpan(
+            StyleSpan(Typeface.BOLD),
+            label.length,
+            text.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        return spannable
     }
 
     private fun processCheckout() {
@@ -251,6 +272,10 @@ class CheckoutActivity : AppCompatActivity() {
                                 orderPlacedCardView.visibility = View.VISIBLE
                             }
                         }
+
+                        cartViewModel.removeCheckedOutItems(selectedCartItems)
+
+
                     } else {
                         Log.e("CHECKOUT_ERROR", "Checkout failed: ${checkoutResponse?.message}")
                         Toast.makeText(this@CheckoutActivity, "Checkout failed: ${checkoutResponse?.message}", Toast.LENGTH_LONG).show()

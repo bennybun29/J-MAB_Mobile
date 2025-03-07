@@ -10,13 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:text="To Ship Fragment" />
-
         <ImageView
             android:id="@+id/empytIcon"
             android:layout_width="150dp"

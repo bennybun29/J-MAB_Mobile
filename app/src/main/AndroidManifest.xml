@@ -62,51 +62,65 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SignUpActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:exported="true"
+            android:exported="false"
             android:label="@string/title_activity_splash_screen"
             android:theme="@style/Theme.JMABMobile.Fullscreen" >
         </activity>
+
         <activity
             android:name=".NoInternetActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".MainActivity"
-            android:exported="true"
+            android:exported="false"
             android:windowSoftInputMode="adjustPan">
         </activity>
+
         <activity
             android:name=".SignInActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".CartActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".AccountAndSecurityActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".MyAddressesActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".HelpActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".ProductScreenActivity"
-            android:exported="true" >
+            android:exported="false" >
         </activity>
+
         <activity
             android:name=".MyPurchasesActivity"
-            android:exported="true" />
+            android:exported="false" />
+
         <activity android:name=".NewAddressActivity"
-            android:exported="true"/>
+            android:exported="false"/>
+
+        <activity android:name=".EditAddressActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>

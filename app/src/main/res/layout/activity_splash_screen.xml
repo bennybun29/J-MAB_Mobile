@@ -7,9 +7,9 @@
 
     <ImageView
         android:id="@+id/jmabLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/jmab_splash"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:src="@drawable/jmab_no_bg"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

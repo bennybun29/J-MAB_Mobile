@@ -21,7 +21,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginRight="5dp">
+            android:layout_marginRight="5dp"
+            android:background="@drawable/single_border"> <!-- Single border -->
 
             <TextView
                 android:id="@+id/minusBtn"
@@ -30,8 +31,13 @@
                 android:text="-"
                 android:gravity="center"
                 android:textSize="16sp"
-                android:textColor="@color/j_mab_blue"
-                android:background="@drawable/bottom_options_border" />
+                android:textColor="@color/j_mab_blue" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/j_mab_blue" />
 
             <TextView
                 android:id="@+id/quantityText"
@@ -40,8 +46,13 @@
                 android:gravity="center"
                 android:text="1"
                 android:textSize="16sp"
-                android:textColor="@color/j_mab_blue"
-                android:background="@drawable/bottom_options_border"/>
+                android:textColor="@color/j_mab_blue" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@color/j_mab_blue" />
 
             <TextView
                 android:id="@+id/plusBtn"
@@ -50,9 +61,10 @@
                 android:text="+"
                 android:gravity="center"
                 android:textSize="16sp"
-                android:textColor="@color/j_mab_blue"
-                android:background="@drawable/bottom_options_border" />
+                android:textColor="@color/j_mab_blue" />
+
         </LinearLayout>
+
 
         <CheckBox
             android:id="@+id/cartItemCheckBox"

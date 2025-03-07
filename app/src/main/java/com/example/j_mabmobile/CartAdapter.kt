@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.CartItem
 import com.squareup.picasso.Picasso
@@ -48,6 +49,7 @@ class CartAdapter(
         val cartItem = cartItems[position]
         val userId = getUserId(holder.itemView.context)
         val token = getToken(holder.itemView.context)
+        var toast: Toast? = null
 
         holder.itemName.text = cartItem.product_name
         holder.itemQuantity.text = "${cartItem.quantity}"
@@ -106,12 +108,18 @@ class CartAdapter(
         }
 
         holder.plusBtn.setOnClickListener {
-            cartItem.quantity++
-            holder.itemQuantity.text = "${cartItem.quantity}"
-            val updatedPrice = cartItem.product_price * cartItem.quantity
-            holder.productPrice.text = "Price: ₱${formatPrice(updatedPrice)}"
-            updateTotalPrice()
-            onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
+            if (cartItem.quantity < cartItem.product_stock) {  // Check stock limit
+                cartItem.quantity++
+                holder.itemQuantity.text = "${cartItem.quantity}"
+                val updatedPrice = cartItem.product_price * cartItem.quantity
+                holder.productPrice.text = "Price: ₱${formatPrice(updatedPrice)}"
+                updateTotalPrice()
+                onQuantityUpdated(cartItem.cart_id, cartItem.quantity)
+            } else {
+                toast?.cancel()
+                toast = Toast.makeText(holder.itemView.context, "Stock limit reached!", Toast.LENGTH_SHORT)
+                toast?.show()
+            }
         }
 
         holder.removeFromCartBtn.setOnClickListener {

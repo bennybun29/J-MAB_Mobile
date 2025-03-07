@@ -19,6 +19,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
@@ -53,6 +54,9 @@ class AccountFragment : Fragment() {
     lateinit var userIdTV: TextView
     lateinit var changeProfilePicBtn: CircleImageView
     lateinit var userPhoneNumberTV: TextView
+    private lateinit var ordersViewModel: OrdersViewModel
+    private lateinit var toPayBadge: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +85,7 @@ class AccountFragment : Fragment() {
         userIdTV = view.findViewById(R.id.userIDNumberTV)
         changeProfilePicBtn = view.findViewById(R.id.ProfilePictureButton)
         userPhoneNumberTV = view.findViewById(R.id.userPhoneNumberTV)
-
+        toPayBadge = view.findViewById(R.id.toPayBadge)
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
@@ -101,6 +105,22 @@ class AccountFragment : Fragment() {
         emailAddressTV.text = email ?: "Email Address"
         userIdTV.text = if (userId != -1) "ID: $userId" else "User ID"
         userPhoneNumberTV.text = if (phoneNumber.isNullOrEmpty()) "(09##) ### ####" else phoneNumber
+
+        ordersViewModel = ViewModelProvider(
+            requireActivity(),
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        ).get(OrdersViewModel::class.java)
+
+        //Duplicate mo tong block ng code tas palitan lang toPayCount para madisplay count ng state ng orders
+        ordersViewModel.toPayCount.observe(viewLifecycleOwner) { count ->
+            Log.d("DEBUG", "AccountFragment - To-Pay Badge Updated: $count")
+            if (count > 0) {
+                toPayBadge.text = count.toString()
+                toPayBadge.visibility = View.VISIBLE
+            } else {
+                toPayBadge.visibility = View.GONE
+            }
+        }
 
         setupButtonListeners()
         return view
@@ -166,6 +186,10 @@ class AccountFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        val userId = getUserId()
+        if (userId != -1) {
+            ordersViewModel.fetchOrders(userId, requireContext())
+        }
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
         updateUI()
     }

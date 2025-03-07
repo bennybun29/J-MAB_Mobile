@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,6 +40,8 @@ class CartActivity : AppCompatActivity() {
     private lateinit var deleteTV: TextView
     private lateinit var checkoutBtn: Button
     private lateinit var horizontal_linear_layout: LinearLayout
+    private lateinit var cartViewModel: CartViewModel
+
 
     private val cartItems = mutableListOf<CartItem>()
 
@@ -58,6 +61,16 @@ class CartActivity : AppCompatActivity() {
         deleteTV = findViewById(R.id.deleteTV)
         checkoutBtn = findViewById(R.id.checkoutBtn)
         horizontal_linear_layout = findViewById(R.id.horizontal_linear_layout)
+        cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
+
+        cartViewModel.cartItems.observe(this) { cartList ->
+            cartItems.clear()
+            cartItems.addAll(cartList)
+            cartAdapter.notifyDataSetChanged()
+            updateEmptyCartUI(cartList.isEmpty())
+        }
+
+
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -83,7 +96,7 @@ class CartActivity : AppCompatActivity() {
         }
 
         if (userId != -1 && authToken != null) {
-            fetchCartItems()
+            cartViewModel.fetchCartItems(userId, this)
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
         }
@@ -122,6 +135,11 @@ class CartActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 
+    override fun onResume() {
+        super.onResume()
+        cartViewModel.fetchCartItems(userId, this) // Refresh cart badge when returning
+    }
+
 
     private fun showDeleteConfirmationDialog(cartIds: String) {
         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
@@ -157,7 +175,7 @@ class CartActivity : AppCompatActivity() {
             return
         }
 
-        RetrofitClient.getApiService(this).getCartItems(userId)
+        RetrofitClient.getApiService(this).getCartItemsCall(userId)
             .enqueue(object : Callback<CartResponse> {
                 override fun onResponse(call: Call<CartResponse>, response: Response<CartResponse>) {
                     if (response.isSuccessful && response.body() != null) {

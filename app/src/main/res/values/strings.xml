@@ -13,6 +13,20 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <string-array name="dropdown_items">
+        <item>Recently Added</item>
+        <item>Price: High to Low</item>
+        <item>Price: Low to High</item>
+    </string-array>
+
+    <string name="j_mab_description">
+    At <b>J-MAB</b>, we\’re passionate about helping you get the most out of your vehicle.
+    We offer a wide range of high-quality car supplies, from performance parts to everyday essentials, all designed to keep your car running smoothly and efficiently.
+    Whether you\'re upgrading your ride or simply maintaining it, we make it easy to find the products you need.
+    Your journey matters to us, and we\'re here to support you every mile of the way with reliable, top-notch car care solutions.
+</string>
+
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

@@ -34,7 +34,7 @@
 
         <TextView
             android:id="@+id/UsernameTV"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
             android:layout_marginBottom="5dp"
@@ -42,10 +42,14 @@
             android:text="Username Example"
             android:textColor="@color/white"
             android:textSize="24sp"
-            android:layout_marginLeft="50dp"
             android:textStyle="bold"
-            app:layout_constraintLeft_toRightOf="@+id/ProfilePictureButton"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginLeft="16dp"
+            app:layout_constraintStart_toEndOf="@id/ProfilePictureButton"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
 
         <TextView
             android:id="@+id/userPhoneNumberTV"
@@ -56,6 +60,7 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="italic"
+            android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@+id/UsernameTV"
             app:layout_constraintTop_toBottomOf="@+id/UsernameTV"
             tools:layout_editor_absoluteY="75dp" />
@@ -147,13 +152,35 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
-                        <ImageButton
-                            android:id="@+id/toPayBtn"
+
+                        <FrameLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/to_pay_icon"
-                            android:layout_marginBottom="5dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                            android:layout_height="wrap_content">
+
+                            <!-- Icon Button -->
+                            <ImageButton
+                                android:id="@+id/toPayBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/to_pay_icon"
+                                android:layout_marginBottom="5dp"
+                                android:padding="2dp"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+
+                            <!-- Badge (Hidden by Default) -->
+                            <TextView
+                                android:id="@+id/toPayBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/badge_background"
+                                android:textSize="10sp"
+                                android:textColor="@android:color/white"
+                                android:gravity="center"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end" />
+                        </FrameLayout>
+
+                        <!-- Text Below Icon -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -163,19 +190,42 @@
                             android:gravity="center"/>
                     </LinearLayout>
 
+
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
-                        <ImageButton
-                            android:id="@+id/toShipBtn"
+
+                        <FrameLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/to_ship_icon"
-                            android:layout_marginBottom="5dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                            android:layout_height="wrap_content">
+
+                            <!-- Icon Button -->
+                            <ImageButton
+                                android:id="@+id/toShipBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/to_ship_icon"
+                                android:layout_marginBottom="5dp"
+                                android:padding="2dp"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+
+                            <!-- Badge (Hidden by Default) -->
+                            <TextView
+                                android:id="@+id/toShipBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/badge_background"
+                                android:textSize="10sp"
+                                android:textColor="@android:color/white"
+                                android:gravity="center"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end" />
+                        </FrameLayout>
+
+                        <!-- Text Below Icon -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -191,13 +241,35 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
-                        <ImageButton
-                            android:id="@+id/toReceiveBtn"
+
+                        <FrameLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/to_receive_icon"
-                            android:layout_marginBottom="5dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                            android:layout_height="wrap_content">
+
+                            <!-- Icon Button -->
+                            <ImageButton
+                                android:id="@+id/toReceiveBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/to_receive_icon"
+                                android:layout_marginBottom="2dp"
+                                android:padding="2dp"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+
+                            <!-- Badge (Hidden by Default) -->
+                            <TextView
+                                android:id="@+id/toReceiveBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/badge_background"
+                                android:textSize="10sp"
+                                android:textColor="@android:color/white"
+                                android:gravity="center"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end" />
+                        </FrameLayout>
+
+                        <!-- Text Below Icon -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -213,13 +285,35 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
-                        <ImageButton
-                            android:id="@+id/toRateBtn"
+
+                        <FrameLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/to_rate_icon"
-                            android:layout_marginBottom="5dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"/>
+                            android:layout_height="wrap_content">
+
+                            <!-- Icon Button -->
+                            <ImageButton
+                                android:id="@+id/toRateBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:src="@drawable/to_rate_icon"
+                                android:layout_marginBottom="5dp"
+                                android:padding="2dp"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"/>
+
+                            <!-- Badge (Hidden by Default) -->
+                            <TextView
+                                android:id="@+id/toRateBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/badge_background"
+                                android:textSize="10sp"
+                                android:textColor="@android:color/white"
+                                android:gravity="center"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end" />
+                        </FrameLayout>
+
+                        <!-- Text Below Icon -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

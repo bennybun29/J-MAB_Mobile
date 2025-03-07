@@ -18,6 +18,8 @@ class HelpActivity : AppCompatActivity() {
     lateinit var backBtn: ImageButton
     lateinit var tvGlobeNumber: TextView
     lateinit var tvSmartNumber: TextView
+    lateinit var googleMapsButton: ImageButton
+    lateinit var facebookBtn: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,9 @@ class HelpActivity : AppCompatActivity() {
         backBtn = findViewById(R.id.backBtn)
         tvGlobeNumber = findViewById(R.id.tvGlobeNumber)
         tvSmartNumber = findViewById(R.id.tvSmartNumber)
+        googleMapsButton = findViewById(R.id.mapsBtn)
+        facebookBtn = findViewById(R.id.facebookBtn)
+
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -36,6 +41,46 @@ class HelpActivity : AppCompatActivity() {
 
         underlineTextView(tvGlobeNumber, "GLOBE: 0977 769 3620", "0977 769 3620")
         underlineTextView(tvSmartNumber, "SMART: 0946 289 6767", "0946 289 6767")
+
+
+        googleMapsButton.setOnClickListener {
+            openGoogleMaps()
+        }
+
+        facebookBtn.setOnClickListener{
+            openFacebookPage()
+        }
+
+    }
+
+    private fun openGoogleMaps() {
+        val mapUrl = "https://www.google.com/maps/place/87+Tebeng+Rd,+Dagupan,+Pangasinan/@16.0356193,120.3567036,696m/data=!3m2!1e3!4b1!4m5!3m4!1s0x339142a6bd9e0ac9:0x917be9d95001da77!8m2!3d16.0356142!4d120.3592785?entry=ttu"
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(mapUrl))
+        intent.setPackage("com.google.android.apps.maps")
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(mapUrl))
+            startActivity(webIntent)
+        }
+
+    }
+
+    private fun openFacebookPage() {
+        val facebookPageID = "jmab.trd"
+        val facebookUrl = "https://www.facebook.com/$facebookPageID"
+        val facebookAppUri = Uri.parse("fb://facewebmodal/f?href=$facebookUrl")
+
+        val intent = Intent(Intent.ACTION_VIEW, facebookAppUri)
+        intent.setPackage("com.facebook.katana")
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse(facebookUrl))
+            startActivity(webIntent)
+        }
     }
 
     private fun showOptionsDialog(phoneNumber: String) {

@@ -27,7 +27,7 @@
                 android:text="Edit Security"
                 android:fontFamily="@font/dmsans_bold"
                 android:textSize="18sp"
-                android:textStyle="bold"
+                android:textColor="@color/j_mab_blue"
                 android:layout_gravity="center"/>
 
             <EditText
