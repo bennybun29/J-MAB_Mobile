@@ -33,13 +33,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans_bold"
-        android:text="HELP"
+        android:text="Help"
         android:textColor="@color/white"
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="28dp"/>
+
+    <View
+        app:layout_constraintTop_toBottomOf="@id/helpTitle"
+        app:layout_constraintEnd_toEndOf="@id/helpTitle"
+        app:layout_constraintStart_toStartOf="@id/helpTitle"
+        android:id="@+id/cartUnderline"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#FFD700"
+        android:layout_marginTop="4dp"/>
 
     <!-- Scrollable Section -->
     <androidx.core.widget.NestedScrollView

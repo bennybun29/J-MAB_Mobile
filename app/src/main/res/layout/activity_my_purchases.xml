@@ -26,6 +26,7 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="30dp"/>
     <TextView
+        android:id="@+id/myPurchasesTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans_bold"
@@ -36,6 +37,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="28dp"/>
+
+    <View
+        app:layout_constraintTop_toBottomOf="@id/myPurchasesTV"
+        app:layout_constraintEnd_toEndOf="@id/myPurchasesTV"
+        app:layout_constraintStart_toStartOf="@id/myPurchasesTV"
+        android:id="@+id/cartUnderline"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#FFD700"
+        android:layout_marginTop="4dp"/>
 
     <HorizontalScrollView
         android:id="@+id/categoryHorizontalScrollView"

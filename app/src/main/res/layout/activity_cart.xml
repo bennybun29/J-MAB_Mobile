@@ -53,10 +53,11 @@
         android:layout_marginLeft="20dp"
         android:layout_marginTop="30dp"/>
     <TextView
+        android:id="@+id/myCartTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans_bold"
-        android:text="MY CART"
+        android:text="My Cart"
         android:textColor="@color/white"
         android:textSize="36sp"
         android:textStyle="bold"
@@ -64,6 +65,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="25dp"/>
+
+    <View
+        app:layout_constraintTop_toBottomOf="@id/myCartTV"
+        app:layout_constraintEnd_toEndOf="@id/myCartTV"
+        app:layout_constraintStart_toStartOf="@id/myCartTV"
+        android:id="@+id/cartUnderline"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="@color/j_mab_yellow"
+        android:layout_marginTop="4dp" />
 
     <TextView
         android:id="@+id/deleteTV"
@@ -95,7 +106,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/bottom_options_border">
 
         <CheckBox
             android:id="@+id/selectAllChkBox"
@@ -103,7 +115,6 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:fontFamily="@font/dmsans_bold"
-            android:background="@drawable/bottom_options_border"
             android:text="Select All"
             android:paddingStart="10dp"/>
 

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
@@ -14,7 +15,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -51,6 +51,9 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var doneBtn: Button
     private lateinit var overlayBackground: View
     private lateinit var cartViewModel: CartViewModel
+    private lateinit var userLocationTV: TextView
+    private lateinit var addressViewModel: AddressViewModel
+    private var defaultAddressId: Int? = null
 
 
 
@@ -71,6 +74,49 @@ class CheckoutActivity : AppCompatActivity() {
         overlayBackground = findViewById(R.id.overlayBackground)
         cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
 
+        userLocationTV = findViewById(R.id.userLocationTV)  // Ensure this is initialized
+
+        addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
+
+        addressViewModel.addresses.observe(this) { addresses ->
+            val defaultAddress = addresses.find { it.is_default }
+            if (defaultAddress != null) {
+                // ✅ Create a bold SpannableString for the address
+                val fullAddress = "${defaultAddress.home_address}, ${defaultAddress.barangay}, ${defaultAddress.city}, Pangasinan"
+                val spannableString = SpannableString(fullAddress)
+
+                // ✅ Make home address bold
+                val homeAddressStart = 0
+                val homeAddressEnd = defaultAddress.home_address.length
+                spannableString.setSpan(StyleSpan(Typeface.BOLD), homeAddressStart, homeAddressEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                // ✅ Make barangay bold
+                val barangayStart = fullAddress.indexOf(defaultAddress.barangay)
+                val barangayEnd = barangayStart + defaultAddress.barangay.length
+                spannableString.setSpan(StyleSpan(Typeface.BOLD), barangayStart, barangayEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                // ✅ Make city bold
+                val cityStart = fullAddress.indexOf(defaultAddress.city)
+                val cityEnd = cityStart + defaultAddress.city.length
+                spannableString.setSpan(StyleSpan(Typeface.BOLD), cityStart, cityEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                val pangasinanStart = fullAddress.indexOf("Pangasinan")
+                val pangasinanEnd = pangasinanStart + "Pangasinan".length
+                spannableString.setSpan(StyleSpan(Typeface.BOLD), pangasinanStart, pangasinanEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+
+                // ✅ Set the bold text to TextView
+                userLocationTV.text = spannableString
+
+                // ✅ Store the default address ID
+                defaultAddressId = defaultAddress.id
+            } else {
+                userLocationTV.text = "No default address found"
+            }
+        }
+
+        // ✅ Fetch addresses when the screen loads
+        addressViewModel.fetchAddresses()
 
         progressBar.visibility = View.GONE
         orderPlacedCardView.visibility = View.GONE
@@ -118,9 +164,7 @@ class CheckoutActivity : AppCompatActivity() {
         changeAddressBtn = findViewById(R.id.changeAddressBtn)
 
         changeAddressBtn.setOnClickListener({
-            onPause()
-            val intent = Intent(this, MyAddressesActivity::class.java)
-            startActivity(intent)
+            openChangeAddressScreen()
         })
 
         codCheckBox = findViewById(R.id.codChkBox)
@@ -163,6 +207,8 @@ class CheckoutActivity : AppCompatActivity() {
         val exitConfirmationCard = findViewById<CardView>(R.id.exitConfirmationCard)
         exitConfirmationCard.visibility = View.GONE
         overlayBackground.visibility = View.GONE
+        addressViewModel.fetchAddresses()
+
     }
 
     override fun onBackPressed() {
@@ -198,10 +244,10 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun processCheckout() {
         val token = getToken()
+        val userId = getUserID()
 
-        if (token == null) {
-            Log.e("CHECKOUT_ERROR", "Token is null! Cannot proceed.")
-            Toast.makeText(this, "Authentication error: No token found", Toast.LENGTH_SHORT).show()
+        if (token == null || userId == -1) {
+            Toast.makeText(this, "Authentication error", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -227,34 +273,39 @@ class CheckoutActivity : AppCompatActivity() {
             return
         }
 
-        // Show progressBar if GCASH is selected
+        // ✅ Show progressBar if GCASH is selected
         if (selectedPaymentMethod == "gcash") {
             overlayBackground.visibility = View.VISIBLE
             progressBar.visibility = View.VISIBLE
         }
 
-        // Show orderPlacedCardView immediately if COD is selected
+        // ✅ Show orderPlacedCardView immediately if COD is selected
         if (selectedPaymentMethod == "cod") {
             overlayBackground.visibility = View.VISIBLE
             orderPlacedCardView.visibility = View.VISIBLE
         }
 
-        val userId = getUserID()
-        if (userId == -1) { // Assuming -1 is an invalid ID; adjust if your default differs
+        if (userId == -1) {
             Log.e("CHECKOUT_ERROR", "User ID not found.")
             Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val request = CheckoutRequest(cartIds, selectedPaymentMethod!!)
+        // ✅ Now include the default address ID if it exists
+        val request = CheckoutRequest(
+            cart_ids = cartIds,
+            payment_method = selectedPaymentMethod!!,
+            address_id = defaultAddressId // <-- Send the default address ID
+        )
+
         Log.d("CHECKOUT_DEBUG", "Request Payload: $request")
 
         val apiService = RetrofitClient.getApiService(this)
 
-        // Corrected call with userId and request
+        // ✅ Send Checkout Request
         apiService.checkout(userId, request).enqueue(object : Callback<CheckoutResponse> {
             override fun onResponse(call: Call<CheckoutResponse>, response: Response<CheckoutResponse>) {
-                // Hide progressBar after response
+                // ✅ Hide progressBar after response
                 if (selectedPaymentMethod == "gcash") {
                     progressBar.visibility = View.GONE
                 }
@@ -262,7 +313,7 @@ class CheckoutActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val checkoutResponse = response.body()
                     if (checkoutResponse != null && checkoutResponse.success) {
-                        // Open GCASH payment link if available
+                        // ✅ Open GCASH payment link if available
                         checkoutResponse.payment_link?.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
                             startActivity(intent)
@@ -273,34 +324,42 @@ class CheckoutActivity : AppCompatActivity() {
                             }
                         }
 
+                        // ✅ Remove checked out items from cart
                         cartViewModel.removeCheckedOutItems(selectedCartItems)
-
-
                     } else {
                         Log.e("CHECKOUT_ERROR", "Checkout failed: ${checkoutResponse?.message}")
-                        Toast.makeText(this@CheckoutActivity, "Checkout failed: ${checkoutResponse?.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@CheckoutActivity,
+                            "Checkout failed: ${checkoutResponse?.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
                     Log.e("CHECKOUT_ERROR", "Server error response: $errorBody")
-                    Toast.makeText(this@CheckoutActivity, "Server error: $errorBody", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@CheckoutActivity,
+                        "Server error: $errorBody",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
 
             override fun onFailure(call: Call<CheckoutResponse>, t: Throwable) {
-                // Hide progressBar if GCASH request fails
+                // ✅ Hide progressBar if GCASH request fails
                 if (selectedPaymentMethod == "gcash") {
                     progressBar.visibility = View.GONE
                 }
 
                 Log.e("CHECKOUT_ERROR", "Network error: ${t.message}")
-                Toast.makeText(this@CheckoutActivity, "Network error: ${t.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@CheckoutActivity,
+                    "Network error: ${t.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         })
     }
-
-
-
 
     private fun getToken(): String? {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
@@ -317,6 +376,9 @@ class CheckoutActivity : AppCompatActivity() {
         return sharedPreferences.getInt("user_id", 1)
     }
 
-
+    private fun openChangeAddressScreen() {
+        val intent = Intent(this, MyAddressesActivity::class.java)
+        startActivity(intent)
+    }
 
 }

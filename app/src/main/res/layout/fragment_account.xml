@@ -14,7 +14,7 @@
             android:id="@+id/imageView3"
             android:layout_width="match_parent"
             android:layout_height="170dp"
-            android:src="@drawable/top_background_gradient"
+            android:src="@drawable/fragment_account_heaeder_background"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -67,7 +67,7 @@
 
         <TextView
             android:id="@+id/userFullAddressTV"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:fontFamily="@font/dmsans"
@@ -75,7 +75,10 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="italic"
+            android:maxLines="1"
+            android:ellipsize="end"
             app:layout_constraintStart_toStartOf="@+id/UsernameTV"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/userPhoneNumberTV" />
 
         <TextView
@@ -361,6 +364,7 @@
                     android:layout_marginBottom="4dp"
                     android:gravity="center_vertical|left"
                     android:paddingStart="16dp"
+                    android:textAllCaps="false"
                     android:background="@drawable/rounded_button"
                     android:drawableEnd="@drawable/arrow" />
 
@@ -387,6 +391,7 @@
                     android:backgroundTint="@color/white"
                     android:textColor="@color/j_mab_blue"
                     android:layout_marginBottom="5dp"
+                    android:textAllCaps="false"
                     android:background="@drawable/rounded_button"
                     android:gravity="center_vertical|left"
                     android:paddingStart="15dp"
@@ -415,6 +420,7 @@
                     android:background="@drawable/rounded_button"
                     android:backgroundTint="@color/white"
                     android:textColor="@color/j_mab_blue"
+                    android:textAllCaps="false"
                     android:gravity="center_vertical|left"
                     android:paddingStart="15dp"
                     android:drawableEnd="@drawable/arrow" />

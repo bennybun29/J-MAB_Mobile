@@ -119,7 +119,6 @@ class SignInActivity : AppCompatActivity() {
                     val expiresIn = apiResponse?.expiresIn ?: 3600L
                     val email = apiResponse?.user?.email
                     val phone_number = apiResponse?.user?.phone_number
-                    val user_address = apiResponse?.user?.user_address
                     val birthday = apiResponse?.user?.birthday
                     val gender = apiResponse?.user?.gender
 
@@ -141,10 +140,6 @@ class SignInActivity : AppCompatActivity() {
 
                     if (phone_number != null) {
                         savePhoneNumber(phone_number)
-                    }
-
-                    if (user_address != null) {
-                        saveUserAddress(user_address)
                     }
 
                     if (gender != null) {

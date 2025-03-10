@@ -117,7 +117,7 @@
             android:exported="false" />
 
         <activity android:name=".NewAddressActivity"
-            android:exported="false"/>
+            android:exported="true"/>
 
         <activity android:name=".EditAddressActivity"
             android:exported="false"/>

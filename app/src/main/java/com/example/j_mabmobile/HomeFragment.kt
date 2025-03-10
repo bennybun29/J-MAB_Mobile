@@ -250,7 +250,8 @@ class HomeFragment : Fragment() {
 
     private fun fetchProducts() {
         progressBar.visibility = View.VISIBLE
-        emptyMessage.visibility = View.GONE
+        emptyMessage.visibility = View.GONE  // Hide error message while loading
+        recyclerView.visibility = View.GONE  // Hide recycler view while loading
 
         val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
         apiService.getProducts().enqueue(object : Callback<ProductResponse> {
@@ -258,27 +259,28 @@ class HomeFragment : Fragment() {
                 progressBar.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
                     val productResponse = response.body()!!
-                    if (productResponse.success) {
+                    if (productResponse.success && productResponse.products.isNotEmpty()) {
                         allProducts = productResponse.products.reversed()
-                        productNames = allProducts.map { it.name } // Store product names
-                        setupSearchView() // Initialize suggestions
-                        filterProducts("All", "")
+                        productNames = allProducts.map { it.name }
+                        setupSearchView()
+                        filterProducts("All", "")  // This will call updateRecyclerView()
                     } else {
-                        Toast.makeText(requireContext(), "Failed to load products", Toast.LENGTH_SHORT).show()
+                        // Only now show the error message if there are genuinely no products
+                        showErrorMessage("No products found.")
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Unexpected response format", Toast.LENGTH_SHORT).show()
+                    showErrorMessage("Unexpected response format")
                 }
             }
-
 
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
                 progressBar.visibility = View.GONE
                 showErrorMessage("Error fetching products. Please try again.")
-                Log.e("HomeFragment", "Error fetching products", t)
             }
         })
     }
+
+
 
     private fun setupSearchView() {
         listPopupWindow = ListPopupWindow(requireContext())
@@ -353,7 +355,7 @@ class HomeFragment : Fragment() {
         recyclerView.visibility = View.GONE
 
         val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
-        apiService.getProducts().enqueue(object : Callback<ProductResponse> { // Fetch all products first
+        apiService.getProducts().enqueue(object : Callback<ProductResponse> {
             override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
                 progressBar.visibility = View.GONE
 
@@ -368,7 +370,12 @@ class HomeFragment : Fragment() {
                                         it.brand?.contains(query, ignoreCase = true) == true)
                     }
 
-                    updateRecyclerView()
+                    if (filteredProducts.isEmpty()) {
+                        // Only show empty message if a search was performed and no results were found
+                        showErrorMessage("No products found for \"$query\" in $category category.")
+                    } else {
+                        updateRecyclerView()
+                    }
                 } else {
                     showErrorMessage("No products found for \"$query\" in $category category.")
                 }
@@ -382,6 +389,7 @@ class HomeFragment : Fragment() {
     }
 
 
+
     private fun sortProductsByPrice(descending: Boolean) {
         filteredProducts = allProducts.filter {
             currentCategory == "All" || it.category.equals(currentCategory, ignoreCase = true)
@@ -393,16 +401,24 @@ class HomeFragment : Fragment() {
 
 
     private fun updateRecyclerView() {
-        if (filteredProducts.isEmpty()) {
+        progressBar.visibility = View.GONE
+
+        if (filteredProducts.isEmpty() && allProducts.isNotEmpty()) {
             recyclerView.visibility = View.GONE
             emptyMessage.visibility = View.VISIBLE
-            emptyMessage.findViewById<TextView>(R.id.emptyMessage).text = "No products found."
+        } else if (filteredProducts.isEmpty() && allProducts.isEmpty()) {
+            // Initial state or no products at all - keep message hidden
+            recyclerView.visibility = View.GONE
+            emptyMessage.visibility = View.GONE
         } else {
+            // We have products to show
             recyclerView.visibility = View.VISIBLE
             emptyMessage.visibility = View.GONE
             recyclerView.adapter = RecyclerAdapter(filteredProducts, userId)
         }
     }
+
+
 
     private fun showErrorMessage(message: String) {
         recyclerView.visibility = View.GONE

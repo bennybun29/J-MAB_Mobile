@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Main Blue Background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/j_mab_yellow"/>
+            <corners android:bottomLeftRadius="16dp" android:bottomRightRadius="16dp"/>
+        </shape>
+    </item>
+
+    <!-- Bottom Yellow Border - Aligned with Bottom -->
+    <item android:left="0dp" android:right="0dp" android:bottom="6dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/j_mab_blue"/>
+            <size android:height="2dp"/>
+            <corners android:bottomLeftRadius="16dp" android:bottomRightRadius="16dp"/>
+        </shape>
+    </item>
+</layer-list>

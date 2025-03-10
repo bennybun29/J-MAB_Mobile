@@ -1,5 +1,6 @@
 package com.example.j_mabmobile.api
 
+import com.example.j_mabmobile.model.AddressRequest
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.CartResponse
@@ -39,6 +40,22 @@ interface ApiService {
         @Path("id") userId: Int,
         @Body request: UpdateProfileRequest
     ): Call<UpdateProfileResponse>
+
+    @PUT("users/{id}")
+    fun newAddress(
+        @Path("id") userId: Int,
+        @Body addressRequest: AddressRequest
+    ): Call<UserProfileResponse>
+
+    @GET("users/{id}")
+    fun getAddresses(
+        @Path("id") userId: Int
+    ): Call<UserProfileResponse>
+
+    @GET("users/{userId}/default-address")
+    fun getDefaultAddress(
+        @Path("userId") userId: Int
+    ): Call<UserProfileResponse>
 
     // Product Methods
     @GET("products")

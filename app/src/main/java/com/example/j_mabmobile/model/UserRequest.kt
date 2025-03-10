@@ -21,12 +21,27 @@ data class User(
     val phone_number: String,
     val user_address: String,
     val birthday: String,
-    val gender: String
+    val gender: String,
+    val addresses: List<UserAddresses>
 )
 
 data class UserProfileResponse(
     val success: Boolean,
-    val user: User
+    val user: User?,
+    val message: String?
+)
+
+
+data class AddressRequest(
+    val addresses: List<UserAddresses>
+)
+
+data class UserAddresses(
+    val id: Int,
+    val home_address: String,
+    val barangay: String,
+    val city: String,
+    var is_default: Boolean
 )
 
 data class SignUpRequest(
@@ -114,7 +129,7 @@ data class UpdateProfileResponse(
 data class CheckoutRequest(
     val cart_ids: List<Int>,
     val payment_method: String,
-    //val user_id: Int
+    val address_id: Int? = null
 )
 
 data class CheckoutResponse(
@@ -141,12 +156,4 @@ data class Order(
     val product_name: String,
     val quantity: Int,
     val product_image: String
-)
-
-data class Address(
-    val title: String,
-    val street: String,
-    val barangay: String,
-    val city: String,
-    var isSelected: Boolean = false // To handle checkbox state
 )

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Main Blue Background -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:bottomLeftRadius="25dp" android:bottomRightRadius="25dp"/>
             <solid android:color="@color/j_mab_blue"/>
+            <corners android:bottomLeftRadius="24dp" android:bottomRightRadius="24dp"/>
         </shape>
     </item>
 
-</selector>
+</layer-list>

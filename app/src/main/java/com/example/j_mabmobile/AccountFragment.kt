@@ -29,6 +29,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 
@@ -55,7 +56,9 @@ class AccountFragment : Fragment() {
     lateinit var changeProfilePicBtn: CircleImageView
     lateinit var userPhoneNumberTV: TextView
     private lateinit var ordersViewModel: OrdersViewModel
+    private lateinit var addressViewModel: AddressViewModel
     private lateinit var toPayBadge: TextView
+    lateinit var userFullAddressTV: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +89,7 @@ class AccountFragment : Fragment() {
         changeProfilePicBtn = view.findViewById(R.id.ProfilePictureButton)
         userPhoneNumberTV = view.findViewById(R.id.userPhoneNumberTV)
         toPayBadge = view.findViewById(R.id.toPayBadge)
+        userFullAddressTV = view.findViewById(R.id.userFullAddressTV)
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
@@ -105,6 +109,27 @@ class AccountFragment : Fragment() {
         emailAddressTV.text = email ?: "Email Address"
         userIdTV.text = if (userId != -1) "ID: $userId" else "User ID"
         userPhoneNumberTV.text = if (phoneNumber.isNullOrEmpty()) "(09##) ### ####" else phoneNumber
+
+        addressViewModel = ViewModelProvider(
+            requireActivity(),
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        ).get(AddressViewModel::class.java)
+
+        addressViewModel.fetchAddresses()
+
+        addressViewModel.addresses.observe(viewLifecycleOwner) { addresses ->
+            if (addresses.isNotEmpty()) {
+                val defaultAddress = addresses.find { it.is_default }
+                if (defaultAddress != null) {
+                    userFullAddressTV.text = "${defaultAddress.home_address}, ${defaultAddress.barangay}, ${defaultAddress.city}, Pangasinan"
+                } else {
+                    userFullAddressTV.text = "No default address set."
+                }
+            } else {
+                userFullAddressTV.text = "No address found."
+            }
+        }
+
 
         ordersViewModel = ViewModelProvider(
             requireActivity(),
@@ -192,6 +217,7 @@ class AccountFragment : Fragment() {
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
         updateUI()
+        addressViewModel.fetchAddresses()
     }
 
     override fun onPause() {
@@ -229,67 +255,68 @@ class AccountFragment : Fragment() {
     }
 
     private fun uploadImage(imageUri: Uri) {
-        val filePath = getRealPathFromURI(imageUri)
-        if (filePath == null) {
-            Log.e("AccountFragment", "Failed to get real path from URI: $imageUri")
-            Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
-            return
-        }
+        try {
+            val inputStream = requireActivity().contentResolver.openInputStream(imageUri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
 
-        val base64Image = convertImageToBase64(filePath)
-        if (base64Image == null) {
-            Toast.makeText(requireContext(), "Failed to encode image", Toast.LENGTH_SHORT).show()
-            return
-        }
+            val base64Image = convertBitmapToBase64(bitmap)
+            if (base64Image == null) {
+                Toast.makeText(requireContext(), "Failed to encode image", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-        val userId = getUserId()
-        if (userId == -1) {
-            Log.e("AccountFragment", "User ID not found")
-            Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
-            return
-        }
+            val userId = getUserId()
+            if (userId == -1) {
+                Toast.makeText(requireContext(), "User ID not found", Toast.LENGTH_SHORT).show()
+                return
+            }
 
-        // Create request without id since it's in the URL
-        val request = UpdateProfileRequest(
-            first_name = getUserFirstName(),
-            last_name = getUserLastName(),
-            profile_picture = base64Image,
-            email = getEmailAddress(),
-            phone_number = getPhoneNumber(),
-            address = getAddress(),
-            gender = getGender(),
-            birthday = getBirthday()
-        )
-
-        val token = getToken()
-        if (token != null) {
-            val call = RetrofitClient.getApiService(requireContext()).updateProfilePicture(
-                userId, // Pass userId as the first parameter (for @Path)
-                request // Pass request as the second parameter (for @Body)
+            val request = UpdateProfileRequest(
+                first_name = getUserFirstName(),
+                last_name = getUserLastName(),
+                profile_picture = base64Image,
+                email = getEmailAddress(),
+                phone_number = getPhoneNumber(),
+                address = getAddress(),
+                gender = getGender(),
+                birthday = getBirthday()
             )
 
-            call.enqueue(object : Callback<UpdateProfileResponse> {
-                override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
-                    if (response.isSuccessful) {
-                        Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                        val bitmap = BitmapFactory.decodeFile(filePath)
-                        changeProfilePicBtn.setImageBitmap(bitmap)
-                        loadUserProfile()
-                    } else {
-                        Log.e("AccountFragment", "Error: ${response.errorBody()?.string()}")
-                        Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
-                    }
-                }
+            val token = getToken()
+            if (token != null) {
+                val call = RetrofitClient.getApiService(requireContext()).updateProfilePicture(
+                    userId, request
+                )
 
-                override fun onFailure(call: Call<UpdateProfileResponse>, t: Throwable) {
-                    Log.e("AccountFragment", "API Failure: ${t.message}")
-                    Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        } else {
-            Toast.makeText(requireContext(), "Token not found", Toast.LENGTH_SHORT).show()
+                call.enqueue(object : Callback<UpdateProfileResponse> {
+                    override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(requireContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                            changeProfilePicBtn.setImageBitmap(bitmap)
+                            loadUserProfile()
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update profile", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<UpdateProfileResponse>, t: Throwable) {
+                        Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            }
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Failed to process image", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun convertBitmapToBase64(bitmap: Bitmap): String? {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.NO_WRAP)
+    }
+
 
     private fun convertImageToBase64(filePath: String): String? {
         return try {
@@ -415,14 +442,4 @@ class AccountFragment : Fragment() {
         }
     }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AccountFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

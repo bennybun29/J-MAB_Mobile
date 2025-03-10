@@ -4,7 +4,7 @@
     <item android:state_selected="true">
         <shape android:shape="oval">
             <solid android:color="@color/j_mab_blue" /><!-- Active button color -->
-            <stroke android:width="2dp" android:color="@color/j_mab_blue" /> <!-- Border color matches background -->
+            <stroke android:width="2dp" android:color="@color/j_mab_yellow" /> <!-- Border color matches background -->
         </shape>
     </item>
     <!-- Default state -->

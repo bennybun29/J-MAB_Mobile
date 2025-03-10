@@ -4,6 +4,7 @@ import ImageCarouselAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.activity.viewModels
+import androidx.core.content.ContextCompat
 
 class ProductScreenActivity : AppCompatActivity() {
 

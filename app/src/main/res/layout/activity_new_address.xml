@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fitsSystemWindows="true"
@@ -25,17 +26,29 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="30dp"/>
+
     <TextView
+        android:id="@+id/newAddressTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/dmsans_bold"
-        android:text="NEW ADDRESS"
+        android:text="New Address"
         android:textColor="@color/white"
         android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="25dp"/>
+
+    <View
+        app:layout_constraintTop_toBottomOf="@id/newAddressTV"
+        app:layout_constraintEnd_toEndOf="@id/newAddressTV"
+        app:layout_constraintStart_toStartOf="@id/newAddressTV"
+        android:id="@+id/cartUnderline"
+        android:layout_width="0dp"
+        android:layout_height="2dp"
+        android:background="#FFD700"
+        android:layout_marginTop="4dp"/>
 
     <LinearLayout
         android:id="@+id/myAddresses"
@@ -50,80 +63,103 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="STREET"
+            android:text="PROVINCE"
             android:fontFamily="@font/dmsans_bold"
-            android:textColor="@color/j_mab_blue"   />
+            android:textColor="@color/j_mab_blue" />
 
         <EditText
-            android:id="@+id/streetEditText"
+            android:id="@+id/provinceEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Street Name"
+            android:text="Pangasinan"
             android:background="#D3D3D3"
             android:padding="10dp"
             android:layout_marginTop="8dp"
             android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:layout_marginBottom="10dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BARANGAY"
-            android:fontFamily="@font/dmsans_bold"
-            android:textColor="@color/j_mab_blue"   />
-
-        <EditText
-            android:id="@+id/barangayEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Barangay Name"
-            android:background="#D3D3D3"
-            android:padding="10dp"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="10dp"
+            android:focusable="false"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="CITY / MUNICIPALITY"
             android:fontFamily="@font/dmsans_bold"
-            android:textColor="@color/j_mab_blue"   />
+            android:textColor="@color/j_mab_blue" />
 
-        <EditText
-            android:id="@+id/cityOrMunicipalityEditText"
+        <!-- Replace EditText with TextInputLayout and AutoCompleteTextView for City -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cityTextInputLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter City / Municipality Name"
-            android:background="#D3D3D3"
-            android:padding="10dp"
+            android:layout_height="40dp"
             android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="10dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:background="#D3D3D3"
+            app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                android:id="@+id/cityAutoCompleteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select City / Municipality"
+                android:padding="10dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:inputType="none"
+                android:background="#D3D3D3"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="PROVINCE"
+            android:text="BARANGAY"
             android:fontFamily="@font/dmsans_bold"
-            android:textColor="@color/j_mab_blue"   />
+            android:textColor="@color/j_mab_blue" />
+
+        <!-- Replace EditText with TextInputLayout and AutoCompleteTextView for Barangay -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/barangayTextInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:background="#D3D3D3"
+            app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                android:id="@+id/barangayAutoCompleteTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Barangay"
+                android:padding="10dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:background="#D3D3D3"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HOME ADDRESS"
+            android:fontFamily="@font/dmsans_bold"
+            android:textColor="@color/j_mab_blue" />
 
         <EditText
-            android:id="@+id/provinceEditText"
+            android:id="@+id/homeAddressEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Province Name"
+            android:hint="Enter Home Address"
             android:background="#D3D3D3"
             android:padding="10dp"
             android:layout_marginTop="8dp"
             android:textColor="@android:color/black"
             android:textSize="16sp"
-            android:layout_marginBottom="10dp"/>
-
-
+            android:layout_marginBottom="10dp"
+            android:imeOptions="actionDone"
+            android:singleLine="true" />
 
     </LinearLayout>
 
@@ -134,22 +170,13 @@
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/discardButton"
-            android:layout_width="0dp"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:background="@drawable/bottom_options_border"
-            android:text="DISCARD"/>
-
         <Button
             android:id="@+id/saveButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bottom_options_border"
-            android:text="SAVE"/>
+            android:text="SAVE ADDRESS"/>
 
     </LinearLayout>
 
