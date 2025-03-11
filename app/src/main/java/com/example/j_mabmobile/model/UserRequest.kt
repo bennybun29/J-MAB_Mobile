@@ -118,7 +118,8 @@ data class UpdateProfileRequest(
     val phone_number: String?,
     val address: String?,
     val gender: String?,
-    val birthday: String?
+    val birthday: String?,
+    val password: String?
 )
 
 data class UpdateProfileResponse(

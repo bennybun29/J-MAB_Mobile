@@ -223,7 +223,8 @@ class EditPersonalInfoDialog : DialogFragment() {
             phone_number = null,
             address = null,
             gender = gender.ifEmpty { null },
-            birthday = birthday.ifEmpty { null }
+            birthday = birthday.ifEmpty { null },
+            password = null
         )
 
         // Corrected call with userId and updateRequest

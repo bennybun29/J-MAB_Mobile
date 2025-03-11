@@ -7,9 +7,17 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
+import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
+import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.User
+import com.example.j_mabmobile.model.UserProfileResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class AccountAndSecurityActivity : AppCompatActivity() {
 
@@ -45,8 +53,13 @@ class AccountAndSecurityActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
+        // Load user info from SharedPreferences first
         loadUserInfo()
 
+        // Fetch user profile from API
+        fetchUserProfile()
+
+        // Handle click events
         backBtn.setOnClickListener {
             onBackPressed()
         }
@@ -67,6 +80,40 @@ class AccountAndSecurityActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Fetch user profile from API
+     */
+    private fun fetchUserProfile() {
+        val userId = sharedPreferences.getInt("user_id", -1) // Get user ID from shared preferences
+        if (userId == -1) return
+
+        val apiService = RetrofitClient.getApiService(this)
+        apiService.getUserProfile(userId).enqueue(object : Callback<UserProfileResponse> {
+            override fun onResponse(
+                call: Call<UserProfileResponse>,
+                response: Response<UserProfileResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    val userProfile = response.body()!!.user
+                    if (userProfile != null) {
+                        // Update UI with user's gender and birthday
+                        userGenderTV.text = getBoldText("Gender: ", userProfile.gender)
+                        userBirthdayTV.text = getBoldText("Birthday: ", userProfile.birthday)
+                    }
+                } else {
+                    Log.e("API_ERROR", "Failed to fetch user profile: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserProfileResponse>, t: Throwable) {
+                Log.e("API_ERROR", "Network error: ${t.message}")
+            }
+        })
+    }
+
+    /**
+     * Load user information from SharedPreferences
+     */
     private fun loadUserInfo() {
         firstNameTV.text = getBoldText("First Name: ", sharedPreferences.getString("first_name", "N/A"))
         lastNameTV.text = getBoldText("Last Name: ", sharedPreferences.getString("last_name", "N/A"))
@@ -76,6 +123,26 @@ class AccountAndSecurityActivity : AppCompatActivity() {
         userPhoneNumberTV.text = getBoldText("Phone Number: ", sharedPreferences.getString("phone_number", "N/A"))
     }
 
+    /**
+     * Save user information to SharedPreferences
+     */
+    private fun saveUserInfo(
+        firstName: String, lastName: String, email: String,
+        phoneNumber: String, gender: String, birthday: String
+    ) {
+        val editor = sharedPreferences.edit()
+        editor.putString("first_name", firstName)
+        editor.putString("last_name", lastName)
+        editor.putString("user_email", email)
+        editor.putString("phone_number", phoneNumber)
+        editor.putString("gender", gender)
+        editor.putString("birthday", birthday)
+        editor.apply()
+    }
+
+    /**
+     * Apply bold text to labels
+     */
     private fun getBoldText(label: String, value: String?): SpannableString {
         val text = "$label$value"
         val spannable = SpannableString(text)
@@ -88,16 +155,9 @@ class AccountAndSecurityActivity : AppCompatActivity() {
         return spannable
     }
 
-    private fun saveUserInfo(firstName: String, lastName: String, email: String, phoneNumber: String) {
-        val editor = sharedPreferences.edit()
-        editor.putString("first_name", firstName)
-        editor.putString("last_name", lastName)
-        editor.putString("user_email", email)
-        editor.putString("phone_number", phoneNumber)
-        editor.apply()
-    }
-
-
+    /**
+     * Called to refresh user data after updating
+     */
     fun updateUserInfoUI() {
         loadUserInfo()
     }

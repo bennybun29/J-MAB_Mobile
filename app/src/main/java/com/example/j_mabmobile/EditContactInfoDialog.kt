@@ -133,7 +133,8 @@ class EditContactInfoDialog : DialogFragment() {
             phone_number = phoneNumber,
             address = null,
             gender = null,
-            birthday = null
+            birthday = null,
+            password = null
         )
 
         // Corrected call with userId and updateRequest

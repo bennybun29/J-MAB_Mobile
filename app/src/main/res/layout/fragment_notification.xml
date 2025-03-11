@@ -57,8 +57,7 @@
             android:layout_height="wrap_content"
             android:text="NO NEW NOTIFICATIONS"
             app:layout_constraintTop_toBottomOf="@id/empytIcon"
-            android:fontFamily="@font/dmsans"
-            android:textStyle="bold"
+            android:fontFamily="@font/dmsans_bold"
             android:textColor="@color/j_mab_blue"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />

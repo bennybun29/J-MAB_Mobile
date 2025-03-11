@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 
 class ProductScreenActivity : AppCompatActivity() {
@@ -71,6 +72,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val imageCountTextView: TextView = findViewById(R.id.image_count)
         val imageCarousel: ViewPager2 = findViewById(R.id.image_carousel)
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
+        val fromRecommended = intent.getBooleanExtra("from_recommended", false)
         overlayBackground = findViewById(R.id.overlayBackground)
         addToCartOverlay = findViewById(R.id.addToCartOverlay)
         recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
@@ -91,7 +93,11 @@ class ProductScreenActivity : AppCompatActivity() {
         quantityText = findViewById(R.id.quantityText)
 
         backBtn.setOnClickListener {
-            onBackPressed()
+            if (fromRecommended){
+                finish()
+            } else {
+                onBackPressed()
+            }
         }
 
         cartBtn.setOnClickListener{
@@ -119,25 +125,75 @@ class ProductScreenActivity : AppCompatActivity() {
         Log.d("DEBUG", "Received token: $token")
 
         buyNowBtn.setOnClickListener {
-            onPause()
+            token?.let {
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        // First, check if the product already exists in the cart
+                        val cartResponse = apiService.getCartItemsSuspend(userId)
 
-            val selectedItem = CartItem(
-                cart_id = 0,  // Set to 0 since it's not from the cart
-                user_id = userId,
-                product_id = product_id,
-                product_name = name ?: "Unknown",
-                product_image = imageUrl ?: "",
-                product_price = price,
-                product_brand = brand ?: "Unknown",
-                product_description = description ?: "No description",
-                product_stock = stock,
-                quantity = quantity  // Get the current selected quantity
-            )
+                        if (cartResponse.isSuccessful) {
+                            val cartItems = cartResponse.body()?.cart ?: emptyList()
+                            val existingCartItem = cartItems.find { it.product_id == product_id }
 
-            val intent = Intent(this, CheckoutActivity::class.java)
-            intent.putParcelableArrayListExtra("selected_items", arrayListOf(selectedItem))
-            startActivity(intent)
+                            if (existingCartItem != null) {
+                                // Show custom dialog if product already exists in the cart
+                                val dialogView = layoutInflater.inflate(R.layout.custom_cart_dialog, null)
+                                val dialogBuilder = AlertDialog.Builder(this@ProductScreenActivity)
+                                    .setView(dialogView)
+
+                                val alertDialog = dialogBuilder.create()
+                                alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                                alertDialog.show()
+
+
+                                dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
+                                    val intent = Intent(this@ProductScreenActivity, CartActivity::class.java)
+                                    startActivity(intent)
+                                    alertDialog.dismiss()
+                                }
+
+                                dialogView.findViewById<Button>(R.id.btnNo).setOnClickListener {
+                                    alertDialog.dismiss()
+                                }
+
+                                alertDialog.show()
+                                return@launch
+                            }
+                        }
+
+                        // If not in cart, proceed to buy now
+                        val cartRequest = CartRequest(userId, product_id, quantity)
+                        val response = apiService.addToCart(cartRequest)
+
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            val cartItemResponse = apiService.getCartItemsSuspend(userId)
+
+                            if (cartItemResponse.isSuccessful) {
+                                val cartItems = cartItemResponse.body()?.cart ?: emptyList()
+                                val cartItem = cartItems.find { it.product_id == product_id }
+
+                                if (cartItem != null) {
+                                    val intent = Intent(this@ProductScreenActivity, CheckoutActivity::class.java)
+                                    intent.putParcelableArrayListExtra("selected_items", arrayListOf(cartItem))
+                                    intent.putExtra("from_buy_now", true)
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(this@ProductScreenActivity, "Added to cart but couldn't retrieve cart information", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                Toast.makeText(this@ProductScreenActivity, "Added to cart but couldn't retrieve cart details", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            val errorMessage = response.body()?.errors?.get(0) ?: "Unknown error"
+                            Toast.makeText(this@ProductScreenActivity, "Failed to add to cart: $errorMessage", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@ProductScreenActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
+
 
 
         productName.text = name

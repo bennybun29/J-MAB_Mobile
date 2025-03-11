@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
@@ -58,7 +59,11 @@ class AccountFragment : Fragment() {
     private lateinit var ordersViewModel: OrdersViewModel
     private lateinit var addressViewModel: AddressViewModel
     private lateinit var toPayBadge: TextView
+    private lateinit var toShipBadge: TextView
+    private lateinit var toReceiveBadge: TextView
+    private lateinit var toRateBadge: TextView
     lateinit var userFullAddressTV: TextView
+    lateinit var editProfilePictureIcon: ImageButton
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,8 +92,12 @@ class AccountFragment : Fragment() {
         emailAddressTV = view.findViewById(R.id.emailAddressTV)
         userIdTV = view.findViewById(R.id.userIDNumberTV)
         changeProfilePicBtn = view.findViewById(R.id.ProfilePictureButton)
+        editProfilePictureIcon = view.findViewById(R.id.editProfilePictureBtn)
         userPhoneNumberTV = view.findViewById(R.id.userPhoneNumberTV)
         toPayBadge = view.findViewById(R.id.toPayBadge)
+        toShipBadge = view.findViewById(R.id.toShipBadge)
+        toReceiveBadge = view.findViewById(R.id.toReceiveBadge)
+        toRateBadge = view.findViewById(R.id.toRateBadge)
         userFullAddressTV = view.findViewById(R.id.userFullAddressTV)
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -147,6 +156,36 @@ class AccountFragment : Fragment() {
             }
         }
 
+        ordersViewModel.toShipCount.observe(viewLifecycleOwner) { count ->
+            Log.d("DEBUG", "AccountFragment - To-Ship Badge Updated: $count")
+            if (count > 0) {
+                toShipBadge.text = count.toString()
+                toShipBadge.visibility = View.VISIBLE
+            } else {
+                toShipBadge.visibility = View.GONE
+            }
+        }
+
+        ordersViewModel.toReceiveCount.observe(viewLifecycleOwner) { count ->
+            Log.d("DEBUG", "AccountFragment - To-Receive Badge Updated: $count")
+            if (count > 0) {
+                toReceiveBadge.text = count.toString()
+                toReceiveBadge.visibility = View.VISIBLE
+            } else {
+                toReceiveBadge.visibility = View.GONE
+            }
+        }
+
+        ordersViewModel.toRateCount.observe(viewLifecycleOwner) { count ->
+            Log.d("DEBUG", "AccountFragment - To-Receive Badge Updated: $count")
+            if (count > 0) {
+                toRateBadge.text = count.toString()
+                toRateBadge.visibility = View.VISIBLE
+            } else {
+                toRateBadge.visibility = View.GONE
+            }
+        }
+
         setupButtonListeners()
         return view
     }
@@ -174,6 +213,9 @@ class AccountFragment : Fragment() {
             startActivity(Intent(activity, HelpActivity::class.java))
         }
         changeProfilePicBtn.setOnClickListener {
+            showImagePickerDialog()
+        }
+        editProfilePictureIcon.setOnClickListener{
             showImagePickerDialog()
         }
         log_out_btn.setOnClickListener {
@@ -280,7 +322,8 @@ class AccountFragment : Fragment() {
                 phone_number = getPhoneNumber(),
                 address = getAddress(),
                 gender = getGender(),
-                birthday = getBirthday()
+                birthday = getBirthday(),
+                password = null
             )
 
             val token = getToken()

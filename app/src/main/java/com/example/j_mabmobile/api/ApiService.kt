@@ -83,6 +83,9 @@ interface ApiService {
         @Path("cart_id") cartIds: String
     ): Call<ApiResponse>
 
+    @DELETE("carts/{cartId}")
+    suspend fun deleteCartItem(@Path("cartId") cartId: Int): Response<CartResponse>
+
     @PUT("carts/{cart_id}")
     fun updateCartItem(
         @Path("cart_id") cartId: Int,

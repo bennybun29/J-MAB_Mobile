@@ -5,8 +5,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Looper
+import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
@@ -63,8 +65,64 @@ class SignUpActivity : AppCompatActivity() {
         signUpBtn.setBackgroundColor(Color.LTGRAY)
 
         emailTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
-        firstNameTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
-        lastNameTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        firstNameTextField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                toggleSignUpButton()
+
+                if (s.isNullOrEmpty()) return
+
+                // Prevent numbers and special characters
+                val filteredText = s.toString().replace("[^a-zA-Z ]".toRegex(), "")
+
+                // Capitalize the first letter of each word
+                val words = filteredText.split(" ")
+                val capitalizedWords = words.joinToString(" ") { word ->
+                    if (word.isNotEmpty()) word.replaceFirstChar { it.uppercase() } else ""
+                }
+
+                // Prevent infinite loop by comparing the old and new text
+                if (s.toString() != capitalizedWords) {
+                    firstNameTextField.removeTextChangedListener(this)
+                    firstNameTextField.setText(capitalizedWords)
+                    firstNameTextField.setSelection(capitalizedWords.length)
+                    firstNameTextField.addTextChangedListener(this)
+                }
+            }
+        })
+
+        lastNameTextField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                toggleSignUpButton()
+
+                if (s.isNullOrEmpty()) return
+
+                // Prevent numbers and special characters
+                val filteredText = s.toString().replace("[^a-zA-Z ]".toRegex(), "")
+
+                // Capitalize the first letter of each word
+                val words = filteredText.split(" ")
+                val capitalizedWords = words.joinToString(" ") { word ->
+                    if (word.isNotEmpty()) word.replaceFirstChar { it.uppercase() } else ""
+                }
+
+                // Prevent infinite loop by comparing the old and new text
+                if (s.toString() != capitalizedWords) {
+                    lastNameTextField.removeTextChangedListener(this)
+                    lastNameTextField.setText(capitalizedWords)
+                    lastNameTextField.setSelection(capitalizedWords.length)
+                    lastNameTextField.addTextChangedListener(this)
+                }
+            }
+        })
+
         passwordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
         confirmPasswordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
 

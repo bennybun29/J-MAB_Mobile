@@ -2,13 +2,15 @@ package com.example.j_mabmobile
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 class MyAddressesActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -16,6 +18,8 @@ class MyAddressesActivity : AppCompatActivity() {
     private lateinit var addressViewModel: AddressViewModel
     private lateinit var addAddressBtn: ImageButton
     private lateinit var backBtn: ImageButton
+    private lateinit var noAddressIcon: ImageView
+    private lateinit var noNewAddressText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +31,8 @@ class MyAddressesActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewAddress)
         backBtn = findViewById(R.id.backButton)
         addAddressBtn = findViewById(R.id.addAddressBtn)
+        noAddressIcon = findViewById(R.id.noAddressIcon)
+        noNewAddressText = findViewById(R.id.noNewAddressText)
 
         // ✅ Back button functionality
         backBtn.setOnClickListener { onBackPressed() }
@@ -57,6 +63,7 @@ class MyAddressesActivity : AppCompatActivity() {
         // ✅ Observe changes from ViewModel
         addressViewModel.addresses.observe(this) { updatedList ->
             addressAdapter.updateData(updatedList)
+            toggleEmptyState(updatedList.isEmpty())
         }
 
         // ✅ Fetch the list of addresses when the screen opens
@@ -67,5 +74,17 @@ class MyAddressesActivity : AppCompatActivity() {
         super.onResume()
         // ✅ Always refresh the address list when returning from Edit/Add
         addressViewModel.fetchAddresses()
+    }
+
+    private fun toggleEmptyState(isEmpty: Boolean) {
+        if (isEmpty) {
+            noAddressIcon.visibility = View.VISIBLE
+            noNewAddressText.visibility = View.VISIBLE
+            recyclerView.visibility = View.GONE
+        } else {
+            noAddressIcon.visibility = View.GONE
+            noNewAddressText.visibility = View.GONE
+            recyclerView.visibility = View.VISIBLE
+        }
     }
 }

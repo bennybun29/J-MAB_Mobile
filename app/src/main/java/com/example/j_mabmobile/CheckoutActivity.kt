@@ -54,6 +54,8 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var userLocationTV: TextView
     private lateinit var addressViewModel: AddressViewModel
     private var defaultAddressId: Int? = null
+    private var isFromBuyNow = false
+
 
 
 
@@ -73,6 +75,7 @@ class CheckoutActivity : AppCompatActivity() {
         doneBtn = findViewById(R.id.doneBtn)
         overlayBackground = findViewById(R.id.overlayBackground)
         cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
+        isFromBuyNow = intent.getBooleanExtra("from_buy_now", false)
 
         userLocationTV = findViewById(R.id.userLocationTV)  // Ensure this is initialized
 
@@ -147,6 +150,11 @@ class CheckoutActivity : AppCompatActivity() {
         })
 
         confirmExitBtn.setOnClickListener {
+            if (isFromBuyNow) {
+                // Only delete the cart if coming from Buy Now
+                Log.d("CheckoutActivity", "Deleting cart from Buy Now flow")
+                deleteCart()
+            }
             finish()
         }
 
@@ -190,13 +198,11 @@ class CheckoutActivity : AppCompatActivity() {
             }
         }
 
-        doneBtn.setOnClickListener{
-            doneBtn.setOnClickListener {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-                finish()
-            }
+        doneBtn.setOnClickListener {
+            val intent = Intent(this, MyPurchasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
         }
         updateTotalPrice()
 
@@ -208,6 +214,23 @@ class CheckoutActivity : AppCompatActivity() {
         exitConfirmationCard.visibility = View.GONE
         overlayBackground.visibility = View.GONE
         addressViewModel.fetchAddresses()
+
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val gcashPaymentStarted = sharedPreferences.getBoolean("gcash_payment_started", false)
+
+        if (gcashPaymentStarted) {
+            sharedPreferences.edit().putBoolean("gcash_payment_started", false).apply()
+
+            val intent = Intent(this, MyPurchasesActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
+        } else {
+            val exitConfirmationCard = findViewById<CardView>(R.id.exitConfirmationCard)
+            exitConfirmationCard.visibility = View.GONE
+            overlayBackground.visibility = View.GONE
+            addressViewModel.fetchAddresses()
+        }
 
     }
 
@@ -252,12 +275,14 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         val cartIds = selectedCartItems.map { it.cart_id }
-        Log.d("CHECKOUT_DEBUG", "Selected Cart Items: $selectedCartItems")
-        Log.d("CHECKOUT_DEBUG", "Cart IDs: $cartIds")
-
         if (cartIds.isEmpty()) {
-            Log.e("CHECKOUT_ERROR", "No cart items selected.")
             Toast.makeText(this, "No items selected for checkout", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // ✅ Check if there's a selected address
+        if (defaultAddressId == null) {
+            Toast.makeText(this, "Please select an address before checkout", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -268,44 +293,29 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         if (selectedPaymentMethod == null) {
-            Log.e("CHECKOUT_ERROR", "No payment method selected.")
             Toast.makeText(this, "Please select a payment method", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // ✅ Show progressBar if GCASH is selected
         if (selectedPaymentMethod == "gcash") {
             overlayBackground.visibility = View.VISIBLE
             progressBar.visibility = View.VISIBLE
         }
 
-        // ✅ Show orderPlacedCardView immediately if COD is selected
         if (selectedPaymentMethod == "cod") {
             overlayBackground.visibility = View.VISIBLE
             orderPlacedCardView.visibility = View.VISIBLE
         }
 
-        if (userId == -1) {
-            Log.e("CHECKOUT_ERROR", "User ID not found.")
-            Toast.makeText(this, "User ID not found", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // ✅ Now include the default address ID if it exists
         val request = CheckoutRequest(
             cart_ids = cartIds,
             payment_method = selectedPaymentMethod!!,
-            address_id = defaultAddressId // <-- Send the default address ID
+            address_id = defaultAddressId
         )
 
-        Log.d("CHECKOUT_DEBUG", "Request Payload: $request")
-
         val apiService = RetrofitClient.getApiService(this)
-
-        // ✅ Send Checkout Request
         apiService.checkout(userId, request).enqueue(object : Callback<CheckoutResponse> {
             override fun onResponse(call: Call<CheckoutResponse>, response: Response<CheckoutResponse>) {
-                // ✅ Hide progressBar after response
                 if (selectedPaymentMethod == "gcash") {
                     progressBar.visibility = View.GONE
                 }
@@ -313,53 +323,36 @@ class CheckoutActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val checkoutResponse = response.body()
                     if (checkoutResponse != null && checkoutResponse.success) {
-                        // ✅ Open GCASH payment link if available
                         checkoutResponse.payment_link?.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
                             startActivity(intent)
+
+                            val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+                            sharedPreferences.edit().putBoolean("gcash_payment_started", true).apply()
                         } ?: run {
                             if (selectedPaymentMethod == "cod") {
                                 overlayBackground.visibility = View.VISIBLE
                                 orderPlacedCardView.visibility = View.VISIBLE
                             }
                         }
-
-                        // ✅ Remove checked out items from cart
                         cartViewModel.removeCheckedOutItems(selectedCartItems)
                     } else {
-                        Log.e("CHECKOUT_ERROR", "Checkout failed: ${checkoutResponse?.message}")
-                        Toast.makeText(
-                            this@CheckoutActivity,
-                            "Checkout failed: ${checkoutResponse?.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        Toast.makeText(this@CheckoutActivity, "Checkout failed", Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    val errorBody = response.errorBody()?.string()
-                    Log.e("CHECKOUT_ERROR", "Server error response: $errorBody")
-                    Toast.makeText(
-                        this@CheckoutActivity,
-                        "Server error: $errorBody",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    Toast.makeText(this@CheckoutActivity, "Server error", Toast.LENGTH_LONG).show()
                 }
             }
 
             override fun onFailure(call: Call<CheckoutResponse>, t: Throwable) {
-                // ✅ Hide progressBar if GCASH request fails
                 if (selectedPaymentMethod == "gcash") {
                     progressBar.visibility = View.GONE
                 }
-
-                Log.e("CHECKOUT_ERROR", "Network error: ${t.message}")
-                Toast.makeText(
-                    this@CheckoutActivity,
-                    "Network error: ${t.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@CheckoutActivity, "Network error", Toast.LENGTH_LONG).show()
             }
         })
     }
+
 
     private fun getToken(): String? {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
@@ -379,6 +372,13 @@ class CheckoutActivity : AppCompatActivity() {
     private fun openChangeAddressScreen() {
         val intent = Intent(this, MyAddressesActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun deleteCart() {
+        if (selectedCartItems.isNotEmpty()) {
+            Log.d("CheckoutActivity", "Deleting cart items: ${selectedCartItems.map { it.cart_id }}")
+            cartViewModel.removeCheckedOutItems(selectedCartItems)
+        }
     }
 
 }

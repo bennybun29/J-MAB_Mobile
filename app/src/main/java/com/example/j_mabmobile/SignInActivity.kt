@@ -215,15 +215,6 @@ class SignInActivity : AppCompatActivity() {
         Log.d("Phone Number", "Phone Number saved: $phoneNumber")
     }
 
-    private fun saveUserAddress(userAddress: String) {
-        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("user_address", userAddress)
-        editor.apply()
-
-        Log.d("User Address", "User Address saved: $userAddress")
-    }
-
     private fun saveGender(gender: String) {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()

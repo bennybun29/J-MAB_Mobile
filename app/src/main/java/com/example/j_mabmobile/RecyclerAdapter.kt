@@ -38,6 +38,13 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
             val context = it.context
             val token = getTokenFromSharedPreferences(context)
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
+                // Add flags to clear the back stack
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+                // Add a flag to identify this is from recommended products
+                putExtra("from_recommended", true)
+
+                // Your existing extras
                 putExtra("product_id", product.product_id)
                 putExtra("product_name", product.name)
                 putExtra("product_description", product.description)

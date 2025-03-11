@@ -67,7 +67,9 @@
             android:drawableStart="@drawable/user_icon"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
-            android:inputType="text"/>
+            android:inputType="textCapWords"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+            />
 
 
         <EditText
@@ -84,7 +86,9 @@
             android:layout_marginBottom="15dp"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
-            android:inputType="text"/>
+            android:inputType="textCapWords"
+            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
+            />
     </LinearLayout>
 
 
