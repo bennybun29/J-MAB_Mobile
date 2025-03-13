@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
@@ -60,7 +61,16 @@ class AddressAdapter(
                 handler.post { notifyItemChanged(position) }
             }
 
-            editButton.setOnClickListener { onEditClick(address) }
+            editButton.setOnClickListener {
+                val context = itemView.context
+                val intent = Intent(context, EditAddressActivity::class.java).apply {
+                    putExtra("id", address.id)
+                    putExtra("is_default", address.is_default)
+                    putExtra("address", address)
+                }
+                context.startActivity(intent)
+            }
+
         }
     }
 

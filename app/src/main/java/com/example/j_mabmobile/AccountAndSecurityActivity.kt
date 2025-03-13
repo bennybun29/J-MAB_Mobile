@@ -38,6 +38,8 @@ class AccountAndSecurityActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_and_security)
 
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         editPersonalInfoButton = findViewById(R.id.editPersonalInfoButton)
         editSecurityButton = findViewById(R.id.editSecurityButton)
         editContactInfoButton = findViewById(R.id.editContactInfoButton)

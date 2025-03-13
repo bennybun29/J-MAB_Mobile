@@ -36,13 +36,14 @@ data class AddressRequest(
     val addresses: List<UserAddresses>
 )
 
+@Parcelize
 data class UserAddresses(
     val id: Int,
     val home_address: String,
     val barangay: String,
     val city: String,
     var is_default: Boolean
-)
+) : Parcelable
 
 data class SignUpRequest(
     val first_name: String?,
@@ -158,3 +159,28 @@ data class Order(
     val quantity: Int,
     val product_image: String
 )
+
+data class MessageRequest(
+    val sender_id: Int,
+    val receiver_id: Int,
+    val message: String
+)
+
+data class Message(
+    val id: Int,
+    val sender_id: Int,
+    val receiver_id: Int,
+    val message: String,
+    val timestamp: String,
+    val status: String,   // "delivered" or "read"
+    val is_read: Int      // 0 (unread), 1 (read)
+)
+
+data class MessageResponse(
+    val success: Boolean,
+    val messages: List<Message>,
+    val page: Int,
+    val perPage: Int
+)
+
+

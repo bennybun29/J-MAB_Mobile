@@ -25,6 +25,8 @@ class MyAddressesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_addresses)
 
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         // ✅ Initialize ViewModel
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
 

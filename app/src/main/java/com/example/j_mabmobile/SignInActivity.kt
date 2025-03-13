@@ -181,13 +181,18 @@ class SignInActivity : AppCompatActivity() {
     private fun saveToken(token: String, expiresIn: Long) {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        val expiryTime = System.currentTimeMillis() + expiresIn * 1000
+
+        // 🔥 Force expiration to 7 days (604800 seconds) if API sends a lower value
+        val correctedExpiry = if (expiresIn < 604800) 604800 else expiresIn
+
+        val expiryTime = System.currentTimeMillis() + correctedExpiry * 1000
         editor.putString("jwt_token", token)
         editor.putLong("token_expiry_time", expiryTime)
         editor.apply()
 
-        Log.d("Token", "Token saved with expiry time: $expiryTime")
+        Log.d("Token", "Token saved with corrected expiry time: $expiryTime (expires in: $correctedExpiry seconds)")
     }
+
 
     private fun saveUserName(firstName: String, lastName: String) {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)

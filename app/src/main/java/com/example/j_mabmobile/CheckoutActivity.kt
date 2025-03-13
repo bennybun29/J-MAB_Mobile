@@ -200,6 +200,7 @@ class CheckoutActivity : AppCompatActivity() {
 
         doneBtn.setOnClickListener {
             val intent = Intent(this, MyPurchasesActivity::class.java)
+            intent.putExtra("FROM_CHECKOUT", true)  // Add this flag
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()
@@ -222,6 +223,7 @@ class CheckoutActivity : AppCompatActivity() {
             sharedPreferences.edit().putBoolean("gcash_payment_started", false).apply()
 
             val intent = Intent(this, MyPurchasesActivity::class.java)
+            intent.putExtra("FROM_CHECKOUT", true)  // Add this flag
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             finish()

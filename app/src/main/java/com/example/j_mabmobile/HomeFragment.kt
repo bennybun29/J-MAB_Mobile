@@ -249,6 +249,8 @@ class HomeFragment : Fragment() {
 
 
     private fun fetchProducts() {
+        if (!isAdded || isDetached) return // Check if fragment is attached
+
         progressBar.visibility = View.VISIBLE
         emptyMessage.visibility = View.GONE  // Hide error message while loading
         recyclerView.visibility = View.GONE  // Hide recycler view while loading
@@ -256,6 +258,8 @@ class HomeFragment : Fragment() {
         val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
         apiService.getProducts().enqueue(object : Callback<ProductResponse> {
             override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
+                if (!isAdded || isDetached) return // Check if fragment is attached
+
                 progressBar.visibility = View.GONE
                 if (response.isSuccessful && response.body() != null) {
                     val productResponse = response.body()!!
@@ -274,6 +278,8 @@ class HomeFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
+                if (!isAdded || isDetached) return // Check if fragment is attached
+
                 progressBar.visibility = View.GONE
                 showErrorMessage("Error fetching products. Please try again.")
             }
@@ -283,6 +289,8 @@ class HomeFragment : Fragment() {
 
 
     private fun setupSearchView() {
+        if (!isAdded || isDetached) return // Check if fragment is attached
+
         listPopupWindow = ListPopupWindow(requireContext())
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -350,6 +358,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun searchProducts(query: String, category: String, brand: String) {
+        if (!isAdded || isDetached) return // Check if fragment is attached
+
         progressBar.visibility = View.VISIBLE
         emptyMessage.visibility = View.GONE
         recyclerView.visibility = View.GONE
@@ -357,6 +367,8 @@ class HomeFragment : Fragment() {
         val apiService = RetrofitClient.getRetrofitInstance(requireContext()).create(ApiService::class.java)
         apiService.getProducts().enqueue(object : Callback<ProductResponse> {
             override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
+                if (!isAdded || isDetached) return // Check if fragment is attached
+
                 progressBar.visibility = View.GONE
 
                 if (response.isSuccessful && response.body() != null) {
@@ -382,6 +394,8 @@ class HomeFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
+                if (!isAdded || isDetached) return // Check if fragment is attached
+
                 progressBar.visibility = View.GONE
                 showErrorMessage("Error: ${t.message}")
             }

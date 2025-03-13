@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
         }
+
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         // Check if the token is valid and handle authentication
         if (!isTokenValid()) {
             // If the token is not valid or expired, navigate to the SignInActivity
@@ -61,6 +64,18 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 else -> false
+            }
+        }
+
+        if (intent.hasExtra("OPEN_FRAGMENT")) {
+            when (intent.getStringExtra("OPEN_FRAGMENT")) {
+                "HOME" -> {
+                    // Navigate to HomeFragment
+                    loadFragment(HomeFragment())
+                    // Update your bottom navigation or other UI elements if needed
+                    binding.bottomNavigation.selectedItemId = R.id.home_btn
+                }
+                // Handle other fragment destinations here if needed
             }
         }
 
@@ -138,5 +153,11 @@ class MainActivity : AppCompatActivity() {
             .commit()
 
         binding.bottomNavigation.selectedItemId = R.id.home_btn
+    }
+
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
     }
 }

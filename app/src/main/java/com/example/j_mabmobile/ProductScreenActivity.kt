@@ -55,6 +55,8 @@ class ProductScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_screen)
 
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService::class.java)
 
         val productName: TextView = findViewById(R.id.item_text)

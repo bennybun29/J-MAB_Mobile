@@ -19,6 +19,8 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 
+        window.navigationBarColor = resources.getColor(R.color.white, theme)
+
         jmabLogo = findViewById(R.id.jmabLogo)
 
         // Show splash screen for at least 3 seconds

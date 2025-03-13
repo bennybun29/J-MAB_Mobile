@@ -11,6 +11,8 @@ class NoInternetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_no_internet)
 
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         val retryButton: Button = findViewById(R.id.retryButton)
         retryButton.setOnClickListener {
             startActivity(Intent(this, SplashScreenActivity::class.java))

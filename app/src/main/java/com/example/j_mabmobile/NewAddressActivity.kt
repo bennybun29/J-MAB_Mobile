@@ -65,7 +65,7 @@ class NewAddressActivity : AppCompatActivity() {
         // Initialize SharedPreferences correctly
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
-
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
 
         backButton = findViewById(R.id.backButton)
         saveButton = findViewById(R.id.saveButton)

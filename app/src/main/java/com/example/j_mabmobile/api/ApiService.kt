@@ -7,6 +7,8 @@ import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.CheckoutRequest
 import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.LogInRequest
+import com.example.j_mabmobile.model.MessageRequest
+import com.example.j_mabmobile.model.MessageResponse
 import com.example.j_mabmobile.model.OrderResponse
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.SignUpRequest
@@ -50,6 +52,13 @@ interface ApiService {
     @GET("users/{id}")
     fun getAddresses(
         @Path("id") userId: Int
+    ): Call<UserProfileResponse>
+
+    @PUT("users/{userId}/addresses/{addressId}")
+    fun updateAddress(
+        @Path("userId") userId: Int,
+        @Path("addressId") addressId: Int,
+        @Body addressRequest: AddressRequest
     ): Call<UserProfileResponse>
 
     @GET("users/{userId}/default-address")
@@ -104,4 +113,12 @@ interface ApiService {
     fun getOrders(
         @Path("user_id") userId: Int
     ): Call<OrderResponse>
+
+    // Messages Methods
+    @POST("messages")
+    fun sendMessage(@Body messageRequest: MessageRequest): Call<ApiResponse>
+
+    @GET("messages/user/{user_id}")
+    fun getMessages(@Path("user_id") userId: Int): Call<MessageResponse>
+
 }

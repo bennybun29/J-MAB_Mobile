@@ -25,6 +25,8 @@ class HelpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_help)
 
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
         backBtn = findViewById(R.id.backBtn)
         tvGlobeNumber = findViewById(R.id.tvGlobeNumber)
         tvSmartNumber = findViewById(R.id.tvSmartNumber)
