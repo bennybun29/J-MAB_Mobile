@@ -361,35 +361,6 @@ class AccountFragment : Fragment() {
     }
 
 
-    private fun convertImageToBase64(filePath: String): String? {
-        return try {
-            val file = File(filePath)
-            val inputStream = FileInputStream(file)
-            val buffer = ByteArray(file.length().toInt())
-            inputStream.read(buffer)
-            inputStream.close()
-            Base64.encodeToString(buffer, Base64.NO_WRAP)
-        } catch (e: Exception) {
-            Log.e("AccountFragment", "Base64 Encoding Error: ${e.message}")
-            null
-        }
-    }
-
-    private fun getRealPathFromURI(uri: Uri): String? {
-        if ("content".equals(uri.scheme, ignoreCase = true)) {
-            requireActivity().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                val columnIndex = cursor.getColumnIndex(android.provider.MediaStore.Images.Media.DATA)
-                if (columnIndex != -1) {
-                    cursor.moveToFirst()
-                    return cursor.getString(columnIndex)
-                }
-            }
-        } else if ("file".equals(uri.scheme, ignoreCase = true)) {
-            return uri.path
-        }
-        return null
-    }
-
     private fun getToken(): String? {
         return sharedPreferences.getString("jwt_token", null)
     }

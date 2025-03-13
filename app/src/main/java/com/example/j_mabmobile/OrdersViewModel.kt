@@ -13,6 +13,7 @@ import com.example.j_mabmobile.model.OrderResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 class OrdersViewModel(application: Application) : AndroidViewModel(application) {
     //To Pay Chuchu
     private val _toPayCount = MutableLiveData<Int>().apply { value = 0 }
@@ -54,22 +55,27 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                 if (response.isSuccessful && response.body() != null) {
                     val orders = response.body()?.orders ?: emptyList()
 
-                    val toPayOrders = orders.filter {
-                        (it.payment_status == "pending" && it.payment_method == "gcash") ||
-                                (it.payment_status == "failed") || (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "pending")
+                    // Exclude failed/cancelled orders
+                    val validOrders = orders.filterNot {
+                        it.payment_status == "failed" || it.status in listOf("failed delivery", "cancelled")
                     }
 
-                    val toShipOrders = orders.filter {
+                    val toPayOrders = validOrders.filter {
+                        (it.payment_status == "pending" && it.payment_method == "gcash") ||
+                                (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "pending")
+                    }
+
+                    val toShipOrders = validOrders.filter {
                         (it.payment_status == "paid" && it.status == "processing") ||
                                 (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "processing")
                     }
 
-                    val toReceiveOrders = orders.filter {
+                    val toReceiveOrders = validOrders.filter {
                         (it.payment_status == "paid" && it.status == "out for delivery") ||
                                 (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "out for delivery")
                     }
 
-                    val toRateOrders = orders.filter {
+                    val toRateOrders = validOrders.filter {
                         it.payment_status == "paid" && it.status == "delivered"
                     }
 
@@ -97,6 +103,7 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
             }
         })
     }
+
 
     private fun clearAllLists() {
         _toPayCount.postValue(0)

@@ -61,11 +61,6 @@ interface ApiService {
         @Body addressRequest: AddressRequest
     ): Call<UserProfileResponse>
 
-    @GET("users/{userId}/default-address")
-    fun getDefaultAddress(
-        @Path("userId") userId: Int
-    ): Call<UserProfileResponse>
-
     // Product Methods
     @GET("products")
     fun getProducts(): Call<ProductResponse>
