@@ -4,10 +4,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.UnderlineSpan
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -25,7 +27,12 @@ class HelpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_help)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         backBtn = findViewById(R.id.backBtn)
         tvGlobeNumber = findViewById(R.id.tvGlobeNumber)

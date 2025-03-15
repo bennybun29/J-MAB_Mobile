@@ -52,6 +52,7 @@ class AccountFragment : Fragment() {
     lateinit var toShipBtn: ImageButton
     lateinit var toReceiveBtn: ImageButton
     lateinit var toRateBtn: ImageButton
+    lateinit var cancelledBtn: ImageButton
     lateinit var emailAddressTV: TextView
     lateinit var userIdTV: TextView
     lateinit var changeProfilePicBtn: CircleImageView
@@ -62,6 +63,7 @@ class AccountFragment : Fragment() {
     private lateinit var toShipBadge: TextView
     private lateinit var toReceiveBadge: TextView
     private lateinit var toRateBadge: TextView
+    private lateinit var cancelledBadge: TextView
     lateinit var userFullAddressTV: TextView
     lateinit var editProfilePictureIcon: ImageButton
 
@@ -89,6 +91,7 @@ class AccountFragment : Fragment() {
         toShipBtn = view.findViewById(R.id.toShipBtn)
         toReceiveBtn = view.findViewById(R.id.toReceiveBtn)
         toRateBtn = view.findViewById(R.id.toRateBtn)
+        cancelledBtn = view.findViewById(R.id.cancelledBtn)
         emailAddressTV = view.findViewById(R.id.emailAddressTV)
         userIdTV = view.findViewById(R.id.userIDNumberTV)
         changeProfilePicBtn = view.findViewById(R.id.ProfilePictureButton)
@@ -98,6 +101,7 @@ class AccountFragment : Fragment() {
         toShipBadge = view.findViewById(R.id.toShipBadge)
         toReceiveBadge = view.findViewById(R.id.toReceiveBadge)
         toRateBadge = view.findViewById(R.id.toRateBadge)
+        cancelledBadge = view.findViewById(R.id.cancelledBadge)
         userFullAddressTV = view.findViewById(R.id.userFullAddressTV)
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -186,6 +190,16 @@ class AccountFragment : Fragment() {
             }
         }
 
+        ordersViewModel.cancelledCount.observe(viewLifecycleOwner) { count ->
+            Log.d("DEBUG", "AccountFragment - To-Receive Badge Updated: $count")
+            if (count > 0) {
+                cancelledBadge.text = count.toString()
+                cancelledBadge.visibility = View.VISIBLE
+            } else {
+                cancelledBadge.visibility = View.GONE
+            }
+        }
+
         setupButtonListeners()
         return view
     }
@@ -202,6 +216,9 @@ class AccountFragment : Fragment() {
         }
         toRateBtn.setOnClickListener {
             startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "TO_RATE"))
+        }
+        cancelledBtn.setOnClickListener{
+            startActivity(Intent(activity, MyPurchasesActivity::class.java).putExtra("ACTIVE_TAB", "CANCELLED"))
         }
         account_and_sec_btn.setOnClickListener {
             startActivity(Intent(activity, AccountAndSecurityActivity::class.java))

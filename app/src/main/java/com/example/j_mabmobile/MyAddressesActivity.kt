@@ -1,6 +1,7 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -25,7 +26,12 @@ class MyAddressesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_addresses)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         // ✅ Initialize ViewModel
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]

@@ -3,6 +3,7 @@ package com.example.j_mabmobile
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -27,6 +28,8 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import androidx.core.content.ContextCompat
+
 
 class CartActivity : AppCompatActivity() {
 
@@ -52,7 +55,13 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
-        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+        window.statusBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
+
 
         backBtn = findViewById(R.id.backBtn)
         recyclerViewCart = findViewById(R.id.recyclerViewCart)

@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 object WebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private const val webSocketUrl = "ws://10.0.2.2:8080"
+    private const val webSocketUrl = "ws://192.168.1.18:8080"
     private var userId: Int = -1
 
     var messageListener: ((Message) -> Unit)? = null  // Callback for new messages
@@ -33,9 +33,7 @@ object WebSocketManager {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 super.onOpen(webSocket, response)
                 isConnected = true
-                Log.d("WebSocket", "Connection opened")
-
-                // Send authentication message
+                Log.d("WebSocket", "Connection opened for userId: $userId")
                 val authMessage = JSONObject().apply {
                     put("userId", userId)
                 }.toString()
@@ -43,16 +41,12 @@ object WebSocketManager {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                super.onMessage(webSocket, text)
-                Log.d("WebSocket", "Message received: $text")
-
+                Log.d("WebSocket", "Message received: $text");
                 try {
-                    val messageJson = JSONObject(text)
+                    val messageJson = JSONObject(text);
                     if (messageJson.has("type") && messageJson.getString("type") == "auth") {
-                        // Ignore auth messages
-                        return
+                        return;
                     }
-
                     val message = Message(
                         id = messageJson.optInt("id"),
                         sender_id = messageJson.optInt("sender_id"),
@@ -61,13 +55,10 @@ object WebSocketManager {
                         timestamp = messageJson.optString("timestamp"),
                         status = messageJson.optString("status"),
                         is_read = messageJson.optInt("is_read", 0)
-                    )
-
-                    // Notify the listener (MessagesFragment)
-                    messageListener?.invoke(message)
-
+                    );
+                    messageListener?.invoke(message);
                 } catch (e: Exception) {
-                    Log.e("WebSocket", "Error parsing message: ${e.message}")
+                    Log.e("WebSocket", "Error parsing message: ${e.message}");
                 }
             }
 

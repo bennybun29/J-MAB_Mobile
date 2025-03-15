@@ -28,7 +28,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/dmsans_bold"
-            android:text="START A CONVERSATION WITH THE ADMIN"
+            android:text="START A CONVERSATION \n WITH THE ADMIN"
+            android:gravity="center"
             android:textColor="@color/j_mab_blue"
             app:layout_constraintTop_toBottomOf="@id/noMessageIcon"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,40 +47,63 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/jmab_logo_message"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/jmab_logo_message"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="68dp" />
-
-        <TextView
-            android:id="@+id/jmab_name"
+        <!-- Container for Logo, Name, and Description -->
+        <LinearLayout
+            android:id="@+id/header_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="J-MAB"
-            android:fontFamily="@font/dmsans_bold"
-            android:textColor="@color/white"
-            android:textSize="32sp"
-            app:layout_constraintLeft_toRightOf="@id/jmab_logo_message"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"/>
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="@id/imageView3"
+            app:layout_constraintEnd_toEndOf="@id/imageView3"
+            app:layout_constraintTop_toTopOf="@id/imageView3"
+            app:layout_constraintBottom_toBottomOf="@id/imageView3"
+            android:gravity="center"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Vehicle Tires and Batteries Trading"
-            android:fontFamily="@font/cabin"
-            android:textColor="@color/white"
-            app:layout_constraintTop_toBottomOf="@+id/jmab_name"
-            app:layout_constraintLeft_toRightOf="@id/jmab_logo_message"
-            android:layout_marginLeft="20dp"
-            android:textSize="12sp"
-            android:textStyle="normal"/>
+            <!-- Logo -->
+            <ImageView
+                android:id="@+id/jmab_logo_message"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/jmab_logo_message"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="12dp"/>
+
+            <!-- Vertical Layout for Name and Description -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+
+                <!-- Business Name -->
+                <TextView
+                    android:id="@+id/jmab_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="J-MAB"
+                    android:layout_gravity=""
+                    android:fontFamily="@font/dmsans_bold"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    android:layout_marginTop="-4dp"/>
+
+                <!-- Business Description -->
+                <TextView
+                    android:id="@+id/vehicleTiresBatTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Vehicle Tires and Batteries Trading"
+                    android:fontFamily="@font/cabin"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="normal"
+                    android:layout_marginTop="-8dp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewMessages"
@@ -124,13 +148,6 @@
                 android:textColor="@color/black"
                 android:textSize="16sp" />
 
-            <!-- Emoji Icon -->
-            <ImageView
-                android:id="@+id/btn_emoji"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:src="@drawable/emoji_icon"
-                android:padding="8dp" />
 
             <!-- Send Button -->
             <ImageView

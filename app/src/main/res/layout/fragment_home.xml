@@ -136,7 +136,7 @@
 
                 <TextView
                     android:id="@+id/categoriesTV"
-                    android:layout_width="120dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CATEGORIES"
                     android:fontFamily="@font/dmsans_bold"
@@ -144,8 +144,7 @@
                     android:textColor="@color/j_mab_blue"
                     android:textSize="14sp"
                     android:gravity="center"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="8dp"
+                    android:layout_marginStart="18dp"
                     android:layout_marginTop="10dp"/>
 
                 <View
@@ -154,8 +153,8 @@
                     android:layout_height="2dp"
                     android:background="#FFD700"
                     android:layout_gravity="left"
-                    android:layout_marginTop="-4dp"
-                    android:layout_marginStart="18dp"/>
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="18dp" />
 
                 <HorizontalScrollView
                     android:id="@+id/categoryHorizontalScrollView"

@@ -40,7 +40,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="25dp"/>
+        android:layout_marginTop="20dp"/>
 
     <View
         app:layout_constraintTop_toBottomOf="@id/checkoutTitle"
@@ -102,7 +102,7 @@
                 app:layout_constraintTop_toTopOf="@id/locationTV"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="5dp"/>
+                android:layout_marginTop="-4dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/checkoutRecyclerView"

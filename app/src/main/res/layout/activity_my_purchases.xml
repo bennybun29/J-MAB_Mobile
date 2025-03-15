@@ -36,7 +36,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="28dp"/>
+        android:layout_marginTop="20dp"/>
 
     <View
         app:layout_constraintTop_toBottomOf="@id/myPurchasesTV"
@@ -102,6 +102,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:text="TO RATE"
+                android:layout_marginLeft="5dp"
+                android:fontFamily="@font/dmsans"
+                android:textStyle="bold"/>
+
+            <Button
+                android:id="@+id/cancelledBtnFragment"
+                android:background="@drawable/my_purchases_button_background_selector"
+                android:textColor="@drawable/button_text_color_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="CANCELLED"
                 android:layout_marginLeft="5dp"
                 android:fontFamily="@font/dmsans"
                 android:textStyle="bold"/>

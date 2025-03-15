@@ -3,11 +3,13 @@ package com.example.j_mabmobile
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +40,13 @@ class AccountAndSecurityActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_account_and_security)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        // Force white text/icons on the status bar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         editPersonalInfoButton = findViewById(R.id.editPersonalInfoButton)
         editSecurityButton = findViewById(R.id.editSecurityButton)

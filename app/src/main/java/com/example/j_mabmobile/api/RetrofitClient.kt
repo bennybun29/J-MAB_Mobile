@@ -10,7 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:80/final-jmab/api/"
+    private const val BASE_URL = "http://192.168.1.18/final-jmab/api/"
     //10.0.2.2:80
 
     private fun getToken(context: Context): String? {

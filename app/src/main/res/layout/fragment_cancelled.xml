@@ -4,42 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".NotificationFragment">
+    tools:context=".CancelledFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/imageView3"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewCancelled"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:src="@drawable/top_background_gradient"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/notificationsTV"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/dmsans_bold"
-            android:text="Notifications"
-            android:textColor="@color/white"
-            android:textSize="36sp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:scrollbars="vertical"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            app:layout_constraintTop_toBottomOf="@id/notificationsTV"
-            app:layout_constraintStart_toStartOf="@id/notificationsTV"
-            app:layout_constraintEnd_toEndOf="@id/notificationsTV"
-            android:id="@+id/cartUnderline"
-            android:layout_width="0dp"
-            android:layout_height="4dp"
-            android:background="#FFD700" />
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <ImageView
             android:id="@+id/empytIcon"
@@ -55,15 +33,23 @@
             android:id="@+id/noOrdersYetTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="NO NEW NOTIFICATIONS"
+            android:text="NO ODERS YET"
             app:layout_constraintTop_toBottomOf="@id/empytIcon"
             android:fontFamily="@font/dmsans_bold"
             android:textColor="@color/j_mab_blue"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
+        <Button
+            android:id="@+id/continueShoppingBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Continue Shopping"
+            app:layout_constraintTop_toBottomOf="@id/noOrdersYetTV"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="10dp"/>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 </FrameLayout>

@@ -1,7 +1,9 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ class MyPurchasesActivity : AppCompatActivity() {
     lateinit var toShipBtn: Button
     lateinit var toReceiveBtn: Button
     lateinit var toRateBtn: Button
+    lateinit var cancelledBtn: Button
 
     private var activeButton: Button? = null
     private var fromCheckout: Boolean = false
@@ -21,13 +24,19 @@ class MyPurchasesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_purchases)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         backBtn = findViewById(R.id.backButton)
         toPayBtn = findViewById(R.id.toPayBtnFragment)
         toShipBtn = findViewById(R.id.toShipBtnFragment)
         toReceiveBtn = findViewById(R.id.toReceiveBtnFragment)
         toRateBtn = findViewById(R.id.toRateBtnFragment)
+        cancelledBtn = findViewById(R.id.cancelledBtnFragment)
 
         // Check if this activity was opened from CheckoutActivity
         fromCheckout = intent.getBooleanExtra("FROM_CHECKOUT", false)
@@ -58,6 +67,11 @@ class MyPurchasesActivity : AppCompatActivity() {
         toRateBtn.setOnClickListener {
             setActiveButton(toRateBtn)
             loadFragment(ToRateFragment())
+        }
+
+        cancelledBtn.setOnClickListener{
+            setActiveButton(cancelledBtn)
+            loadFragment(CancelledFragment())
         }
     }
 
@@ -91,6 +105,10 @@ class MyPurchasesActivity : AppCompatActivity() {
             "TO_RATE" -> {
                 setActiveButton(toRateBtn)
                 loadFragment(ToRateFragment())
+            }
+            "CANCELLED" -> {
+                setActiveButton(cancelledBtn)
+                loadFragment(CancelledFragment())
             }
         }
     }

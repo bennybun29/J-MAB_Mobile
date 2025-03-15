@@ -43,6 +43,13 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
     private val _toRateOrders = MutableLiveData<List<Order>>().apply { value = emptyList() }
     val toRateOrders: LiveData<List<Order>> get() = _toRateOrders
 
+    //Cancelled
+    private val _cancelledCount = MutableLiveData<Int>().apply { value = 0 }
+    val cancelledCount: LiveData<Int> get() = _cancelledCount
+
+    private val _cancelledOrders = MutableLiveData<List<Order>>().apply { value = emptyList() }
+    val cancelledOrders: LiveData<List<Order>> get() = _cancelledOrders
+
     fun fetchOrders(userId: Int, context: Context) {
         if (userId == -1) return
 
@@ -57,7 +64,7 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
                     // Exclude failed/cancelled orders
                     val validOrders = orders.filterNot {
-                        it.payment_status == "failed" || it.status in listOf("failed delivery", "cancelled")
+                        it.payment_status == "failed" || it.status in listOf("failed delivery")
                     }
 
                     val toPayOrders = validOrders.filter {
@@ -79,6 +86,10 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                         it.payment_status == "paid" && it.status == "delivered"
                     }
 
+                    val cancelledOrders = validOrders.filter {
+                        (it.status == "cancelled")
+                    }
+
                     // Update LiveData
                     _toPayCount.postValue(toPayOrders.size)
                     _toPayOrders.postValue(toPayOrders)
@@ -91,6 +102,10 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
                     _toRateCount.postValue(toRateOrders.size)
                     _toRateOrders.postValue(toRateOrders)
+
+                    _cancelledCount.postValue(cancelledOrders.size)
+                    _cancelledOrders.postValue(cancelledOrders)
+
 
                 } else {
                     clearAllLists()
@@ -117,5 +132,8 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
         _toRateCount.postValue(0)
         _toRateOrders.postValue(emptyList())
+
+        _cancelledCount.postValue(0)
+        _cancelledOrders.postValue(emptyList())
     }
 }

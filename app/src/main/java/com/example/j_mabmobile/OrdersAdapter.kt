@@ -19,6 +19,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val productPrice: TextView = itemView.findViewById(R.id.productPriceTV)
         val itemImage: ImageView = itemView.findViewById(R.id.item_image)
         val status: TextView = itemView.findViewById(R.id.statusTV)
+        val order_status: TextView = itemView.findViewById(R.id.orderStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -35,6 +36,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         holder.itemQuantity.text = "Quantity: ${order.quantity}"
         holder.productPrice.text = "Price: ${order.total_price}"
         holder.status.text = "Payment Status: ${order.payment_status}"
+        holder.order_status.text = "Order Status: ${order.status}"
 
         Picasso.get()
             .load(order.product_image)

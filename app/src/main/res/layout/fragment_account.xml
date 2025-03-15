@@ -346,6 +346,50 @@
                             android:gravity="center"/>
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                            <!-- Icon Button -->
+                            <ImageButton
+                                android:id="@+id/cancelledBtn"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="5dp"
+                                android:background="?android:attr/selectableItemBackgroundBorderless"
+                                android:padding="2dp"
+                                android:src="@drawable/cancelled_button" />
+
+                            <!-- Badge (Hidden by Default) -->
+                            <TextView
+                                android:id="@+id/cancelledBadge"
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:background="@drawable/badge_background"
+                                android:textSize="10sp"
+                                android:textColor="@android:color/white"
+                                android:gravity="center"
+                                android:visibility="gone"
+                                android:layout_gravity="top|end" />
+                        </FrameLayout>
+
+                        <!-- Text Below Icon -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cancelled"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:gravity="center"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>

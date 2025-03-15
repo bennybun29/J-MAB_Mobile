@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNavigation.selectedItemId = R.id.home_btn
         } else {
             AlertDialog.Builder(this)
-                .setTitle("Log Out")
+                .setTitle("Close J-MAB")
                 .setMessage("Are you sure you want close the app?")
                 .setPositiveButton("Yes") { _, _ -> super.onBackPressed() }
                 .setNegativeButton("Cancel", null)

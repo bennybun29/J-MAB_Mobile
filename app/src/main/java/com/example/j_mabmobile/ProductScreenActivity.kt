@@ -2,10 +2,12 @@ package com.example.j_mabmobile
 
 import ImageCarouselAdapter
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.ImageButton
@@ -31,7 +33,11 @@ import java.text.NumberFormat
 import java.util.Locale
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -49,13 +55,19 @@ class ProductScreenActivity : AppCompatActivity() {
     private lateinit var shimmerLayout: com.facebook.shimmer.ShimmerFrameLayout
     private lateinit var cartBadge: TextView
     private val cartViewModel: CartViewModel by viewModels()
-
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<CardView>
+    private lateinit var imageCarousel: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_screen)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService::class.java)
 
@@ -70,18 +82,82 @@ class ProductScreenActivity : AppCompatActivity() {
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
         val backButton: TextView = findViewById(R.id.backButton)
-        val goToCartButton: Button= findViewById(R.id.goToCartButton)
+        val goToCartButton: Button = findViewById(R.id.goToCartButton)
         val imageCountTextView: TextView = findViewById(R.id.image_count)
-        val imageCarousel: ViewPager2 = findViewById(R.id.image_carousel)
+        imageCarousel = findViewById(R.id.image_carousel)
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         val fromRecommended = intent.getBooleanExtra("from_recommended", false)
+
         overlayBackground = findViewById(R.id.overlayBackground)
         addToCartOverlay = findViewById(R.id.addToCartOverlay)
         recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
-        recommendedProductsRecycler.layoutManager = GridLayoutManager(this,2)
+        recommendedProductsRecycler.layoutManager = GridLayoutManager(this, 2)
         cartBadge = findViewById(R.id.cartBadge)
         userId = intent.getIntExtra("user_id", 0)
         shimmerLayout = findViewById(R.id.shimmerLayout)
+
+        val cardView = findViewById<CardView>(R.id.cardView)
+        bottomSheetBehavior = BottomSheetBehavior.from(cardView)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        val rootView = findViewById<View>(android.R.id.content)
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            // Now set up the BottomSheet after we know the insets
+            imageCountTextView.post {
+                // Calculate where the bottom of the imageCountTextView is relative to screen top
+                val imageCountLocation = IntArray(2)
+                imageCountTextView.getLocationOnScreen(imageCountLocation)
+                val imageCountBottom = imageCountLocation[1] + imageCountTextView.height
+
+                // Get total screen height, accounting for system insets
+                val screenHeight = resources.displayMetrics.heightPixels
+
+                // Set the bottom sheet's peek height to start exactly at the bottom of the imageCountTextView
+                // Subtract the navigation bar height for gesture navigation devices
+                bottomSheetBehavior.peekHeight = screenHeight - imageCountBottom - systemInsets.bottom
+
+                // Make sure the card is tall enough to fill the rest of the screen when dragged up
+                cardView.layoutParams.height = screenHeight - systemInsets.bottom
+                cardView.requestLayout()
+
+                // Calculate top buttons offset for expanded state
+                val backLocation = IntArray(2)
+                backBtn.getLocationOnScreen(backLocation)
+
+                // Use the back button's position as a reference for where to stop expanding
+                val topOffset = backLocation[1] + backBtn.height + dp(20) // Add some padding
+
+                // Set expanded offset through reflection (optional if needed)
+                try {
+                    val behaviorClass = BottomSheetBehavior::class.java
+                    val field = behaviorClass.getDeclaredField("maxHeight")
+                    field.isAccessible = true
+                    field.set(bottomSheetBehavior, screenHeight - topOffset - systemInsets.bottom)
+                } catch (e: Exception) {
+                    Log.e("BottomSheet", "Could not set maxHeight: ${e.message}")
+                }
+            }
+
+            insets
+        }
+
+// Handle BottomSheet state changes
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                // No state change handling needed
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // Ensure slideOffset is within [0,1] range
+                val offset = slideOffset.coerceIn(0f, 1f)
+
+                // Apply opacity effect smoothly as sheet slides up
+                imageCarousel.alpha = 1 - offset
+            }
+        })
 
         cartViewModel.cartItemCount.observe(this) { count ->
             updateCartBadge(count)
@@ -89,30 +165,30 @@ class ProductScreenActivity : AppCompatActivity() {
 
         cartViewModel.fetchCartItems(userId, this)
 
-
         minusBtn = findViewById(R.id.minusBtn)
         plusBtn = findViewById(R.id.plusBtn)
         quantityText = findViewById(R.id.quantityText)
 
         backBtn.setOnClickListener {
-            if (fromRecommended){
+            if (fromRecommended) {
                 finish()
             } else {
                 onBackPressed()
             }
         }
 
-        cartBtn.setOnClickListener{
+        cartBtn.setOnClickListener {
             onPause()
             val intent = Intent(this, CartActivity::class.java)
             startActivity(intent)
         }
 
-        helpBtn.setOnClickListener{
+        helpBtn.setOnClickListener {
             onPause()
             val intent = Intent(this, HelpActivity::class.java)
             startActivity(intent)
         }
+
         val product_id = intent.getIntExtra("product_id", 0)
         val imageUrl = intent.getStringExtra("product_image_url")
         val name = intent.getStringExtra("product_name")
@@ -122,7 +198,6 @@ class ProductScreenActivity : AppCompatActivity() {
         val category = intent.getStringExtra("product_category")
         val price = intent.getDoubleExtra("product_price", 0.0)
         val token = intent.getStringExtra("jwt_token")
-        val userId = intent.getIntExtra("user_id", 0)
 
         Log.d("DEBUG", "Received token: $token")
 
@@ -146,7 +221,6 @@ class ProductScreenActivity : AppCompatActivity() {
                                 val alertDialog = dialogBuilder.create()
                                 alertDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
                                 alertDialog.show()
-
 
                                 dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
                                     val intent = Intent(this@ProductScreenActivity, CartActivity::class.java)
@@ -196,8 +270,6 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
 
-
-
         productName.text = name
         productDescription.text = description
         productStock.text = "Stock Available: $stock"
@@ -234,7 +306,6 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
 
-
         addToCartBtn.setOnClickListener {
             token?.let {
                 addToCart(userId, product_id, quantity, it)
@@ -245,7 +316,7 @@ class ProductScreenActivity : AppCompatActivity() {
             hideAddToCartOverlay()
         }
 
-        overlayBackground.setOnClickListener{
+        overlayBackground.setOnClickListener {
             hideAddToCartOverlay()
         }
 
@@ -257,7 +328,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val imageUrls = listOf(
             imageUrl ?: "",
             imageUrl ?: "",
-            imageUrl ?:""
+            imageUrl ?: ""
         )
 
         val adapter = ImageCarouselAdapter(imageUrls)
@@ -272,7 +343,6 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         })
 
-
         Log.d("ProductScreenActivity", "User ID: $userId")
         Log.d("ProductScreenActivity", "Token: $token")
         Log.d("ProductScreenActivity", "Product ID: $product_id")
@@ -283,57 +353,6 @@ class ProductScreenActivity : AppCompatActivity() {
         cartViewModel.fetchCartItems(userId, this) // Refresh cart badge when returning
     }
 
-
-    /*
-    private fun animateCartEffect() {
-        val rootLayout = findViewById<ViewGroup>(android.R.id.content)
-        val cartIcon = findViewById<ImageButton>(R.id.cartBtn)
-        val addToCartIcon = findViewById<LinearLayout>(R.id.addToCartBtn)
-            .findViewById<ImageView>(R.id.shopping_cart_image) // Get the ImageView inside LinearLayout
-
-
-        val floatingCart = ImageView(this).apply {
-            setImageResource(R.drawable.shopping_cart_colored)
-            layoutParams = FrameLayout.LayoutParams(100, 100)
-        }
-
-        rootLayout.addView(floatingCart)
-
-        // Get start and end positions
-        val startLoc = IntArray(2)
-        addToCartIcon.getLocationInWindow(startLoc)
-
-        val endLoc = IntArray(2)
-        cartIcon.getLocationInWindow(endLoc)
-
-        val startX = startLoc[0].toFloat()
-        val startY = startLoc[1].toFloat()
-        val endX = endLoc[0].toFloat()
-        val endY = endLoc[1].toFloat()
-
-        floatingCart.x = startX
-        floatingCart.y = startY
-
-        val animator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 500
-            addUpdateListener { animation ->
-                val fraction = animation.animatedValue as Float
-                floatingCart.x = startX + fraction * (endX - startX)
-                floatingCart.y = startY + fraction * (endY - startY)
-            }
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    rootLayout.removeView(floatingCart)
-                }
-            })
-        }
-
-        val scaleAnim = AnimationUtils.loadAnimation(this, R.anim.cart_animation)
-        cartIcon.startAnimation(scaleAnim)
-
-        animator.start()
-    }*/
-
     private fun updateCartBadge(count: Int) {
         if (count > 0) {
             cartBadge.visibility = View.VISIBLE
@@ -341,6 +360,10 @@ class ProductScreenActivity : AppCompatActivity() {
         } else {
             cartBadge.visibility = View.GONE
         }
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 
     private fun addToCart(userId: Int, productId: Int, quantity: Int, token: String) {
@@ -392,9 +415,6 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
     }
-
-
-
 
     private fun showAddToCartOverlay() {
         overlayBackground.visibility = View.VISIBLE
@@ -463,8 +483,4 @@ class ProductScreenActivity : AppCompatActivity() {
             "%.2f".format(price)
         }
     }
-
-
 }
-
-

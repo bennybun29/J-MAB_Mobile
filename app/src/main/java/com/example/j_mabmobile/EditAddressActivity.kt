@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.media.Image
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -62,7 +64,12 @@ class EditAddressActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
         window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         backBtn = findViewById(R.id.backButton)
         cityAutoCompleteTextView = findViewById(R.id.cityAutoCompleteTextView)
