@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,10 +41,34 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
 
         Picasso.get()
             .load(order.product_image)
-            .placeholder(R.drawable.jmab_logo) // Use a placeholder drawable
-            .error(R.drawable.jmab_logo) // Use an error drawable if loading fails
+            .placeholder(R.drawable.jmab_logo)
+            .error(R.drawable.jmab_logo)
             .into(holder.itemImage)
+
+        // Set click listener to pass data to OrderInfoActivity
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, OrderInfoActivity::class.java).apply {
+                putExtra("ORDER_ID", order.order_id)
+                putExtra("PRODUCT_NAME", order.product_name)
+                putExtra("PRODUCT_BRAND", order.product_brand)
+                putExtra("QUANTITY", order.quantity)
+                putExtra("TOTAL_PRICE", order.total_price)
+                putExtra("PAYMENT_METHOD", order.payment_method)
+                putExtra("PAYMENT_STATUS", order.payment_status)
+                putExtra("ORDER_STATUS", order.status)
+                putExtra("PRODUCT_IMAGE", order.product_image)
+                putExtra("HOME_ADDRESS", order.home_address)
+                putExtra("BARANGAY", order.barangay)
+                putExtra("CITY", order.city)
+                putExtra("PRODUCT_IMAGE", order.product_image)
+                putExtra("REQUEST_TIME", order.created_at)
+                putExtra("REFERENCE", order.reference_number)
+            }
+            context.startActivity(intent)
+        }
     }
+
 
     override fun getItemCount(): Int {
         return orders.size

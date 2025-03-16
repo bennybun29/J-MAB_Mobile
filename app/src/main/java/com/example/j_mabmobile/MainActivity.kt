@@ -5,20 +5,52 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private var pendingProductName: String? = null
+    private var pendingFromProductScreen: Boolean = false
+    private var pendingProductId: String? = null
+    private lateinit var notificationViewModel: NotificationViewModel
+    var isNotificationFragmentOpen = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
+
+        NotificationWebSocketManager.notificationListener = { notification ->
+            // Use ViewModel to handle the notification
+            notificationViewModel.addNotification(notification)
+        }
+
+        setupWebSocketListener()
+
+        notificationViewModel.hasUnreadNotifications.observe(this) { hasUnread ->
+            updateNotificationIcon(hasUnread)
+        }
+
+        val sharedPreferences = getSharedPreferences("myAppPrefs", MODE_PRIVATE)
+        val userId = sharedPreferences.getInt("user_id", -1)
+
+        if (userId != -1) {
+            notificationViewModel.fetchNotifications(userId)
+            // Connect to WebSocket for real-time updates
+            NotificationWebSocketManager.connect(userId)
+        }
+
+
 
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -53,10 +85,35 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.notification_btn -> {
                     openFragment(NotificationFragment())
+                    isNotificationFragmentOpen = true
+                    val notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
+                    notificationViewModel.markNotificationsAsRead() // Reset notifications when opened
                     true
                 }
                 R.id.message_btn -> {
-                    openFragment(MessagesFragment())
+                    // Create a fragment with the pending parameters if they exist
+                    val messagesFragment = MessagesFragment().apply {
+                        arguments = Bundle().apply {
+                            putBoolean("FROM_PRODUCT_SCREEN", pendingFromProductScreen)
+                            if (pendingProductName != null) {
+                                putString("PRODUCT_NAME", pendingProductName)
+                            }
+                            if (pendingProductId != null) {
+                                putString("PRODUCT_ID", pendingProductId)
+                            }
+                        }
+                    }
+
+                    // Reset pending parameters
+                    pendingProductName = null
+                    pendingFromProductScreen = false
+                    isNotificationFragmentOpen = false
+
+                    // Open the fragment
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, messagesFragment, "MESSAGES_FRAGMENT")
+                        .commit()
+
                     true
                 }
                 R.id.account_btn -> {
@@ -69,25 +126,65 @@ class MainActivity : AppCompatActivity() {
 
         if (intent.hasExtra("OPEN_FRAGMENT")) {
             when (intent.getStringExtra("OPEN_FRAGMENT")) {
-                "HOME" -> {
-                    // Navigate to HomeFragment
-                    loadFragment(HomeFragment())
-                    // Update your bottom navigation or other UI elements if needed
-                    binding.bottomNavigation.selectedItemId = R.id.home_btn
+                "MESSAGE" -> {
+                    // Store the parameters instead of creating the fragment here
+                    pendingFromProductScreen = intent.getBooleanExtra("FROM_PRODUCT_SCREEN", false)
+                    pendingProductName = intent.getStringExtra("PRODUCT_NAME")
+                    pendingProductId = intent.getStringExtra("PRODUCT_ID")
+
+                    Log.d("MainActivity", "Setting pending parameters: fromProductScreen=$pendingFromProductScreen, productName=$pendingProductName")
+
+                    // Just set selected item, the listener will handle fragment creation
+                    binding.bottomNavigation.selectedItemId = R.id.message_btn
                 }
-                // Handle other fragment destinations here if needed
+                // Other cases...
             }
         }
+
 
         setInitialIconsState()
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+
+        if (intent.hasExtra("OPEN_FRAGMENT")) {
+            val fragment = MessagesFragment()
+            val bundle = Bundle()
+
+            val fromOrderInfo = intent.getBooleanExtra("FROM_ORDER_INFO", false)
+            val fromProductScreen = intent.getBooleanExtra("FROM_PRODUCT_SCREEN", false)
+            val productName = intent.getStringExtra("PRODUCT_NAME")
+
+            Log.d("MainActivity", "onNewIntent: fromOrderInfo=$fromOrderInfo, fromProductScreen=$fromProductScreen, productName=$productName")
+
+            bundle.putBoolean("FROM_ORDER_INFO", fromOrderInfo)
+            bundle.putBoolean("FROM_PRODUCT_SCREEN", fromProductScreen)
+            if (productName != null) {
+                bundle.putString("PRODUCT_NAME", productName)
+            }
+
+            fragment.arguments = bundle
+            loadFragment(fragment)
+            binding.bottomNavigation.selectedItemId = R.id.message_btn
+        }
+    }
+
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
-        if (currentFragment !is HomeFragment) {
+        Log.d("MainActivity", "onBackPressed: currentFragment=${currentFragment?.javaClass?.simpleName}")
+
+        if (currentFragment is MessagesFragment && currentFragment.shouldReturnToProduct()) {
+            // Return to the specific product screen
+            val productId = currentFragment.getSourceProductId()
+            navigateToProductScreen(productId)
+        }
+        else if (currentFragment !is HomeFragment) {
             openFragment(HomeFragment())
             binding.bottomNavigation.selectedItemId = R.id.home_btn
-        } else {
+        }
+        else {
             AlertDialog.Builder(this)
                 .setTitle("Close J-MAB")
                 .setMessage("Are you sure you want close the app?")
@@ -97,22 +194,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun setupWebSocketListener() {
+        NotificationWebSocketManager.notificationListener = { notification ->
+            // Always update the notifications in the view model
+            notificationViewModel.addNotification(notification)
+
+            // If we're not currently in the notification fragment, make sure the icon updates
+            if (!isNotificationFragmentOpen && notification.is_read == 0) {
+                // Force update the UI on the main thread
+                runOnUiThread {
+                    updateNotificationIcon(true)
+                }
+            }
+        }
+    }
+
+
+    private fun navigateToProductScreen(productId: String?) {
+        if (productId != null) {
+            val intent = Intent(this, ProductScreenActivity::class.java) // Or whatever your product activity is
+            intent.putExtra("PRODUCT_ID", productId)
+            startActivity(intent)
+        }
+    }
+
     private fun openFragment(fragment: Fragment) {
+        // If we're leaving the notification fragment
+        if (isNotificationFragmentOpen && fragment !is NotificationFragment) {
+            // Reset the notification fragment state
+            isNotificationFragmentOpen = false
+
+            // Re-setup the WebSocket listener to ensure it works correctly
+            setupWebSocketListener()
+
+            // Force a check for unread notifications
+            notificationViewModel.forceUpdateNotificationState()
+        }
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-    }
-
-    private fun updateBottomNavState(item: MenuItem) {
-        for (i in 0 until binding.bottomNavigation.menu.size()) {
-            val menuItem = binding.bottomNavigation.menu.getItem(i)
-            val icon = menuItem.icon
-            if (menuItem.itemId == item.itemId) {
-                scaleIcon(icon, 36)
-            } else {
-                scaleIcon(icon, 24)
-            }
-        }
     }
 
     private fun scaleIcon(icon: Drawable?, size: Int) {
@@ -156,8 +277,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadFragment(fragment: Fragment) {
+        val fragmentTag = when (fragment) {
+            is MessagesFragment -> "MESSAGES_FRAGMENT"
+            is HomeFragment -> "HOME_FRAGMENT"
+            is NotificationFragment -> "NOTIFICATION_FRAGMENT"
+            is AccountFragment -> "ACCOUNT_FRAGMENT"
+            else -> null
+        }
+
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.fragment_container, fragment, fragmentTag)
             .commit()
     }
+
+    private fun updateNotificationIcon(hasUnread: Boolean) {
+        val menuItem = binding.bottomNavigation.menu.findItem(R.id.notification_btn)
+        if (hasUnread) {
+            menuItem.setIcon(R.drawable.notification_unread)
+        } else {
+            menuItem.setIcon(R.drawable.notification_icon)
+        }
+        // Force redraw of the navigation bar
+        binding.bottomNavigation.invalidate()
+    }
+
+    fun getNotificationViewModel(): NotificationViewModel {
+        return notificationViewModel
+    }
+
+
 }

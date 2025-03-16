@@ -62,10 +62,10 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                 if (response.isSuccessful && response.body() != null) {
                     val orders = response.body()?.orders ?: emptyList()
 
-                    // Exclude failed/cancelled orders
                     val validOrders = orders.filterNot {
-                        it.payment_status == "failed" || it.status in listOf("failed delivery")
+                        it.status == "failed delivery"  // Keep cancelled orders
                     }
+
 
                     val toPayOrders = validOrders.filter {
                         (it.payment_status == "pending" && it.payment_method == "gcash") ||
@@ -87,7 +87,7 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                     }
 
                     val cancelledOrders = validOrders.filter {
-                        (it.status == "cancelled")
+                        ( it.payment_status == "failed" && it.status == "cancelled" ) || (it.status == "cancelled")
                     }
 
                     // Update LiveData

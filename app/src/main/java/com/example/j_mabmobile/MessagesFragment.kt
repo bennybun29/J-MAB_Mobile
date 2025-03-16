@@ -1,6 +1,7 @@
 package com.example.j_mabmobile
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,13 +11,15 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.api.ApiService
+import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.RetrofitClient
-import com.example.j_mabmobile.api.WebSocketManager
+import com.example.j_mabmobile.api.MessageWebSocketManager
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.Message
 import com.example.j_mabmobile.model.MessageRequest
@@ -40,10 +43,21 @@ class MessagesFragment : Fragment() {
     private lateinit var noMessageIcon: ImageView
     private lateinit var startConvoTV: TextView
     private var lastTempMessage: Message? = null // Track the last temporary message
+    private var openedFromOrderInfo = false
+    private var openedFromProductScreen = false
+    private var sourceProductId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
+        openedFromOrderInfo = arguments?.getBoolean("FROM_ORDER_INFO", false) ?: false
+        openedFromProductScreen = arguments?.getBoolean("FROM_PRODUCT_SCREEN", false) ?: false
+        sourceProductId = arguments?.getString("PRODUCT_ID")
+
+        val productName = arguments?.getString("PRODUCT_NAME")
+
+        Log.d("MessagesFragment", "onCreate: fromOrderInfo=$openedFromOrderInfo, fromProductScreen=$openedFromProductScreen, productName=$productName")
+
     }
 
     override fun onCreateView(
@@ -51,7 +65,7 @@ class MessagesFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_messages, container, false)
-        WebSocketManager.reset()
+        MessageWebSocketManager.reset()
         userId = getUserIdFromPreferences()
 
         apiService = RetrofitClient.getApiService(requireContext())
@@ -71,39 +85,65 @@ class MessagesFragment : Fragment() {
         fetchMessages()
         setupWebSocketConnection()
 
+        val productName = arguments?.getString("PRODUCT_NAME")
+        val fromProductScreen = arguments?.getBoolean("FROM_PRODUCT_SCREEN", false) ?: false
+
+        Log.d("MessagesFragment", "onCreateView: productName=$productName, fromProductScreen=$fromProductScreen")
+
+        if (fromProductScreen && !productName.isNullOrEmpty()) {
+            val messageText = "I'm interested in $productName"
+            Log.d("MessagesFragment", "Setting message field to: $messageText")
+            etMessage.setText(messageText)
+            etMessage.setSelection(etMessage.text.length)
+        }
+
         btnSend.setOnClickListener {
             val text = etMessage.text.toString().trim()
             if (text.isNotEmpty()) {
                 addLocalMessage(text)
-                sendMessageViaApi(text) // Use only API to avoid potential double sends
+                sendMessageViaApi(text)
                 etMessage.text.clear()
             }
         }
+
         return view
     }
 
     override fun onResume() {
         super.onResume()
+        NotificationWebSocketManager.reconnectIfNeeded()
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (openedFromOrderInfo) {
+                    val intent = Intent(requireContext(), OrderInfoActivity::class.java)
+                    startActivity(intent)
+                    requireActivity().finish() // Close MainActivity to prevent back stack issues
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressed()
+                }
+            }
+        })
         if (userId > 0) {
-            WebSocketManager.connect(userId)
+            MessageWebSocketManager.connect(userId)
             setupWebSocketConnection()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        WebSocketManager.messageListener = null
+        MessageWebSocketManager.messageListener = null
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        WebSocketManager.messageListener = null
+        MessageWebSocketManager.messageListener = null
     }
 
     private fun setupWebSocketConnection() {
-        WebSocketManager.connect(userId)
+        MessageWebSocketManager.connect(userId)
         Log.d("MessagesFragment", "Setting up WebSocket message listener")
-        WebSocketManager.messageListener = { message ->
+        MessageWebSocketManager.messageListener = { message ->
             Log.d("MessagesFragment", "New message received: $message")
             if ((message.sender_id == userId && message.receiver_id == receiverId) ||
                 (message.sender_id == receiverId && message.receiver_id == userId)) {
@@ -137,7 +177,7 @@ class MessagesFragment : Fragment() {
     }
 
     private fun sendMessageViaWebSocket(text: String) {
-        WebSocketManager.sendMessage(text, userId, receiverId)
+        MessageWebSocketManager.sendMessage(text, userId, receiverId)
     }
 
     private fun sendMessageViaApi(text: String) {
@@ -229,5 +269,15 @@ class MessagesFragment : Fragment() {
             startConvoTV.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
         }
+    }
+
+    fun shouldReturnToProduct(): Boolean {
+        val result = openedFromProductScreen && sourceProductId != null
+        Log.d("MessagesFragment", "shouldReturnToProduct: $result (fromProductScreen=$openedFromProductScreen, productId=$sourceProductId)")
+        return result
+    }
+
+    fun getSourceProductId(): String? {
+        return sourceProductId
     }
 }

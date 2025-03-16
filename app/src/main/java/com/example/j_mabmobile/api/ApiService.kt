@@ -2,6 +2,7 @@ package com.example.j_mabmobile.api
 
 import com.example.j_mabmobile.model.AddressRequest
 import com.example.j_mabmobile.model.ApiResponse
+import com.example.j_mabmobile.model.CancelOrderRequest
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.CheckoutRequest
@@ -9,8 +10,11 @@ import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.LogInRequest
 import com.example.j_mabmobile.model.MessageRequest
 import com.example.j_mabmobile.model.MessageResponse
+import com.example.j_mabmobile.model.NotificationResponse
+import com.example.j_mabmobile.model.Order
 import com.example.j_mabmobile.model.OrderResponse
 import com.example.j_mabmobile.model.ProductResponse
+import com.example.j_mabmobile.model.ReadStatusResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
 import com.example.j_mabmobile.model.UpdateProfileRequest
@@ -109,6 +113,12 @@ interface ApiService {
         @Path("user_id") userId: Int
     ): Call<OrderResponse>
 
+    @PUT("orders/status/{order_id}")
+    fun cancelOrders(
+        @Path("order_id") orderId: Int,
+        @Body request: CancelOrderRequest
+    ): Call<ApiResponse>
+
     // Messages Methods
     @POST("messages")
     fun sendMessage(@Body messageRequest: MessageRequest): Call<ApiResponse>
@@ -116,4 +126,14 @@ interface ApiService {
     @GET("messages/user/{user_id}")
     fun getMessages(@Path("user_id") userId: Int): Call<MessageResponse>
 
+    //Notification Methods
+    @GET("notifications/user/{user_id}")
+    fun getNotifications(
+        @Path("user_id") userId: Int
+    ): Call<NotificationResponse>
+
+    @PUT("notifications/read/{notification_id}")
+    suspend fun markNotificationAsRead(
+        @Path("notification_id") notificationId: Int
+    ): Response<ReadStatusResponse>
 }

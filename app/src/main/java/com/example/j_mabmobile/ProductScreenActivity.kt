@@ -57,6 +57,8 @@ class ProductScreenActivity : AppCompatActivity() {
     private val cartViewModel: CartViewModel by viewModels()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<CardView>
     private lateinit var imageCarousel: ViewPager2
+    private lateinit var imageCountTextView: TextView
+    private lateinit var backButton: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,9 +83,10 @@ class ProductScreenActivity : AppCompatActivity() {
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
-        val backButton: TextView = findViewById(R.id.backButton)
+        backButton = findViewById(R.id.backButton)
         val goToCartButton: Button = findViewById(R.id.goToCartButton)
-        val imageCountTextView: TextView = findViewById(R.id.image_count)
+        imageCountTextView= findViewById(R.id.image_count)
+        val circularButton: ImageButton = findViewById(R.id.chatSellerForThisProduct)
         imageCarousel = findViewById(R.id.image_carousel)
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         val fromRecommended = intent.getBooleanExtra("from_recommended", false)
@@ -100,64 +103,7 @@ class ProductScreenActivity : AppCompatActivity() {
         bottomSheetBehavior = BottomSheetBehavior.from(cardView)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        val rootView = findViewById<View>(android.R.id.content)
-
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, insets ->
-            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-            // Now set up the BottomSheet after we know the insets
-            imageCountTextView.post {
-                // Calculate where the bottom of the imageCountTextView is relative to screen top
-                val imageCountLocation = IntArray(2)
-                imageCountTextView.getLocationOnScreen(imageCountLocation)
-                val imageCountBottom = imageCountLocation[1] + imageCountTextView.height
-
-                // Get total screen height, accounting for system insets
-                val screenHeight = resources.displayMetrics.heightPixels
-
-                // Set the bottom sheet's peek height to start exactly at the bottom of the imageCountTextView
-                // Subtract the navigation bar height for gesture navigation devices
-                bottomSheetBehavior.peekHeight = screenHeight - imageCountBottom - systemInsets.bottom
-
-                // Make sure the card is tall enough to fill the rest of the screen when dragged up
-                cardView.layoutParams.height = screenHeight - systemInsets.bottom
-                cardView.requestLayout()
-
-                // Calculate top buttons offset for expanded state
-                val backLocation = IntArray(2)
-                backBtn.getLocationOnScreen(backLocation)
-
-                // Use the back button's position as a reference for where to stop expanding
-                val topOffset = backLocation[1] + backBtn.height + dp(20) // Add some padding
-
-                // Set expanded offset through reflection (optional if needed)
-                try {
-                    val behaviorClass = BottomSheetBehavior::class.java
-                    val field = behaviorClass.getDeclaredField("maxHeight")
-                    field.isAccessible = true
-                    field.set(bottomSheetBehavior, screenHeight - topOffset - systemInsets.bottom)
-                } catch (e: Exception) {
-                    Log.e("BottomSheet", "Could not set maxHeight: ${e.message}")
-                }
-            }
-
-            insets
-        }
-
-// Handle BottomSheet state changes
-        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                // No state change handling needed
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                // Ensure slideOffset is within [0,1] range
-                val offset = slideOffset.coerceIn(0f, 1f)
-
-                // Apply opacity effect smoothly as sheet slides up
-                imageCarousel.alpha = 1 - offset
-            }
-        })
+        setupBottomSheetBehavior()
 
         cartViewModel.cartItemCount.observe(this) { count ->
             updateCartBadge(count)
@@ -200,6 +146,20 @@ class ProductScreenActivity : AppCompatActivity() {
         val token = intent.getStringExtra("jwt_token")
 
         Log.d("DEBUG", "Received token: $token")
+
+        circularButton.setOnClickListener {
+            val productNameToSend = name ?: "Unknown Product"  // Fallback if name is null
+            val productIdToSend = product_id ?: ""
+            Log.d("ProductScreen", "Sending product name to MessagesFragment: $productNameToSend")
+
+            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("OPEN_FRAGMENT", "MESSAGE")
+            intent.putExtra("FROM_PRODUCT_SCREEN", true)
+            intent.putExtra("PRODUCT_NAME", productNameToSend)
+            intent.putExtra("PRODUCT_ID", productIdToSend)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+        }
 
         buyNowBtn.setOnClickListener {
             token?.let {
@@ -351,6 +311,56 @@ class ProductScreenActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         cartViewModel.fetchCartItems(userId, this) // Refresh cart badge when returning
+    }
+
+    private fun setupBottomSheetBehavior() {
+        val cardView = findViewById<CardView>(R.id.cardView)
+        bottomSheetBehavior = BottomSheetBehavior.from(cardView)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { _, insets ->
+            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            // Calculate peek height and max height dynamically
+            imageCountTextView.post {
+                val imageCountLocation = IntArray(2)
+                imageCountTextView.getLocationOnScreen(imageCountLocation)
+                val imageCountBottom = imageCountLocation[1] + imageCountTextView.height
+
+                val screenHeight = resources.displayMetrics.heightPixels
+                bottomSheetBehavior.peekHeight = screenHeight - imageCountBottom - systemInsets.bottom
+
+                cardView.layoutParams.height = screenHeight - systemInsets.bottom
+                cardView.requestLayout()
+
+                val backLocation = IntArray(2)
+                backButton.getLocationOnScreen(backLocation)
+                val topOffset = backLocation[1] + backButton.height + dp(20)
+
+                try {
+                    val behaviorClass = BottomSheetBehavior::class.java
+                    val field = behaviorClass.getDeclaredField("maxHeight")
+                    field.isAccessible = true
+                    field.set(bottomSheetBehavior, screenHeight - topOffset - systemInsets.bottom)
+                } catch (e: Exception) {
+                    Log.e("BottomSheet", "Could not set maxHeight: ${e.message}")
+                }
+            }
+
+            insets
+        }
+
+        // Handle BottomSheet state changes
+        bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                // No state change handling needed
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                val offset = slideOffset.coerceIn(0f, 1f)
+                imageCarousel.alpha = 1 - offset
+            }
+        })
     }
 
     private fun updateCartBadge(count: Int) {

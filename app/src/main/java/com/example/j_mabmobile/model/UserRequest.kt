@@ -153,11 +153,18 @@ data class Order(
     val status: String,
     val payment_status: String,
     val reference_number: String,
+    val home_address: String,
+    val barangay: String,
+    val city: String,
     val created_at: String,
     val product_brand: String,
     val product_name: String,
     val quantity: Int,
     val product_image: String
+)
+
+data class CancelOrderRequest(
+    val status: String
 )
 
 data class MessageRequest(
@@ -182,5 +189,27 @@ data class MessageResponse(
     val page: Int,
     val perPage: Int
 )
+
+data class NotificationResponse(
+    val success: Boolean,
+    val notifications: List<Notification>,
+    val page: Int,
+    val perPage: Int
+)
+
+data class ReadStatusResponse(
+    val success: Boolean,
+    val message: String
+)
+
+data class Notification(
+    val id: Int,
+    val user_id: Int,
+    val title: String,
+    val message: String,
+    var is_read: Int,
+    val created_at: String,
+)
+
 
 

@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.ApiService
+import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.Product
@@ -237,6 +238,7 @@ class HomeFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         cartViewModel.fetchCartItems(userId, requireContext())
+        NotificationWebSocketManager.reconnectIfNeeded()
     }
 
 

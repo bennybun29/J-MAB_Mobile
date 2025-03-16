@@ -5,9 +5,11 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.HorizontalScrollView
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+
 class MyPurchasesActivity : AppCompatActivity() {
 
     lateinit var backBtn: ImageButton
@@ -16,6 +18,7 @@ class MyPurchasesActivity : AppCompatActivity() {
     lateinit var toReceiveBtn: Button
     lateinit var toRateBtn: Button
     lateinit var cancelledBtn: Button
+    lateinit var buttonScrollView: HorizontalScrollView
 
     private var activeButton: Button? = null
     private var fromCheckout: Boolean = false
@@ -37,6 +40,7 @@ class MyPurchasesActivity : AppCompatActivity() {
         toReceiveBtn = findViewById(R.id.toReceiveBtnFragment)
         toRateBtn = findViewById(R.id.toRateBtnFragment)
         cancelledBtn = findViewById(R.id.cancelledBtnFragment)
+        buttonScrollView = findViewById(R.id.categoryHorizontalScrollView) // Add this line to get the ScrollView
 
         // Check if this activity was opened from CheckoutActivity
         fromCheckout = intent.getBooleanExtra("FROM_CHECKOUT", false)
@@ -89,28 +93,36 @@ class MyPurchasesActivity : AppCompatActivity() {
     }
 
     private fun setInitialFragment(activeTab: String) {
-        when (activeTab) {
-            "TO_PAY" -> {
-                setActiveButton(toPayBtn)
-                loadFragment(ToPayFragment())
-            }
-            "TO_SHIP" -> {
-                setActiveButton(toShipBtn)
-                loadFragment(ToShipFragment())
-            }
-            "TO_RECEIVE" -> {
-                setActiveButton(toReceiveBtn)
-                loadFragment(ToReceiveFragment())
-            }
-            "TO_RATE" -> {
-                setActiveButton(toRateBtn)
-                loadFragment(ToRateFragment())
-            }
-            "CANCELLED" -> {
-                setActiveButton(cancelledBtn)
-                loadFragment(CancelledFragment())
-            }
+        val buttonToSelect = when (activeTab) {
+            "TO_PAY" -> toPayBtn
+            "TO_SHIP" -> toShipBtn
+            "TO_RECEIVE" -> toReceiveBtn
+            "TO_RATE" -> toRateBtn
+            "CANCELLED" -> cancelledBtn
+            else -> toPayBtn
         }
+
+        buttonScrollView.post {
+            val scrollX = when (activeTab) {
+                "CANCELLED" -> buttonToSelect.right - buttonScrollView.width
+                else -> buttonToSelect.left
+            }
+
+            buttonScrollView.smoothScrollTo(scrollX, 0)
+        }
+
+        setActiveButton(buttonToSelect)
+
+        val fragment = when (activeTab) {
+            "TO_PAY" -> ToPayFragment()
+            "TO_SHIP" -> ToShipFragment()
+            "TO_RECEIVE" -> ToReceiveFragment()
+            "TO_RATE" -> ToRateFragment()
+            "CANCELLED" -> CancelledFragment()
+            else -> ToPayFragment()
+        }
+
+        loadFragment(fragment)
     }
 
     private fun loadFragment(fragment: Fragment) {

@@ -21,6 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
@@ -270,6 +271,7 @@ class AccountFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        NotificationWebSocketManager.reconnectIfNeeded()
         val userId = getUserId()
         if (userId != -1) {
             ordersViewModel.fetchOrders(userId, requireContext())

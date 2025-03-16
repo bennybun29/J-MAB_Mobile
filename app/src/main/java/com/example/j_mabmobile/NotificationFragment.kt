@@ -1,59 +1,85 @@
 package com.example.j_mabmobile
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.j_mabmobile.api.NotificationWebSocketManager
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [NotificationFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class NotificationFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var viewModel: NotificationViewModel
+    private lateinit var adapter: NotificationAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        viewModel = (activity as MainActivity).getNotificationViewModel()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_notification, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment NotificationFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            NotificationFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewNotifications)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        adapter = NotificationAdapter(mutableListOf())
+        recyclerView.adapter = adapter
+
+        viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
+            adapter.updateData(notifications)
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+
+        }
+
+        // ✅ Retrieve user ID from SharedPreferences
+        val sharedPreferences = requireContext().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val userId = sharedPreferences.getInt("user_id", -1)
+
+        if (userId != -1) {
+            viewModel.fetchNotifications(userId)
+            NotificationWebSocketManager.connect(userId) // ✅ Connect WebSocket with user ID
+        } else {
+            Log.e("UserID", "Failed to retrieve user ID")
+        }
+
+        // ✅ Listen for new WebSocket notifications and update UI
+        NotificationWebSocketManager.notificationListener = { notification ->
+            viewModel.addNotification(notification)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // This ensures we only mark them as read when user actually sees them
+        viewModel.markNotificationsAsRead()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        // Important: Deregister the local notification listener
+        NotificationWebSocketManager.notificationListener = null
+
+        // Re-establish the main activity's listener
+        (activity as? MainActivity)?.setupWebSocketListener()
+
+        // Let the main activity know we're closing
+        (activity as? MainActivity)?.let {
+            it.isNotificationFragmentOpen = false
+        }
     }
 }
