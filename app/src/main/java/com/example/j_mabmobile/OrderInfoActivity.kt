@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -18,15 +19,19 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.CancelOrderRequest
+import com.example.j_mabmobile.model.PostRatingResponse
+import com.example.j_mabmobile.model.RatingRequest
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class OrderInfoActivity : AppCompatActivity() {
@@ -47,10 +52,32 @@ class OrderInfoActivity : AppCompatActivity() {
     private lateinit var confirmOrderBtn: Button
     private lateinit var chatSeller: Button
     private lateinit var contactSeller: Button
+    private lateinit var etaTV: TextView
+    private lateinit var stars: Array<ImageView>
+    private var selectedRating = 0f
+    private lateinit var topCardView: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_info)
+
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
+
+        // Force white text/icons on the status bar
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
+
+        val ratingLayout = findViewById<View>(R.id.ratingLayout)
+        stars = arrayOf(
+            findViewById(R.id.star1),
+            findViewById(R.id.star2),
+            findViewById(R.id.star3),
+            findViewById(R.id.star4),
+            findViewById(R.id.star5)
+        )
+        val submitButton = findViewById<Button>(R.id.submitRatingButton)
 
         // Initialize UI components
         productNameTV = findViewById(R.id.item_text)
@@ -69,6 +96,8 @@ class OrderInfoActivity : AppCompatActivity() {
         confirmOrderBtn = findViewById(R.id.confirmOderButton)
         chatSeller = findViewById(R.id.chatSeller)
         contactSeller = findViewById(R.id.contactSeller)
+        etaTV = findViewById(R.id.etaTV)
+        topCardView = findViewById(R.id.topCardView)
 
         // Retrieve data from intent
         val orderID = intent.getIntExtra("ORDER_ID", 0)
@@ -85,6 +114,8 @@ class OrderInfoActivity : AppCompatActivity() {
         val city = intent.getStringExtra("CITY") ?: "N/A"
         val reference = intent.getStringExtra("REFERENCE") ?: "N/A"
         val requestTimeRaw = intent.getStringExtra("REQUEST_TIME") ?: "N/A"
+        val formattedEtaTime = formatRequestTime(requestTimeRaw)
+        setBoldText(etaTV, formattedEtaTime)
 
         // Format requestTime
         val formattedRequestTime = formatRequestTime(requestTimeRaw)
@@ -108,7 +139,52 @@ class OrderInfoActivity : AppCompatActivity() {
             (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true))) {
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
+            topCardView.visibility = View.GONE
         }
+
+        if (orderStatus.equals("delivered", ignoreCase = true) && paymentStatus.equals("paid", ignoreCase = true)) {
+            ratingLayout.visibility = View.VISIBLE
+            cancelOrderBtn.visibility = View.GONE
+            confirmOrderBtn.visibility = View.GONE
+            topCardView.visibility = View.GONE
+        } else {
+            ratingLayout.visibility = View.GONE
+        }
+
+        // Set click listeners for each star
+        for (i in stars.indices) {
+            stars[i].setOnClickListener {
+                updateStars(i + 1f)
+            }
+        }
+
+        submitButton.setOnClickListener {
+            if (selectedRating > 0) {
+                val apiService = RetrofitClient.getApiService(this)
+
+                val productId = intent.getIntExtra("PRODUCT_ID", 0) // Retrieve order ID from intent
+                val ratingRequest = RatingRequest(productId, selectedRating)
+
+                apiService.postRating(ratingRequest).enqueue(object : Callback<PostRatingResponse> {
+                    override fun onResponse(call: Call<PostRatingResponse>, response: Response<PostRatingResponse>) {
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            Toast.makeText(this@OrderInfoActivity, "Rating submitted successfully!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@OrderInfoActivity, "Failed to submit rating", Toast.LENGTH_SHORT).show()
+                            Log.e("RATING_ERROR", "Response: ${response.errorBody()?.string()}")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<PostRatingResponse>, t: Throwable) {
+                        Toast.makeText(this@OrderInfoActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("RATING_ERROR", "API call failed", t)
+                    }
+                })
+            } else {
+                Toast.makeText(this, "Please select a rating!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
         backBtn.setOnClickListener {
             onBackPressed()
@@ -202,13 +278,24 @@ class OrderInfoActivity : AppCompatActivity() {
     private fun formatRequestTime(rawTime: String): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) // Date only format
+
+            val calendar = Calendar.getInstance()
             val date = inputFormat.parse(rawTime)
-            outputFormat.format(date ?: rawTime)
+
+            if (date != null) {
+                calendar.time = date
+                calendar.add(Calendar.DAY_OF_MONTH, 5) // Add 5 days
+                outputFormat.format(calendar.time) // Return only date
+            } else {
+                rawTime
+            }
         } catch (e: Exception) {
             rawTime
         }
     }
+
+
 
     private fun setBoldText(textView: TextView, value: String) {
         val spannableString = SpannableString(value)
@@ -220,4 +307,16 @@ class OrderInfoActivity : AppCompatActivity() {
         )
         textView.text = spannableString
     }
+
+    private fun updateStars(rating: Float) {
+        selectedRating = rating
+        for (i in stars.indices) {
+            if (i < rating) {
+                stars[i].setImageResource(R.drawable.filled_star)
+            } else {
+                stars[i].setImageResource(R.drawable.unfilled_star)
+            }
+        }
+    }
+
 }

@@ -2,6 +2,7 @@ package com.example.j_mabmobile.api
 
 import com.example.j_mabmobile.model.AddressRequest
 import com.example.j_mabmobile.model.ApiResponse
+import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.CancelOrderRequest
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.CartResponse
@@ -13,7 +14,11 @@ import com.example.j_mabmobile.model.MessageResponse
 import com.example.j_mabmobile.model.NotificationResponse
 import com.example.j_mabmobile.model.Order
 import com.example.j_mabmobile.model.OrderResponse
+import com.example.j_mabmobile.model.PostRatingResponse
 import com.example.j_mabmobile.model.ProductResponse
+import com.example.j_mabmobile.model.RatingByIDResponse
+import com.example.j_mabmobile.model.RatingRequest
+import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.ReadStatusResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
@@ -136,4 +141,15 @@ interface ApiService {
     suspend fun markNotificationAsRead(
         @Path("notification_id") notificationId: Int
     ): Response<ReadStatusResponse>
+
+    //Ratings
+    @GET("ratings/average/{product_id}")
+    fun getAverageRating(@Path("product_id") productId: Int): Call<AverageRatingResponse>
+
+    @GET("ratings/{product_id}")
+    fun getRatingByProductId(@Path("product_id") productId: Int): Call<RatingByIDResponse>
+
+
+    @POST("ratings")
+    fun postRating(@Body request: RatingRequest): Call<PostRatingResponse>
 }

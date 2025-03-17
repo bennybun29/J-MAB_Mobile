@@ -83,6 +83,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
+        val ratingText: TextView = findViewById(R.id.rating_text)
         backButton = findViewById(R.id.backButton)
         val goToCartButton: Button = findViewById(R.id.goToCartButton)
         imageCountTextView= findViewById(R.id.image_count)
@@ -144,6 +145,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val category = intent.getStringExtra("product_category")
         val price = intent.getDoubleExtra("product_price", 0.0)
         val token = intent.getStringExtra("jwt_token")
+        val ratings = intent.getFloatExtra("product_rating", 0f)
 
         Log.d("DEBUG", "Received token: $token")
 
@@ -235,6 +237,8 @@ class ProductScreenActivity : AppCompatActivity() {
         productStock.text = "Stock Available: $stock"
         productBrand.text = "Brand: $brand"
         priceTextView.text = "₱ ${formatPrice(price)}"
+        ratingText.text = if (ratings == 0.0f) "⭐ No ratings yet" else "⭐ $ratings"
+
 
         if (category == "Tires") {
             productVariation.visibility = View.VISIBLE

@@ -47,7 +47,6 @@
         android:layout_height="wrap_content"
         android:text="  0 RATINGS"
         android:fontFamily="@font/dmsans"
-        android:drawableLeft="@drawable/star"
         android:paddingBottom="8dp"/>
 
     </LinearLayout>

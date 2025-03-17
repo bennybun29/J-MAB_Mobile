@@ -84,10 +84,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.notification_btn -> {
-                    openFragment(NotificationFragment())
-                    isNotificationFragmentOpen = true
-                    val notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
-                    notificationViewModel.markNotificationsAsRead() // Reset notifications when opened
+                    if (!isNotificationFragmentOpen) {
+                        openFragment(NotificationFragment())
+                        isNotificationFragmentOpen = true
+                        notificationViewModel.markNotificationsAsRead()
+                    }
                     true
                 }
                 R.id.message_btn -> {

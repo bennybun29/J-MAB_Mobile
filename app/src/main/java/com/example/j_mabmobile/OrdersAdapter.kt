@@ -50,6 +50,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
             val context = holder.itemView.context
             val intent = Intent(context, OrderInfoActivity::class.java).apply {
                 putExtra("ORDER_ID", order.order_id)
+                putExtra("PRODUCT_ID", order.product_id)
                 putExtra("PRODUCT_NAME", order.product_name)
                 putExtra("PRODUCT_BRAND", order.product_brand)
                 putExtra("QUANTITY", order.quantity)

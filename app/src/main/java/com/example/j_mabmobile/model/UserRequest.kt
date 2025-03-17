@@ -160,7 +160,8 @@ data class Order(
     val product_brand: String,
     val product_name: String,
     val quantity: Int,
-    val product_image: String
+    val product_image: String,
+    val product_id: Int
 )
 
 data class CancelOrderRequest(
@@ -212,4 +213,41 @@ data class Notification(
 )
 
 
+data class RatingByIDResponse(
+    val success: Boolean,
+    val rating: Rating // Single rating object
+)
 
+data class Rating(
+    val rating_id: Int,
+    val product_id: Int,
+    val user_id: Int,
+    val rating: Float,
+    val created_at: String
+)
+
+data class RatingRequest(
+    val product_id: Int,
+    val rating: Float
+)
+
+data class RatingResponse(
+    val success: Boolean,
+    val ratings: List<Rating>,
+    val page: Int,
+    val perPage: Int,
+    val totalRatings: Int,
+    val totalPages: Int
+)
+
+data class AverageRatingResponse(
+    val success: Boolean,
+    val average_rating: Float,
+    val rating_count: Int
+)
+
+data class PostRatingResponse(
+    val success: Boolean,
+    val message: String,
+    val rating_id: Int
+)

@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,17 +34,33 @@ class NotificationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val emptyIcon = view.findViewById<ImageView>(R.id.emptyIcon)
+        val noOrdersYetTV = view.findViewById<TextView>(R.id.noOrdersYetTV)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewNotifications)
+
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = NotificationAdapter(mutableListOf())
         recyclerView.adapter = adapter
 
+        // ✅ Correct observer setup (Only ONE observer)
         viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
             adapter.updateData(notifications)
+
+            // Show empty icon if there are no notifications, else show RecyclerView
+            if (notifications.isEmpty()) {
+                emptyIcon.visibility = View.VISIBLE
+                noOrdersYetTV.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            } else {
+                emptyIcon.visibility = View.GONE
+                noOrdersYetTV.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+            }
         }
 
+        // ✅ Observe error messages
         viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
-
+            Log.e("NotificationError", error)
         }
 
         // ✅ Retrieve user ID from SharedPreferences
@@ -51,35 +69,37 @@ class NotificationFragment : Fragment() {
 
         if (userId != -1) {
             viewModel.fetchNotifications(userId)
-            NotificationWebSocketManager.connect(userId) // ✅ Connect WebSocket with user ID
+            NotificationWebSocketManager.connect(userId)
         } else {
             Log.e("UserID", "Failed to retrieve user ID")
         }
 
-        // ✅ Listen for new WebSocket notifications and update UI
+        // ✅ Set WebSocket notification listener
         NotificationWebSocketManager.notificationListener = { notification ->
-            viewModel.addNotification(notification)
+            activity?.runOnUiThread {
+                viewModel.addNotification(notification)
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // This ensures we only mark them as read when user actually sees them
-        viewModel.markNotificationsAsRead()
+        viewModel.markNotificationsAsRead() // Mark notifications as read when user sees them
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
 
-        // Important: Deregister the local notification listener
+        // ✅ Remove observers (no duplicates)
+        viewModel.notifications.removeObservers(viewLifecycleOwner)
+        viewModel.errorMessage.removeObservers(viewLifecycleOwner)
+
+        // ✅ Clean up WebSocket listener
         NotificationWebSocketManager.notificationListener = null
 
-        // Re-establish the main activity's listener
+        // ✅ Re-establish MainActivity WebSocket listener
         (activity as? MainActivity)?.setupWebSocketListener()
 
-        // Let the main activity know we're closing
-        (activity as? MainActivity)?.let {
-            it.isNotificationFragmentOpen = false
-        }
+        (activity as? MainActivity)?.isNotificationFragmentOpen = false
     }
 }

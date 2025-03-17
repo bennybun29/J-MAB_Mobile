@@ -2,14 +2,20 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.Product
 import com.squareup.picasso.Picasso
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -25,26 +31,24 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         val product = products[position]
         holder.textView.text = product.name
         holder.priceView.text = "₱${formatPrice(product.price)}"
-
+        val context = holder.itemView.context
 
         // Load image using Picasso
         Picasso.get()
             .load(product.image_url)
-            .placeholder(R.drawable.jmab_logo) // Use a placeholder drawable
-            .error(R.drawable.jmab_logo) // Use an error drawable if loading fails
+            .placeholder(R.drawable.jmab_logo)
+            .error(R.drawable.jmab_logo)
             .into(holder.imageView)
+
+        // Fetch the average rating from API
+        fetchAverageRating(context, product.product_id, holder)
 
         holder.itemView.setOnClickListener {
             val context = it.context
             val token = getTokenFromSharedPreferences(context)
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
-                // Add flags to clear the back stack
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-                // Add a flag to identify this is from recommended products
                 putExtra("from_recommended", true)
-
-                // Your existing extras
                 putExtra("product_id", product.product_id)
                 putExtra("product_name", product.name)
                 putExtra("product_description", product.description)
@@ -57,14 +61,11 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
                 putExtra("size", product.size)
                 putExtra("user_id", userId)
                 putExtra("jwt_token", token)
+                // Add the rating to the intent
+                putExtra("product_rating", holder.currentRating)
             }
             context.startActivity(intent)
         }
-    }
-
-    private fun getTokenFromSharedPreferences(context: Context): String? {
-        val sharedPreferences = context.getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("jwt_token", null)
     }
 
     override fun getItemCount(): Int = products.size
@@ -73,6 +74,46 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         val imageView: ImageView = itemView.findViewById(R.id.item_image)
         val textView: TextView = itemView.findViewById(R.id.item_text)
         val priceView: TextView = itemView.findViewById(R.id.item_price)
+        val ratingView: TextView = itemView.findViewById(R.id.ratingsTV)
+
+        // Add a variable to store the current rating
+        var currentRating: Float = 0f
+    }
+
+    private fun fetchAverageRating(context: Context, productId: Int, holder: ViewHolder) {
+        RetrofitClient.getApiService(context).getAverageRating(productId)
+            .enqueue(object : Callback<AverageRatingResponse> {
+                override fun onResponse(
+                    call: Call<AverageRatingResponse>,
+                    response: Response<AverageRatingResponse>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val avgRating = response.body()?.average_rating ?: 0f
+                        if (avgRating > 0) {
+                            holder.ratingView.text = "⭐ $avgRating"
+                        } else {
+                            holder.ratingView.text = "⭐ No ratings yet"
+                        }
+                        // Store the rating in the ViewHolder
+                        holder.currentRating = avgRating
+                    } else {
+                        holder.ratingView.text = "⭐ No ratings yet"
+                        holder.currentRating = 0f
+                    }
+                }
+
+                override fun onFailure(call: Call<AverageRatingResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Failed to fetch rating: ${t.message}")
+                    holder.ratingView.text = "⭐ No ratings yet"
+                    holder.currentRating = 0f
+                }
+            })
+    }
+
+
+    private fun getTokenFromSharedPreferences(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("jwt_token", null)
     }
 
     private fun formatPrice(price: Double): String {
