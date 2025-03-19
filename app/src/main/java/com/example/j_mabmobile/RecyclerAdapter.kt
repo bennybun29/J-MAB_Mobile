@@ -18,6 +18,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.NumberFormat
 import java.util.Locale
+import java.io.Serializable
 
 class RecyclerAdapter(private val products: List<Product>, private val userId: Int) :
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
@@ -28,9 +29,18 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val product = products[position]
+        val availableProducts = products.filter { it.variants.any { variant -> variant.stock > 0 } }
+        val product = availableProducts[position]
+
+        // Get the first available variant or default to first variant
+        val variant = product.variants.firstOrNull { it.stock > 0 } ?: product.variants.firstOrNull()
+
         holder.textView.text = product.name
-        holder.priceView.text = "₱${formatPrice(product.price)}"
+
+        // Use price from variant
+        val price = variant?.price?.toDoubleOrNull() ?: 0.0
+        holder.priceView.text = "₱${formatPrice(price)}"
+
         val context = holder.itemView.context
 
         // Load image using Picasso
@@ -46,29 +56,44 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         holder.itemView.setOnClickListener {
             val context = it.context
             val token = getTokenFromSharedPreferences(context)
+
+            // Extract variant names (size or another identifier)
+            val variantNames = product.variants.map { it.size ?: "Default" }
+
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 putExtra("from_recommended", true)
+                putExtra("variant_id", variant?.variant_id)
                 putExtra("product_id", product.product_id)
                 putExtra("product_name", product.name)
                 putExtra("product_description", product.description)
                 putExtra("product_category", product.category)
                 putExtra("product_image_url", product.image_url)
-                putExtra("product_price", product.price)
+                putExtra("product_price", price) // Pass variant price
                 putExtra("product_brand", product.brand)
-                putExtra("product_stock", product.stock)
-                putExtra("voltage", product.voltage.toString())
-                putExtra("size", product.size)
+                putExtra("product_stock", variant?.stock ?: 0)
+                putExtra("size", variant?.size ?: "") // ✅ Keep only one "size" key
                 putExtra("user_id", userId)
                 putExtra("jwt_token", token)
-                // Add the rating to the intent
                 putExtra("product_rating", holder.currentRating)
+                putExtra("has_variants", product.variants.size > 1)
+                putStringArrayListExtra("product_variants", ArrayList(variantNames))
+
+                // Pass variant mapping
+                val variantMap: Map<String, Triple<Int, Double, Int>> = product.variants.associate {
+                    (it.size ?: "Default") to Triple(it.variant_id ?: 0, it.price.toDoubleOrNull() ?: 0.0, it.stock)
+                }
+
+                putExtra("variant_map", HashMap(variantMap) as Serializable)
+
             }
+
             context.startActivity(intent)
         }
+
     }
 
-    override fun getItemCount(): Int = products.size
+    override fun getItemCount(): Int = products.count { it.variants.any { variant -> variant.stock > 0 } }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.item_image)
@@ -109,7 +134,6 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
                 }
             })
     }
-
 
     private fun getTokenFromSharedPreferences(context: Context): String? {
         val sharedPreferences = context.getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)

@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.RetrofitClient
+import com.example.j_mabmobile.model.DeleteNotificationResponse
 import com.example.j_mabmobile.model.Notification
 import com.example.j_mabmobile.model.NotificationResponse
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class NotificationViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,7 +28,7 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> get() = _errorMessage
 
-    private val apiService = RetrofitClient.getApiService(application.applicationContext)
+    val apiService = RetrofitClient.getApiService(application.applicationContext)
     private val currentNotifications = mutableListOf<Notification>()
 
     // Flag to track if all notifications have been manually marked as read
@@ -117,6 +119,34 @@ class NotificationViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
+
+    fun deleteNotification(notificationId: Int) {
+        viewModelScope.launch {
+            try {
+                apiService.deleteNotification(notificationId).enqueue(object : Callback<DeleteNotificationResponse> {
+                    override fun onResponse(call: Call<DeleteNotificationResponse>, response: Response<DeleteNotificationResponse>) {
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            // Remove notification from local list
+                            currentNotifications.removeAll { it.id == notificationId }
+                            _notifications.postValue(ArrayList(currentNotifications))
+
+                            // Update unread notification status
+                            checkUnreadNotifications()
+                        } else {
+                            _errorMessage.postValue("Failed to delete notification")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<DeleteNotificationResponse>, t: Throwable) {
+                        _errorMessage.postValue(t.message ?: "An error occurred while deleting notification")
+                    }
+                })
+            } catch (e: Exception) {
+                _errorMessage.postValue(e.message ?: "An error occurred")
+            }
+        }
+    }
+
 
     // Force update the notification icon state
     fun forceUpdateNotificationState() {

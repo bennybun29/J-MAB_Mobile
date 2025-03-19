@@ -126,6 +126,9 @@
         <activity android:name=".OrderInfoActivity"
             android:exported="false"/>
 
+        <activity android:name=".ViewAllOrdersActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

@@ -9,9 +9,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +41,11 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.j_mabmobile.model.ProductResponse
+import com.google.android.material.textfield.TextInputLayout
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -59,6 +67,7 @@ class ProductScreenActivity : AppCompatActivity() {
     private lateinit var imageCarousel: ViewPager2
     private lateinit var imageCountTextView: TextView
     private lateinit var backButton: TextView
+    private var selectedVariantId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,14 +93,16 @@ class ProductScreenActivity : AppCompatActivity() {
         val priceTextView: TextView = findViewById(R.id.priceTextView)
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
         val ratingText: TextView = findViewById(R.id.rating_text)
-        backButton = findViewById(R.id.backButton)
+        val chooseVariationAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.chooseVariationAutoCompleteTextView)
+        val chooseVariationTextInputLayout = findViewById<TextInputLayout>(R.id.chooseVariationTextInputLayout)
         val goToCartButton: Button = findViewById(R.id.goToCartButton)
-        imageCountTextView= findViewById(R.id.image_count)
         val circularButton: ImageButton = findViewById(R.id.chatSellerForThisProduct)
-        imageCarousel = findViewById(R.id.image_carousel)
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         val fromRecommended = intent.getBooleanExtra("from_recommended", false)
-
+        val cardView = findViewById<CardView>(R.id.cardView)
+        backButton = findViewById(R.id.backButton)
+        imageCountTextView= findViewById(R.id.image_count)
+        imageCarousel = findViewById(R.id.image_carousel)
         overlayBackground = findViewById(R.id.overlayBackground)
         addToCartOverlay = findViewById(R.id.addToCartOverlay)
         recommendedProductsRecycler = findViewById(R.id.recommendedProductsRecycler)
@@ -99,8 +110,6 @@ class ProductScreenActivity : AppCompatActivity() {
         cartBadge = findViewById(R.id.cartBadge)
         userId = intent.getIntExtra("user_id", 0)
         shimmerLayout = findViewById(R.id.shimmerLayout)
-
-        val cardView = findViewById<CardView>(R.id.cardView)
         bottomSheetBehavior = BottomSheetBehavior.from(cardView)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
@@ -136,7 +145,9 @@ class ProductScreenActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val product_id = intent.getIntExtra("product_id", 0)
+        val productId = intent.getIntExtra("product_id", 0)
+        val variant_id = intent.getIntExtra("variant_id", 0)
+        selectedVariantId = variant_id
         val imageUrl = intent.getStringExtra("product_image_url")
         val name = intent.getStringExtra("product_name")
         val description = intent.getStringExtra("product_description")
@@ -146,12 +157,77 @@ class ProductScreenActivity : AppCompatActivity() {
         val price = intent.getDoubleExtra("product_price", 0.0)
         val token = intent.getStringExtra("jwt_token")
         val ratings = intent.getFloatExtra("product_rating", 0f)
+        val hasVariants = intent.getBooleanExtra("has_variants", false)
+        val productVariants = intent.getStringArrayListExtra("product_variants") ?: arrayListOf()
+        val size = intent.getStringExtra("size")
+        val variantMap = intent.getSerializableExtra("variant_map") as? HashMap<String, Triple<Int, Double, Int>> ?: hashMapOf()
 
-        Log.d("DEBUG", "Received token: $token")
+        if (hasVariants && productVariants.isNotEmpty()) {
+            // Filter out variants with zero stock
+            val availableVariants = productVariants.filter { variantName ->
+                val variantDetails = variantMap[variantName]
+                variantDetails?.third ?: 0 > 0
+            }
+
+            if (availableVariants.isNotEmpty()) {
+                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, availableVariants)
+                chooseVariationAutoCompleteTextView.setAdapter(adapter)
+                chooseVariationAutoCompleteTextView.visibility = View.VISIBLE
+                chooseVariationTextInputLayout.visibility = View.VISIBLE
+
+                // Set the first available variant as default
+                val defaultVariantName = availableVariants[0]
+                chooseVariationAutoCompleteTextView.setText(defaultVariantName, false)
+
+                // Update selectedVariantId and UI with default variant details
+                val defaultVariantDetails = variantMap[defaultVariantName]
+                if (defaultVariantDetails != null) {
+                    selectedVariantId = defaultVariantDetails.first // Get variant_id
+                    val newPrice = defaultVariantDetails.second // Get price
+                    val newStock = defaultVariantDetails.third // Get stock
+
+                    // Update UI
+                    priceTextView.text = "₱${String.format("%.2f", newPrice)}"
+                    productStock.text = "Stock: $newStock"
+
+                    Log.d("ProductScreenActivity", "Default Variant: $defaultVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
+                }
+
+                // Handle dropdown selection when user changes it
+                chooseVariationAutoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+                    val selectedVariantName = availableVariants[position]
+                    val variantDetails = variantMap[selectedVariantName]
+
+                    if (variantDetails != null) {
+                        selectedVariantId = variantDetails.first // Get variant_id
+                        val newPrice = variantDetails.second // Get price
+                        val newStock = variantDetails.third // Get stock
+                        quantity = 1
+                        quantityText.text = quantity.toString()
+
+                        // Update UI
+                        priceTextView.text = "₱${String.format("%.2f", newPrice)}"
+                        productStock.text = "Stock: $newStock"
+
+                        Log.d("ProductScreenActivity", "Selected Variant: $selectedVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
+                    }
+                }
+            } else {
+                // No variants with stock available
+                productVariation.visibility = View.VISIBLE
+                productVariation.text = "No variants available"
+                chooseVariationAutoCompleteTextView.visibility = View.GONE
+                chooseVariationTextInputLayout.visibility = View.GONE
+            }
+        } else {
+            productVariation.visibility = View.VISIBLE
+            chooseVariationAutoCompleteTextView.visibility = View.GONE
+            chooseVariationTextInputLayout.visibility = View.GONE
+        }
 
         circularButton.setOnClickListener {
             val productNameToSend = name ?: "Unknown Product"  // Fallback if name is null
-            val productIdToSend = product_id ?: ""
+            val productIdToSend = variant_id ?: ""
             Log.d("ProductScreen", "Sending product name to MessagesFragment: $productNameToSend")
 
             val intent = Intent(this, MainActivity::class.java)
@@ -172,7 +248,7 @@ class ProductScreenActivity : AppCompatActivity() {
 
                         if (cartResponse.isSuccessful) {
                             val cartItems = cartResponse.body()?.cart ?: emptyList()
-                            val existingCartItem = cartItems.find { it.product_id == product_id }
+                            val existingCartItem = cartItems.find { it.variant_id == selectedVariantId }
 
                             if (existingCartItem != null) {
                                 // Show custom dialog if product already exists in the cart
@@ -200,7 +276,7 @@ class ProductScreenActivity : AppCompatActivity() {
                         }
 
                         // If not in cart, proceed to buy now
-                        val cartRequest = CartRequest(userId, product_id, quantity)
+                        val cartRequest = CartRequest(userId, selectedVariantId, quantity)  // Use selectedVariantId
                         val response = apiService.addToCart(cartRequest)
 
                         if (response.isSuccessful && response.body()?.success == true) {
@@ -208,7 +284,7 @@ class ProductScreenActivity : AppCompatActivity() {
 
                             if (cartItemResponse.isSuccessful) {
                                 val cartItems = cartItemResponse.body()?.cart ?: emptyList()
-                                val cartItem = cartItems.find { it.product_id == product_id }
+                                val cartItem = cartItems.find { it.variant_id == selectedVariantId }
 
                                 if (cartItem != null) {
                                     val intent = Intent(this@ProductScreenActivity, CheckoutActivity::class.java)
@@ -232,6 +308,7 @@ class ProductScreenActivity : AppCompatActivity() {
             }
         }
 
+
         productName.text = name
         productDescription.text = description
         productStock.text = "Stock Available: $stock"
@@ -239,29 +316,23 @@ class ProductScreenActivity : AppCompatActivity() {
         priceTextView.text = "₱ ${formatPrice(price)}"
         ratingText.text = if (ratings == 0.0f) "⭐ No ratings yet" else "⭐ $ratings"
 
-
-        if (category == "Tires") {
-            productVariation.visibility = View.VISIBLE
-            productVariation.text = "Size: " + intent.getStringExtra("size")
-        } else if (category == "Batteries") {
-            productVariation.visibility = View.VISIBLE
-            productVariation.text = "Voltage: " + intent.getStringExtra("voltage")
-        }
-
         var hasShownMaxStockToast = false
 
         plusBtn.setOnClickListener {
-            if (quantity < stock) {
+            val currentStock = productStock.text.toString().replace("Stock: ", "").toIntOrNull() ?: stock
+
+            if (quantity < currentStock) {
                 quantity++
                 quantityText.text = quantity.toString()
                 hasShownMaxStockToast = false
             } else {
                 if (!hasShownMaxStockToast) {
-                    Toast.makeText(this, "Max stock reached", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Max stock reached ($currentStock available)", Toast.LENGTH_SHORT).show()
                     hasShownMaxStockToast = true
                 }
             }
         }
+
 
         minusBtn.setOnClickListener {
             if (quantity > 1) {
@@ -272,7 +343,7 @@ class ProductScreenActivity : AppCompatActivity() {
 
         addToCartBtn.setOnClickListener {
             token?.let {
-                addToCart(userId, product_id, quantity, it)
+                addToCart(userId, selectedVariantId, quantity, it)  // Use selectedVariantId instead of variant_id
             }
         }
 
@@ -309,7 +380,7 @@ class ProductScreenActivity : AppCompatActivity() {
 
         Log.d("ProductScreenActivity", "User ID: $userId")
         Log.d("ProductScreenActivity", "Token: $token")
-        Log.d("ProductScreenActivity", "Product ID: $product_id")
+        Log.d("ProductScreenActivity", "Product ID: $variant_id")
     }
 
     override fun onResume() {
@@ -384,7 +455,7 @@ class ProductScreenActivity : AppCompatActivity() {
         Log.d("DEBUG", "Token being sent: $token")
         Log.d("DEBUG", "User ID: $userId, Product ID: $productId, Quantity: $quantity")
 
-        val cartRequest = CartRequest(userId, productId, quantity)
+        val cartRequest = CartRequest(userId, selectedVariantId, quantity)  // Use selectedVariantId
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
@@ -393,7 +464,7 @@ class ProductScreenActivity : AppCompatActivity() {
                 val productStock = intent.getIntExtra("product_stock", 0)
                 if (cartResponse.isSuccessful) {
                     val cartItems = cartResponse.body()?.cart ?: emptyList()
-                    val existingCartItem = cartItems.find { it.product_id == productId }
+                    val existingCartItem = cartItems.find { it.variant_id == selectedVariantId }
                     val existingQuantity = existingCartItem?.quantity ?: 0
 
                     val totalQuantity = existingQuantity + quantity

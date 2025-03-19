@@ -149,19 +149,44 @@
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp">
 
-                <TextView
-                    android:id="@+id/MyPurchaseTV"
-                    android:layout_width="wrap_content"
+                <!-- My Purchases Title and View All Orders Link -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="My Purchases"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/j_mab_blue"
-                    android:fontFamily="@font/dmsans_bold"
-                    android:gravity="center"
                     android:layout_marginLeft="15dp"
-                    android:layout_marginBottom="8dp"/>
+                    android:layout_marginRight="15dp"
+                    android:layout_marginBottom="8dp">
 
+                    <!-- My Purchases Title -->
+                    <TextView
+                        android:id="@+id/MyPurchaseTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="My Purchases"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/j_mab_blue"
+                        android:fontFamily="@font/dmsans_bold"
+                        android:gravity="center"
+                        android:layout_alignParentStart="true"/>
+
+                    <!-- View All Orders Link -->
+                    <TextView
+                        android:id="@+id/viewAllOrdersTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="View All Orders >"
+                        android:textSize="14sp"
+                        android:textColor="@color/j_mab_blue"
+                        android:fontFamily="@font/dmsans"
+                        android:gravity="center"
+                        android:layout_alignParentEnd="true"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"/>
+                </RelativeLayout>
+
+                <!-- Icons and Labels -->
                 <LinearLayout
                     android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
@@ -212,7 +237,6 @@
                             android:textStyle="bold"
                             android:gravity="center"/>
                     </LinearLayout>
-
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -389,11 +413,8 @@
                             android:textStyle="bold"
                             android:gravity="center"/>
                     </LinearLayout>
-
                 </LinearLayout>
-
             </LinearLayout>
-
         </androidx.cardview.widget.CardView>
 
 

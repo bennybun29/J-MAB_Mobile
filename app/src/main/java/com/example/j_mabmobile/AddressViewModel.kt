@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.AddressRequest
+import com.example.j_mabmobile.model.DeleteAddressRequest
+import com.example.j_mabmobile.model.DeleteAddressResponse
 import com.example.j_mabmobile.model.UserAddresses
 import com.example.j_mabmobile.model.UserProfileResponse
 import retrofit2.Call
@@ -47,11 +49,6 @@ class AddressViewModel(application: Application) : AndroidViewModel(application)
         _addresses.postValue(currentList)
     }
 
-    fun deleteAddress(addressId: Int) {
-        val currentList = _addresses.value?.filterNot { it.id == addressId } ?: emptyList()
-        _addresses.postValue(currentList)
-    }
-
     fun updateDefaultAddress(newDefaultAddress: UserAddresses) {
         val userId = sharedPreferences.getInt("user_id", -1)
         if (userId == -1) {
@@ -83,6 +80,33 @@ class AddressViewModel(application: Application) : AndroidViewModel(application)
             }
         })
     }
+
+    fun deleteAddress(addressId: Int) {
+        val userId = sharedPreferences.getInt("user_id", -1)
+        if (userId == -1) {
+            Log.e("AddressViewModel", "User ID not found")
+            return
+        }
+
+        val request = DeleteAddressRequest(address_ids = listOf(addressId))
+
+        apiService.deleteAddress(userId, request).enqueue(object : Callback<DeleteAddressResponse> {
+            override fun onResponse(call: Call<DeleteAddressResponse>, response: Response<DeleteAddressResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    // Remove from local list and update LiveData
+                    val updatedList = _addresses.value?.filterNot { it.id == addressId } ?: emptyList()
+                    _addresses.postValue(updatedList)
+                } else {
+                    Log.e("AddressViewModel", "Failed to delete address: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<DeleteAddressResponse>, t: Throwable) {
+                Log.e("AddressViewModel", "Error: ${t.message}")
+            }
+        })
+    }
+
 
 
 }

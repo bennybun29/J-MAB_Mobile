@@ -15,12 +15,15 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
+import androidx.appcompat.app.AlertDialog
 
 class AddressAdapter(
     private var addressList: MutableList<UserAddresses>,
     private val onEditClick: (UserAddresses) -> Unit,
-    private val onAddressSelected: (UserAddresses) -> Unit
+    private val onAddressSelected: (UserAddresses) -> Unit,
+    private val addressViewModel: AddressViewModel // Pass ViewModel
 ) : RecyclerView.Adapter<AddressAdapter.AddressViewHolder>() {
+
 
     private var selectedPosition: Int = -1
     private val handler = Handler(Looper.getMainLooper())
@@ -32,6 +35,7 @@ class AddressAdapter(
         private val city: TextView = itemView.findViewById(R.id.city)
         private val checkBox: CheckBox = itemView.findViewById(R.id.selectAddressCheckBox)
         private val editButton: ImageButton = itemView.findViewById(R.id.editAddressButton)
+        private val deleteAddressButton: ImageButton = itemView.findViewById(R.id.deleteAddressButton)
 
         fun bind(address: UserAddresses, position: Int) {
             addressNumber.text = "Address #${position + 1}"
@@ -70,6 +74,18 @@ class AddressAdapter(
                 }
                 context.startActivity(intent)
             }
+
+            deleteAddressButton.setOnClickListener {
+                AlertDialog.Builder(itemView.context)
+                    .setTitle("Delete Address")
+                    .setMessage("Are you sure you want to delete this address?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        addressViewModel.deleteAddress(address.id)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+
 
         }
     }

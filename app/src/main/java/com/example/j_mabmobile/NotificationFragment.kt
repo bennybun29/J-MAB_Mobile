@@ -39,14 +39,17 @@ class NotificationFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerViewNotifications)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = NotificationAdapter(mutableListOf())
+
+        adapter = NotificationAdapter(mutableListOf()) { notificationId ->
+            viewModel.deleteNotification(notificationId) // Pass function reference
+        }
+
         recyclerView.adapter = adapter
 
-        // ✅ Correct observer setup (Only ONE observer)
+        // ✅ Observe notifications from ViewModel
         viewModel.notifications.observe(viewLifecycleOwner) { notifications ->
             adapter.updateData(notifications)
 
-            // Show empty icon if there are no notifications, else show RecyclerView
             if (notifications.isEmpty()) {
                 emptyIcon.visibility = View.VISIBLE
                 noOrdersYetTV.visibility = View.VISIBLE

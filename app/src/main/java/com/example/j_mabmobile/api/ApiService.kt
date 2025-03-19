@@ -8,6 +8,9 @@ import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.CheckoutRequest
 import com.example.j_mabmobile.model.CheckoutResponse
+import com.example.j_mabmobile.model.DeleteAddressRequest
+import com.example.j_mabmobile.model.DeleteAddressResponse
+import com.example.j_mabmobile.model.DeleteNotificationResponse
 import com.example.j_mabmobile.model.LogInRequest
 import com.example.j_mabmobile.model.MessageRequest
 import com.example.j_mabmobile.model.MessageResponse
@@ -30,9 +33,11 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -70,6 +75,12 @@ interface ApiService {
         @Body addressRequest: AddressRequest
     ): Call<UserProfileResponse>
 
+    @HTTP(method = "DELETE", path = "users/{userId}/addresses", hasBody = true)
+    fun deleteAddress(
+        @Path("userId") userId: Int,
+        @Body request: DeleteAddressRequest
+    ): Call<DeleteAddressResponse>
+
     // Product Methods
     @GET("products")
     fun getProducts(): Call<ProductResponse>
@@ -79,6 +90,9 @@ interface ApiService {
     suspend fun addToCart(
         @Body cartRequest: CartRequest
     ): Response<CartResponse>
+
+    @GET("products/{id}")
+    fun getProductById(@Path("id") productId: Int): Call<ProductResponse>
 
     @GET("carts/{user_id}")
     suspend fun getCartItemsSuspend(
@@ -139,8 +153,14 @@ interface ApiService {
 
     @PUT("notifications/read/{notification_id}")
     suspend fun markNotificationAsRead(
-        @Path("notification_id") notificationId: Int
+        @Path("notification_id") notificationId: Int,
+        @Body body: Any = emptyMap<String, Any>() // Sends {}
     ): Response<ReadStatusResponse>
+
+    @DELETE("notifications/{notification_id}")
+    fun deleteNotification(
+        @Path("notification_id") notificationId: Int
+    ): Call<DeleteNotificationResponse>
 
     //Ratings
     @GET("ratings/average/{product_id}")

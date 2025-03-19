@@ -409,12 +409,12 @@ class HomeFragment : Fragment() {
     private fun sortProductsByPrice(descending: Boolean) {
         filteredProducts = allProducts.filter {
             currentCategory == "All" || it.category.equals(currentCategory, ignoreCase = true)
-        }.sortedWith(compareBy<Product> { it.price }.let { if (descending) it.reversed() else it })
+        }.sortedWith(compareBy<Product> {
+            it.variants.firstOrNull()?.price?.toDoubleOrNull() ?: 0.0
+        }.let { if (descending) it.reversed() else it })
 
         updateRecyclerView()
     }
-
-
 
     private fun updateRecyclerView() {
         progressBar.visibility = View.GONE
@@ -423,16 +423,19 @@ class HomeFragment : Fragment() {
             recyclerView.visibility = View.GONE
             emptyMessage.visibility = View.VISIBLE
         } else if (filteredProducts.isEmpty() && allProducts.isEmpty()) {
-            // Initial state or no products at all - keep message hidden
             recyclerView.visibility = View.GONE
             emptyMessage.visibility = View.GONE
         } else {
-            // We have products to show
             recyclerView.visibility = View.VISIBLE
             emptyMessage.visibility = View.GONE
-            recyclerView.adapter = RecyclerAdapter(filteredProducts, userId)
+
+            val availableProducts = filteredProducts.filter {
+                it.variants.any { variant -> variant.stock > 0 }
+            }
+            recyclerView.adapter = RecyclerAdapter(availableProducts, userId)
         }
     }
+
 
 
 

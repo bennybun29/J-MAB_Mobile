@@ -8,8 +8,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Notification
 
-class NotificationAdapter(private val notifications: MutableList<Notification>) :
-    RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder>() {
+class NotificationAdapter(
+    private val notifications: MutableList<Notification>,
+    private val onDeleteNotification: (Int) -> Unit // Callback for deletion
+) : RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder>() {
 
     class NotificationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.notificationTitle)
@@ -29,8 +31,7 @@ class NotificationAdapter(private val notifications: MutableList<Notification>) 
         holder.message.text = notification.message
 
         holder.deleteButton.setOnClickListener {
-            notifications.removeAt(position)
-            notifyItemRemoved(position)
+            onDeleteNotification(notification.id)
         }
     }
 
@@ -41,4 +42,5 @@ class NotificationAdapter(private val notifications: MutableList<Notification>) 
         notifications.addAll(newNotifications)
         notifyDataSetChanged()
     }
+
 }

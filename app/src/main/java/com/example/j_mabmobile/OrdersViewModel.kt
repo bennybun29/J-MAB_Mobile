@@ -15,6 +15,11 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class OrdersViewModel(application: Application) : AndroidViewModel(application) {
+
+    //All Orders Chuchu
+    private val _allOrders = MutableLiveData<List<Order>>().apply { value = emptyList() }
+    val allOrders: LiveData<List<Order>> get() = _allOrders
+
     //To Pay Chuchu
     private val _toPayCount = MutableLiveData<Int>().apply { value = 0 }
     val toPayCount: LiveData<Int> get() = _toPayCount
@@ -66,6 +71,7 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
                         it.status == "failed delivery"  // Keep cancelled orders
                     }
 
+                    _allOrders.postValue(validOrders)
 
                     val toPayOrders = validOrders.filter {
                         (it.payment_status == "pending" && it.payment_method == "gcash") ||
@@ -121,6 +127,8 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
 
     private fun clearAllLists() {
+        _allOrders.postValue(emptyList())
+
         _toPayCount.postValue(0)
         _toPayOrders.postValue(emptyList())
 

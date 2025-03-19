@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Order
 import com.squareup.picasso.Picasso
 
-class OrdersAdapter(private val orders: MutableList<Order>) :
-    RecyclerView.Adapter<OrdersAdapter.OrderViewHolder>() {
+class ViewAllOrdersAdapter(private val orders: MutableList<Order>) :
+    RecyclerView.Adapter<ViewAllOrdersAdapter.OrderViewHolder>() {
 
     class OrderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val itemText: TextView = itemView.findViewById(R.id.item_text)
@@ -24,13 +24,12 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val productPrice: TextView = itemView.findViewById(R.id.productPriceTV)
         val itemImage: ImageView = itemView.findViewById(R.id.item_image)
         val status: TextView = itemView.findViewById(R.id.statusTV)
-        val order_status: TextView = itemView.findViewById(R.id.orderStatus)
-        val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
+        val orderStatus: TextView = itemView.findViewById(R.id.orderStatus)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.my_purchases_item_card, parent, false)
+            .inflate(R.layout.all_orders_item_card, parent, false) // Using the correct layout
         return OrderViewHolder(view)
     }
 
@@ -42,8 +41,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         holder.itemQuantity.text = boldText("Quantity: ", order.quantity.toString())
         holder.productPrice.text = boldText("Price: ", order.total_price.toString())
         holder.status.text = boldText("Payment Status: ", order.payment_status)
-        holder.order_status.text = boldText("Order Status: ", order.status)
-        holder.sizeTV.text = boldText("Size: ", order.variant_size)
+        holder.orderStatus.text = boldText("Order Status: ", order.status)
 
         Picasso.get()
             .load(order.product_image)
@@ -51,7 +49,6 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
             .error(R.drawable.jmab_logo)
             .into(holder.itemImage)
 
-        // Set click listener to pass data to OrderInfoActivity
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, OrderInfoActivity::class.java).apply {
@@ -71,7 +68,6 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
                 putExtra("PRODUCT_IMAGE", order.product_image)
                 putExtra("REQUEST_TIME", order.created_at)
                 putExtra("REFERENCE", order.reference_number)
-                putExtra("SIZE", order.variant_size)
             }
             context.startActivity(intent)
         }
@@ -83,6 +79,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         spannable.setSpan(StyleSpan(Typeface.BOLD), label.length, spannable.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spannable
     }
+
 
 
     override fun getItemCount(): Int {

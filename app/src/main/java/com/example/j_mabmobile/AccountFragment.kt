@@ -67,6 +67,7 @@ class AccountFragment : Fragment() {
     private lateinit var cancelledBadge: TextView
     lateinit var userFullAddressTV: TextView
     lateinit var editProfilePictureIcon: ImageButton
+    private lateinit var viewAllOrdersTV: TextView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +105,7 @@ class AccountFragment : Fragment() {
         toRateBadge = view.findViewById(R.id.toRateBadge)
         cancelledBadge = view.findViewById(R.id.cancelledBadge)
         userFullAddressTV = view.findViewById(R.id.userFullAddressTV)
+        viewAllOrdersTV = view.findViewById(R.id.viewAllOrdersTV)
         sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             when (key) {
@@ -195,7 +197,7 @@ class AccountFragment : Fragment() {
             Log.d("DEBUG", "AccountFragment - To-Receive Badge Updated: $count")
             if (count > 0) {
                 cancelledBadge.text = count.toString()
-                cancelledBadge.visibility = View.VISIBLE
+                cancelledBadge.visibility = View.GONE
             } else {
                 cancelledBadge.visibility = View.GONE
             }
@@ -238,6 +240,9 @@ class AccountFragment : Fragment() {
         }
         log_out_btn.setOnClickListener {
             showLogoutDialog()
+        }
+        viewAllOrdersTV.setOnClickListener{
+            startActivity(Intent(activity, ViewAllOrdersActivity::class.java))
         }
     }
 

@@ -36,6 +36,16 @@ data class AddressRequest(
     val addresses: List<UserAddresses>
 )
 
+data class DeleteAddressRequest(
+    val address_ids: List<Int>
+)
+
+data class DeleteAddressResponse(
+    val success: Boolean,
+    val message: String
+)
+
+
 @Parcelize
 data class UserAddresses(
     val id: Int,
@@ -62,23 +72,33 @@ data class ProductResponse(
     val products: List<Product>
 )
 
-
 data class Product(
     val product_id: Int,
     val name: String,
     val description: String,
     val category: String,
+    val subcategory: String?,
     val image_url: String,
-    val price: Double,
+    val model: String,
     val brand: String,
+    val created_at: String,
+    val updated_at: String,
+    val variants: List<Variant>
+)
+
+data class Variant(
+    val variant_id: Int,
+    val product_id: Int,
+    val price: String,
     val stock: Int,
-    val voltage: Int,
-    val size: String
+    val size: String,
+    val created_at: String,
+    val updated_at: String
 )
 
 data class CartRequest(
     val user_id: Int,
-    val product_id: Int,
+    val variant_id: Int,
     val quantity: Int,
 )
 
@@ -96,20 +116,25 @@ data class CartResponse(
 data class CartItem(
     val cart_id: Int,
     val user_id: Int,
+    val variant_id: Int,
+    val variant_price: String,  // Price is stored as a String in API response
+    val variant_stock: Int,
+    val variant_size: String,
+    val product_model: String,
     val product_id: Int,
     val product_name: String,
     val product_image: String,
-    val product_price: Double,
     val product_brand: String,
     val product_description: String,
-    val product_stock: Int,
     var quantity: Int,
+) : Parcelable {
+    val product_price: Double
+        get() = variant_price.toDoubleOrNull() ?: 0.0 // Convert variant_price safely
 
-
-    ) : Parcelable {
     val total_price: Double
         get() = quantity * product_price
 }
+
 
 data class UpdateProfileRequest(
     val first_name: String?,
@@ -161,7 +186,8 @@ data class Order(
     val product_name: String,
     val quantity: Int,
     val product_image: String,
-    val product_id: Int
+    val product_id: Int,
+    val variant_size: String
 )
 
 data class CancelOrderRequest(
@@ -197,6 +223,12 @@ data class NotificationResponse(
     val page: Int,
     val perPage: Int
 )
+
+data class DeleteNotificationResponse(
+    val success: Boolean,
+    val message: String
+)
+
 
 data class ReadStatusResponse(
     val success: Boolean,

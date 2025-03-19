@@ -38,6 +38,7 @@ class CartAdapter(
         val minusBtn: TextView = itemView.findViewById(R.id.minusBtn)
         val plusBtn: TextView = itemView.findViewById(R.id.plusBtn)
         val removeFromCartBtn: ImageButton = itemView.findViewById(R.id.removeFromCartBtn)
+        val itemSize: TextView = itemView.findViewById(R.id.item_size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CartViewHolder {
@@ -56,8 +57,9 @@ class CartAdapter(
 
         val updatedPrice = cartItem.product_price * cartItem.quantity
         val formattedPrice = formatPrice(updatedPrice)
-        holder.productPrice.text = "Price: ₱$formattedPrice"
+        holder.productPrice.text = "Price: ₱${cartItem.total_price}"
         holder.brand.text = "Brand: ${cartItem.product_brand}"
+        holder.itemSize.text = "Size: ${cartItem.variant_size}"
 
         Picasso.get()
             .load(cartItem.product_image)
@@ -82,13 +84,13 @@ class CartAdapter(
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
-                putExtra("product_id", cartItem.product_id)
+                putExtra("product_id", cartItem.variant_id)
                 putExtra("product_image_url", cartItem.product_image)
                 putExtra("product_name", cartItem.product_name)
                 putExtra("product_brand", cartItem.product_brand)
                 putExtra("product_price", cartItem.product_price)
                 putExtra("product_description", cartItem.product_description)
-                putExtra("product_stock", cartItem.product_stock)
+                putExtra("product_stock", cartItem.variant_stock)
                 putExtra("quantity", cartItem.quantity)
                 putExtra("jwt_token", token)
                 putExtra("user_id", userId)
@@ -108,7 +110,7 @@ class CartAdapter(
         }
 
         holder.plusBtn.setOnClickListener {
-            if (cartItem.quantity < cartItem.product_stock) {  // Check stock limit
+            if (cartItem.quantity < cartItem.variant_stock) {  // Check stock limit
                 cartItem.quantity++
                 holder.itemQuantity.text = "${cartItem.quantity}"
                 val updatedPrice = cartItem.product_price * cartItem.quantity

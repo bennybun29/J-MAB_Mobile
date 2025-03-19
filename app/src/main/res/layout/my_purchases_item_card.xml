@@ -54,12 +54,23 @@
             app:layout_constraintLeft_toRightOf="@id/item_image"/>
 
         <TextView
+            android:id="@+id/sizeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/item_brand"
+            app:layout_constraintLeft_toRightOf="@id/item_image"
+            android:text="Size:"
+            android:fontFamily="@font/cabin"
+            android:textSize="10sp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
             android:id="@+id/item_quantity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cabin"
-            android:textStyle="italic"
-            app:layout_constraintTop_toBottomOf="@id/item_brand"
+            app:layout_constraintTop_toBottomOf="@id/sizeTV"
             android:text="Quantity:"
             android:background="@drawable/bottom_options_border"
             android:textSize="8sp"
@@ -90,7 +101,6 @@
             app:layout_constraintLeft_toRightOf="@id/item_image"
             android:text="Status:"
             android:fontFamily="@font/cabin"
-            android:textStyle="italic"
             android:textSize="12sp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="4dp"/>
@@ -103,7 +113,6 @@
             app:layout_constraintLeft_toRightOf="@id/item_image"
             android:text="Order Status:"
             android:fontFamily="@font/cabin"
-            android:textStyle="italic"
             android:textSize="12sp"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="4dp"/>

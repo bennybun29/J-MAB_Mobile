@@ -121,7 +121,7 @@ object MessageWebSocketManager {
 object NotificationWebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private const val webSocketUrl = "ws://192.168.100.27:8081" // Use the notification-specific port
+    private const val webSocketUrl = "ws://192.168.41.183:8081" // Use the notification-specific port
     private var userId: Int = -1
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+
 class MyAddressesActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
@@ -51,8 +52,9 @@ class MyAddressesActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // ✅ Setup RecyclerView and Adapter
-        addressAdapter = AddressAdapter(mutableListOf(),
+// ✅ Setup RecyclerView and Adapter
+        addressAdapter = AddressAdapter(
+            mutableListOf(),
             onEditClick = { address ->
                 val intent = Intent(this, EditAddressActivity::class.java)
                 intent.putExtra("addressId", address.id)
@@ -62,7 +64,8 @@ class MyAddressesActivity : AppCompatActivity() {
                 // ✅ Automatically update the default address in API
                 addressViewModel.updateDefaultAddress(selectedAddress)
                 Toast.makeText(this, "Default address updated!", Toast.LENGTH_SHORT).show()
-            }
+            },
+            addressViewModel = addressViewModel // Add this parameter
         )
 
         recyclerView.layoutManager = LinearLayoutManager(this)

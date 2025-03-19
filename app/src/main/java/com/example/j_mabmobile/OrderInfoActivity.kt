@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
@@ -56,7 +57,7 @@ class OrderInfoActivity : AppCompatActivity() {
     private lateinit var stars: Array<ImageView>
     private var selectedRating = 0f
     private lateinit var topCardView: CardView
-
+    private lateinit var item_size: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_info)
@@ -98,6 +99,7 @@ class OrderInfoActivity : AppCompatActivity() {
         contactSeller = findViewById(R.id.contactSeller)
         etaTV = findViewById(R.id.etaTV)
         topCardView = findViewById(R.id.topCardView)
+        item_size = findViewById(R.id.item_size)
 
         // Retrieve data from intent
         val orderID = intent.getIntExtra("ORDER_ID", 0)
@@ -105,7 +107,8 @@ class OrderInfoActivity : AppCompatActivity() {
         val productBrand = intent.getStringExtra("PRODUCT_BRAND") ?: "N/A"
         val quantity = intent.getIntExtra("QUANTITY", 0)
         val totalPrice = intent.getDoubleExtra("TOTAL_PRICE", 0.0)
-        val paymentMethod = intent.getStringExtra("PAYMENT_METHOD") ?: "N/A"
+        val rawPaymentMethod = intent.getStringExtra("PAYMENT_METHOD") ?: "N/A"
+        val paymentMethod = if (rawPaymentMethod.equals("cod", ignoreCase = true)) "Cash On Delivery" else rawPaymentMethod
         val paymentStatus = intent.getStringExtra("PAYMENT_STATUS") ?: "N/A"
         val orderStatus = intent.getStringExtra("ORDER_STATUS") ?: "N/A"
         val productImage = intent.getStringExtra("PRODUCT_IMAGE") ?: ""
@@ -114,25 +117,32 @@ class OrderInfoActivity : AppCompatActivity() {
         val city = intent.getStringExtra("CITY") ?: "N/A"
         val reference = intent.getStringExtra("REFERENCE") ?: "N/A"
         val requestTimeRaw = intent.getStringExtra("REQUEST_TIME") ?: "N/A"
-        val formattedEtaTime = formatRequestTime(requestTimeRaw)
-        setBoldText(etaTV, formattedEtaTime)
+        val size = intent.getStringExtra("SIZE")?: "N/A"
+        val formattedRequestTime = formatRequestTime(requestTimeRaw)
+        requestTimeTV.text = boldText(formattedRequestTime)
+        val etaTime = calculateEta(requestTimeRaw)
+        setBoldText(etaTV, etaTime)
 
         // Format requestTime
-        val formattedRequestTime = formatRequestTime(requestTimeRaw)
 
-        // Set values to UI components
-        productNameTV.text = productName
-        productBrandTV.text = "Brand: $productBrand"
-        quantityTV.text = "Quantity: $quantity"
-        totalPriceTV.text = "Total Price: ₱$totalPrice"
-        address.text = "$homeAddress, $baranggay, $city, Pangasinan"
+// Apply bold formatting and capitalize the values
+        productNameTV.text = boldText(productName)
+        productBrandTV.text = boldText("Brand: ${productBrand}")
+        quantityTV.text = boldText("Quantity: ${quantity.toString()}")
+        item_size.text = boldText("Size: ${size}")
+        totalPriceTV.text = boldText("₱$totalPrice")
+        paymentMethodTV.text = boldText(paymentMethod)
+        paymentStatusTV.text = boldText(paymentStatus)
+        orderStatusTV.text = boldText(orderStatus)
+        referenceID.text = boldTextOnly(reference)  // Keep original formatting (bold only, no capitalization)
+        requestTimeTV.text = boldText(formattedRequestTime)
 
-        // Set bold text for selected fields
-        setBoldText(referenceID, reference)
-        setBoldText(requestTimeTV, formattedRequestTime)
-        setBoldText(paymentMethodTV, paymentMethod)
-        setBoldText(paymentStatusTV, paymentStatus)
-        setBoldText(orderStatusTV, orderStatus)
+// Format and capitalize the address properly
+        val formattedAddress = listOf(homeAddress, baranggay, city, "Pangasinan")
+            .joinToString(", ") { it.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() } }
+        address.text = boldText(formattedAddress)
+
+
 
         // Hide buttons if order is cancelled or payment failed
         if (orderStatus.equals("cancelled", ignoreCase = true) ||
@@ -275,10 +285,23 @@ class OrderInfoActivity : AppCompatActivity() {
         })
     }
 
+    // For request time formatting only (no days added)
     private fun formatRequestTime(rawTime: String): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) // Date only format
+            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            val date = inputFormat.parse(rawTime)
+            date?.let { outputFormat.format(it) } ?: rawTime
+        } catch (e: Exception) {
+            rawTime
+        }
+    }
+
+    // For ETA calculation (adding 5 days)
+    private fun calculateEta(rawTime: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
             val calendar = Calendar.getInstance()
             val date = inputFormat.parse(rawTime)
@@ -286,7 +309,7 @@ class OrderInfoActivity : AppCompatActivity() {
             if (date != null) {
                 calendar.time = date
                 calendar.add(Calendar.DAY_OF_MONTH, 5) // Add 5 days
-                outputFormat.format(calendar.time) // Return only date
+                outputFormat.format(calendar.time)
             } else {
                 rawTime
             }
@@ -317,6 +340,19 @@ class OrderInfoActivity : AppCompatActivity() {
                 stars[i].setImageResource(R.drawable.unfilled_star)
             }
         }
+    }
+
+    private fun boldText(value: String): SpannableString {
+        val capitalizedValue = value.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+        val spannable = SpannableString(capitalizedValue)
+        spannable.setSpan(StyleSpan(Typeface.BOLD), 0, capitalizedValue.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        return spannable
+    }
+
+    private fun boldTextOnly(value: String): SpannableString {
+        val spannable = SpannableString(value)
+        spannable.setSpan(StyleSpan(Typeface.BOLD), 0, value.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        return spannable
     }
 
 }

@@ -20,6 +20,7 @@ class CheckoutAdapter(private val checkoutItems: List<CartItem>) :
         val itemPrice: TextView = itemView.findViewById(R.id.productPriceTV)
         val itemImage: ImageView = itemView.findViewById(R.id.item_image)
         val itemBrand: TextView = itemView.findViewById(R.id.item_brand)
+        val itemSize: TextView = itemView.findViewById(R.id.item_size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CheckoutViewHolder {
@@ -39,10 +40,10 @@ class CheckoutAdapter(private val checkoutItems: List<CartItem>) :
         }
 
         holder.itemName.text = checkoutItem.product_name
-        holder.itemQuantity.text = "Qty: ${checkoutItem.quantity}"
+        holder.itemQuantity.text = "Quantity: ${checkoutItem.quantity}"
         holder.itemPrice.text = "₱$formattedPrice"
         holder.itemBrand.text = "Brand: ${checkoutItem.product_brand}"
-
+        holder.itemSize.text = "Size: ${checkoutItem.variant_size}"
         Picasso.get()
             .load(checkoutItem.product_image)
             .placeholder(R.drawable.jmab_fab)
