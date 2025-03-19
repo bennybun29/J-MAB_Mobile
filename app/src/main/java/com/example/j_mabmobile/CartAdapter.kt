@@ -84,7 +84,8 @@ class CartAdapter(
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
-                putExtra("product_id", cartItem.variant_id)
+                putExtra("product_id", cartItem.product_id)
+                putExtra("variant_id", cartItem.variant_id)
                 putExtra("product_image_url", cartItem.product_image)
                 putExtra("product_name", cartItem.product_name)
                 putExtra("product_brand", cartItem.product_brand)

@@ -42,6 +42,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.j_mabmobile.model.ProductResponse
+import com.example.j_mabmobile.model.RatingByIDResponse
+import com.example.j_mabmobile.model.RatingResponse
 import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
@@ -68,6 +70,9 @@ class ProductScreenActivity : AppCompatActivity() {
     private lateinit var imageCountTextView: TextView
     private lateinit var backButton: TextView
     private var selectedVariantId: Int = 0
+    private lateinit var ratingText: TextView
+    private var productId: Int = 0
+    private var token: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,17 +91,12 @@ class ProductScreenActivity : AppCompatActivity() {
         val productDescription: TextView = findViewById(R.id.item_description)
         val productStock: TextView = findViewById(R.id.stock_text)
         val productBrand: TextView = findViewById(R.id.brand_text)
-        val productVariation: TextView = findViewById(R.id.variationTV)
         val backBtn: ImageButton = findViewById(R.id.backBtn)
         val addToCartBtn: LinearLayout = findViewById(R.id.addToCartBtn)
         val cartBtn: ImageButton = findViewById(R.id.cartBtn)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
-        val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
-        val ratingText: TextView = findViewById(R.id.rating_text)
-        val chooseVariationAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.chooseVariationAutoCompleteTextView)
-        val chooseVariationTextInputLayout = findViewById<TextInputLayout>(R.id.chooseVariationTextInputLayout)
+        ratingText = findViewById(R.id.rating_text)
         val goToCartButton: Button = findViewById(R.id.goToCartButton)
-        val circularButton: ImageButton = findViewById(R.id.chatSellerForThisProduct)
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         val fromRecommended = intent.getBooleanExtra("from_recommended", false)
         val cardView = findViewById<CardView>(R.id.cardView)
@@ -112,6 +112,10 @@ class ProductScreenActivity : AppCompatActivity() {
         shimmerLayout = findViewById(R.id.shimmerLayout)
         bottomSheetBehavior = BottomSheetBehavior.from(cardView)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+
+        // Get the product ID from intent
+        productId = intent.getIntExtra("product_id", 0)
+        token = intent.getStringExtra("jwt_token")
 
         setupBottomSheetBehavior()
 
@@ -145,28 +149,139 @@ class ProductScreenActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val productId = intent.getIntExtra("product_id", 0)
-        val variant_id = intent.getIntExtra("variant_id", 0)
-        selectedVariantId = variant_id
-        val imageUrl = intent.getStringExtra("product_image_url")
-        val name = intent.getStringExtra("product_name")
-        val description = intent.getStringExtra("product_description")
-        val stock = intent.getIntExtra("product_stock", 0)
-        val brand = intent.getStringExtra("product_brand")
-        val category = intent.getStringExtra("product_category")
-        val price = intent.getDoubleExtra("product_price", 0.0)
-        val token = intent.getStringExtra("jwt_token")
-        val ratings = intent.getFloatExtra("product_rating", 0f)
-        val hasVariants = intent.getBooleanExtra("has_variants", false)
-        val productVariants = intent.getStringArrayListExtra("product_variants") ?: arrayListOf()
-        val size = intent.getStringExtra("size")
-        val variantMap = intent.getSerializableExtra("variant_map") as? HashMap<String, Triple<Int, Double, Int>> ?: hashMapOf()
+        // Fetch product details using the API instead of intent
+        fetchProductDetails(productId)
 
-        if (hasVariants && productVariants.isNotEmpty()) {
+        // Initialize the buy now button click handler
+        initializeBuyNowButton()
+
+        // Placeholder text while loading
+        productName.text = "Loading..."
+        productDescription.text = "Loading..."
+        productStock.text = "Stock: ..."
+        productBrand.text = "Brand: ..."
+        priceTextView.text = "₱ ..."
+        ratingText.text = "⭐ Loading ratings..."
+
+        // Initialize quantity buttons
+        var hasShownMaxStockToast = false
+
+        plusBtn.setOnClickListener {
+            val currentStock = productStock.text.toString().replace("Stock: ", "").toIntOrNull() ?: 0
+
+            if (quantity < currentStock) {
+                quantity++
+                quantityText.text = quantity.toString()
+                hasShownMaxStockToast = false
+            } else {
+                if (!hasShownMaxStockToast) {
+                    Toast.makeText(this, "Max stock reached ($currentStock available)", Toast.LENGTH_SHORT).show()
+                    hasShownMaxStockToast = true
+                }
+            }
+        }
+
+        minusBtn.setOnClickListener {
+            if (quantity > 1) {
+                quantity--
+                quantityText.text = quantity.toString()
+            }
+        }
+
+        addToCartBtn.setOnClickListener {
+            token?.let {
+                addToCart(userId, selectedVariantId, quantity, it)
+            }
+        }
+
+        backButton.setOnClickListener {
+            hideAddToCartOverlay()
+        }
+
+        overlayBackground.setOnClickListener {
+            hideAddToCartOverlay()
+        }
+
+        goToCartButton.setOnClickListener {
+            val intent = Intent(this, CartActivity::class.java)
+            startActivity(intent)
+        }
+
+        Log.d("ProductScreenActivity", "User ID: $userId")
+        Log.d("ProductScreenActivity", "Token: $token")
+        Log.d("ProductScreenActivity", "Product ID: $productId")
+    }
+
+    private fun fetchProductDetails(productId: Int) {
+        if (productId <= 0) {
+            Toast.makeText(this, "Invalid product ID", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // Show loading state
+        shimmerLayout.visibility = View.VISIBLE
+        shimmerLayout.startShimmer()
+
+        apiService.getProductById(productId).enqueue(object : Callback<ProductResponse> {
+            override fun onResponse(call: Call<ProductResponse>, response: Response<ProductResponse>) {
+                shimmerLayout.stopShimmer()
+                shimmerLayout.visibility = View.GONE
+
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val products = response.body()?.products
+                    if (products != null && products.isNotEmpty()) {
+                        val product = products[0]
+                        displayProductDetails(product)
+                    } else {
+                        Toast.makeText(this@ProductScreenActivity, "Product not found", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                } else {
+                    Toast.makeText(this@ProductScreenActivity, "Failed to load product details", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+
+            override fun onFailure(call: Call<ProductResponse>, t: Throwable) {
+                shimmerLayout.stopShimmer()
+                shimmerLayout.visibility = View.GONE
+                Toast.makeText(this@ProductScreenActivity, "Error: ${t.localizedMessage}", Toast.LENGTH_SHORT).show()
+                Log.e("ProductScreenActivity", "API call failed", t)
+                finish()
+            }
+        })
+    }
+
+    private fun displayProductDetails(product: Product) {
+        val productName: TextView = findViewById(R.id.item_text)
+        val productDescription: TextView = findViewById(R.id.item_description)
+        val productStock: TextView = findViewById(R.id.stock_text)
+        val productBrand: TextView = findViewById(R.id.brand_text)
+        val productVariation: TextView = findViewById(R.id.variationTV)
+        val priceTextView: TextView = findViewById(R.id.priceTextView)
+        val chooseVariationAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.chooseVariationAutoCompleteTextView)
+        val chooseVariationTextInputLayout = findViewById<TextInputLayout>(R.id.chooseVariationTextInputLayout)
+        val circularButton: ImageButton = findViewById(R.id.chatSellerForThisProduct)
+
+        // Set basic product details
+        productName.text = product.name
+        productDescription.text = product.description
+        productBrand.text = "Brand: ${product.brand}"
+
+        // Handle variants
+        val variants = product.variants
+        val hasVariants = variants.isNotEmpty()
+
+        if (hasVariants) {
             // Filter out variants with zero stock
-            val availableVariants = productVariants.filter { variantName ->
-                val variantDetails = variantMap[variantName]
-                variantDetails?.third ?: 0 > 0
+            val availableVariants = variants.filter { it.stock > 0 }.map { it.size ?: "Default" }
+
+            val variantMap = HashMap<String, Triple<Int, Double, Int>>()
+            variants.forEach { variant ->
+                val variantName = variant.size ?: "Default"
+                val price = variant.price.toDoubleOrNull() ?: 0.0  // Convert price safely
+                variantMap[variantName] = Triple(variant.variant_id, price, variant.stock)
             }
 
             if (availableVariants.isNotEmpty()) {
@@ -187,7 +302,7 @@ class ProductScreenActivity : AppCompatActivity() {
                     val newStock = defaultVariantDetails.third // Get stock
 
                     // Update UI
-                    priceTextView.text = "₱${String.format("%.2f", newPrice)}"
+                    priceTextView.text = "₱${formatPrice(newPrice)}"
                     productStock.text = "Stock: $newStock"
 
                     Log.d("ProductScreenActivity", "Default Variant: $defaultVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
@@ -206,7 +321,7 @@ class ProductScreenActivity : AppCompatActivity() {
                         quantityText.text = quantity.toString()
 
                         // Update UI
-                        priceTextView.text = "₱${String.format("%.2f", newPrice)}"
+                        priceTextView.text = "₱${formatPrice(newPrice)}"
                         productStock.text = "Stock: $newStock"
 
                         Log.d("ProductScreenActivity", "Selected Variant: $selectedVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
@@ -220,17 +335,45 @@ class ProductScreenActivity : AppCompatActivity() {
                 chooseVariationTextInputLayout.visibility = View.GONE
             }
         } else {
+            // Product has no variants, use the main product details
             productVariation.visibility = View.VISIBLE
             chooseVariationAutoCompleteTextView.visibility = View.GONE
             chooseVariationTextInputLayout.visibility = View.GONE
+
+            // If there are no variants, we should still set a default variant ID
+            // This is assuming the product itself has a variant_id field or the first variant is the default
+            selectedVariantId = if (variants.isNotEmpty()) variants[0].variant_id else 0
+
+            // Set price and stock from the first/default variant or from product itself
+            val price = if (variants.isNotEmpty()) variants[0].price.toDoubleOrNull() ?: 0.0 else 0.0
+            val stock = if (variants.isNotEmpty()) variants[0].stock else 0
+
+            priceTextView.text = "₱${formatPrice(price)}"
+            productStock.text = "Stock: $stock"
         }
 
+        // Set up image carousel
+        val imageUrls = listOf(product.image_url, product.image_url, product.image_url)
+        val adapter = ImageCarouselAdapter(imageUrls)
+        imageCarousel.adapter = adapter
+
+        imageCountTextView.text = "1/${imageUrls.size}"
+
+        imageCarousel.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                imageCountTextView.text = "${position + 1}/${imageUrls.size}"
+            }
+        })
+
+        // Set up chat seller button
         circularButton.setOnClickListener {
-            val productNameToSend = name ?: "Unknown Product"  // Fallback if name is null
-            val productIdToSend = variant_id ?: ""
+            val productNameToSend = product.name
+            val productIdToSend = selectedVariantId
+
             Log.d("ProductScreen", "Sending product name to MessagesFragment: $productNameToSend")
 
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this@ProductScreenActivity, MainActivity::class.java)
             intent.putExtra("OPEN_FRAGMENT", "MESSAGE")
             intent.putExtra("FROM_PRODUCT_SCREEN", true)
             intent.putExtra("PRODUCT_NAME", productNameToSend)
@@ -238,6 +381,13 @@ class ProductScreenActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
+
+        // Fetch ratings
+        fetchAndDisplayRatings(productId)
+    }
+
+    private fun initializeBuyNowButton() {
+        val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
 
         buyNowBtn.setOnClickListener {
             token?.let {
@@ -276,7 +426,7 @@ class ProductScreenActivity : AppCompatActivity() {
                         }
 
                         // If not in cart, proceed to buy now
-                        val cartRequest = CartRequest(userId, selectedVariantId, quantity)  // Use selectedVariantId
+                        val cartRequest = CartRequest(userId, selectedVariantId, quantity)
                         val response = apiService.addToCart(cartRequest)
 
                         if (response.isSuccessful && response.body()?.success == true) {
@@ -307,80 +457,6 @@ class ProductScreenActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-        productName.text = name
-        productDescription.text = description
-        productStock.text = "Stock Available: $stock"
-        productBrand.text = "Brand: $brand"
-        priceTextView.text = "₱ ${formatPrice(price)}"
-        ratingText.text = if (ratings == 0.0f) "⭐ No ratings yet" else "⭐ $ratings"
-
-        var hasShownMaxStockToast = false
-
-        plusBtn.setOnClickListener {
-            val currentStock = productStock.text.toString().replace("Stock: ", "").toIntOrNull() ?: stock
-
-            if (quantity < currentStock) {
-                quantity++
-                quantityText.text = quantity.toString()
-                hasShownMaxStockToast = false
-            } else {
-                if (!hasShownMaxStockToast) {
-                    Toast.makeText(this, "Max stock reached ($currentStock available)", Toast.LENGTH_SHORT).show()
-                    hasShownMaxStockToast = true
-                }
-            }
-        }
-
-
-        minusBtn.setOnClickListener {
-            if (quantity > 1) {
-                quantity--
-                quantityText.text = quantity.toString()
-            }
-        }
-
-        addToCartBtn.setOnClickListener {
-            token?.let {
-                addToCart(userId, selectedVariantId, quantity, it)  // Use selectedVariantId instead of variant_id
-            }
-        }
-
-        backButton.setOnClickListener {
-            hideAddToCartOverlay()
-        }
-
-        overlayBackground.setOnClickListener {
-            hideAddToCartOverlay()
-        }
-
-        goToCartButton.setOnClickListener {
-            val intent = Intent(this, CartActivity::class.java)
-            startActivity(intent)
-        }
-
-        val imageUrls = listOf(
-            imageUrl ?: "",
-            imageUrl ?: "",
-            imageUrl ?: ""
-        )
-
-        val adapter = ImageCarouselAdapter(imageUrls)
-        imageCarousel.adapter = adapter
-
-        imageCountTextView.text = "1/${imageUrls.size}"
-
-        imageCarousel.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                super.onPageSelected(position)
-                imageCountTextView.text = "${position + 1}/${imageUrls.size}"
-            }
-        })
-
-        Log.d("ProductScreenActivity", "User ID: $userId")
-        Log.d("ProductScreenActivity", "Token: $token")
-        Log.d("ProductScreenActivity", "Product ID: $variant_id")
     }
 
     override fun onResume() {
@@ -455,13 +531,17 @@ class ProductScreenActivity : AppCompatActivity() {
         Log.d("DEBUG", "Token being sent: $token")
         Log.d("DEBUG", "User ID: $userId, Product ID: $productId, Quantity: $quantity")
 
-        val cartRequest = CartRequest(userId, selectedVariantId, quantity)  // Use selectedVariantId
+        val cartRequest = CartRequest(userId, selectedVariantId, quantity)
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 // Fetch the current cart items first
                 val cartResponse = apiService.getCartItemsSuspend(userId)
-                val productStock = intent.getIntExtra("product_stock", 0)
+
+                // Get current stock from product stock text view
+                val currentStockText = findViewById<TextView>(R.id.stock_text).text.toString()
+                val productStock = currentStockText.replace("Stock: ", "").toIntOrNull() ?: 0
+
                 if (cartResponse.isSuccessful) {
                     val cartItems = cartResponse.body()?.cart ?: emptyList()
                     val existingCartItem = cartItems.find { it.variant_id == selectedVariantId }
@@ -477,7 +557,6 @@ class ProductScreenActivity : AppCompatActivity() {
                         ).show()
                         return@launch
                     }
-
                 }
 
                 // Now proceed with adding to cart
@@ -567,5 +646,49 @@ class ProductScreenActivity : AppCompatActivity() {
         } else {
             "%.2f".format(price)
         }
+    }
+
+    private fun fetchAndDisplayRatings(productId: Int) {
+        if (productId <= 0) {
+            ratingText.text = "⭐ No ratings yet"
+            return
+        }
+
+        // Call the API to get ratings
+        apiService.getRatingByProductId(productId).enqueue(object : Callback<RatingResponse> {
+            override fun onResponse(call: Call<RatingResponse>, response: Response<RatingResponse>) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val ratingResponse = response.body()
+                    if (ratingResponse != null && ratingResponse.ratings.isNotEmpty()) {
+                        // Calculate average rating if there are multiple ratings
+                        val averageRating = ratingResponse.ratings.map { it.rating }.average().toFloat()
+
+                        // Update UI with the fetched rating
+                        runOnUiThread {
+                            if (averageRating == 0f) {
+                                ratingText.text = "⭐ No ratings yet"
+                            } else {
+                                ratingText.text = "⭐ ${String.format("%.1f", averageRating)}"
+                            }
+                        }
+
+                        // Log the rating for debugging
+                        Log.d("ProductScreenActivity", "Ratings fetched: ${ratingResponse.ratings.size} ratings, average: $averageRating for product $productId")
+                    } else {
+                        ratingText.text = "⭐ No ratings yet"
+                    }
+                } else {
+                    // Handle error
+                    ratingText.text = "⭐ No ratings yet"
+                    Log.e("ProductScreenActivity", "Error fetching ratings: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<RatingResponse>, t: Throwable) {
+                // Handle failure
+                ratingText.text = "⭐ No ratings yet"
+                Log.e("ProductScreenActivity", "Failed to fetch ratings: ${t.message}")
+            }
+        })
     }
 }

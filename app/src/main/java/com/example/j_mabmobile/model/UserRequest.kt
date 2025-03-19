@@ -1,6 +1,8 @@
 package com.example.j_mabmobile.model
 
 import android.os.Parcelable
+import com.example.j_mabmobile.api.ProductListDeserializer
+import com.google.gson.annotations.JsonAdapter
 import kotlinx.android.parcel.Parcelize
 
 
@@ -69,6 +71,7 @@ data class LogInRequest(
 
 data class ProductResponse(
     val success: Boolean,
+    @JsonAdapter(ProductListDeserializer::class)
     val products: List<Product>
 )
 

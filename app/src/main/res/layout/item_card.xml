@@ -31,7 +31,8 @@
         android:gravity="left"
         android:text="Sample Text"
         android:textColor="@color/j_mab_blue"
-        android:textSize="16sp" />
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -39,15 +40,18 @@
         android:id="@+id/item_price"
         android:fontFamily="@font/dmsans"
         android:text="Sample Price"
-        android:layout_gravity="left" />
+        android:layout_gravity="left"
+        android:textSize="10sp"/>
 
     <TextView
         android:id="@+id/ratingsTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="  0 RATINGS"
+        android:text="No Ratings Yet"
         android:fontFamily="@font/dmsans"
-        android:paddingBottom="8dp"/>
+        android:paddingBottom="8dp"
+        android:textSize="10sp"
+        />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

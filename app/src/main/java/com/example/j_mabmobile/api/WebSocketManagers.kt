@@ -15,18 +15,42 @@ import java.util.concurrent.TimeUnit
 object MessageWebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private const val webSocketUrl = "ws://192.168.100.27:8080"
+    private var isConnecting = false
+    private const val webSocketUrl = "ws://192.168.0.30:8080"
     private var userId: Int = -1
+    private val handler = Handler(Looper.getMainLooper())
+    private var reconnectAttempts = 0
+    private val maxReconnectAttempts = 5
 
     var messageListener: ((Message) -> Unit)? = null  // Callback for new messages
 
-    fun connect(userId: Int) {
-        if (isConnected) return
-        this.userId = userId
+    private val client = OkHttpClient.Builder()
+        .readTimeout(0, TimeUnit.MILLISECONDS)
+        .retryOnConnectionFailure(true)
+        .build()
 
-        val client = OkHttpClient.Builder()
-            .readTimeout(0, TimeUnit.MILLISECONDS)
-            .build()
+    @Synchronized
+    fun connect(userId: Int) {
+        Log.d("WebSocket", "connect called for userId: $userId, isConnected: $isConnected, isConnecting: $isConnecting")
+        if (isConnected || isConnecting) {
+            Log.d("WebSocket", "Already connected or connecting, skipping new connection")
+            return
+        }
+
+        if (userId == -1) {
+            Log.e("WebSocket", "Invalid user ID")
+            return
+        }
+
+        // Close any existing connection to ensure only one is active
+        if (webSocket != null) {
+            Log.d("WebSocket", "Closing existing WebSocket before new connection")
+            webSocket?.close(1000, "Replacing old connection")
+            webSocket = null
+        }
+
+        isConnecting = true
+        this.userId = userId
 
         val request = Request.Builder().url(webSocketUrl).build()
 
@@ -34,6 +58,8 @@ object MessageWebSocketManager {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 super.onOpen(webSocket, response)
                 isConnected = true
+                isConnecting = false
+                reconnectAttempts = 0 // Reset on successful connection
                 Log.d("WebSocket", "Connection opened for userId: $userId")
                 val authMessage = JSONObject().apply {
                     put("userId", userId)
@@ -42,11 +68,11 @@ object MessageWebSocketManager {
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Log.d("WebSocket", "Message received: $text");
+                Log.d("WebSocket", "Message received: $text")
                 try {
-                    val messageJson = JSONObject(text);
+                    val messageJson = JSONObject(text)
                     if (messageJson.has("type") && messageJson.getString("type") == "auth") {
-                        return;
+                        return
                     }
                     val message = Message(
                         id = messageJson.optInt("id"),
@@ -56,10 +82,12 @@ object MessageWebSocketManager {
                         timestamp = messageJson.optString("timestamp"),
                         status = messageJson.optString("status"),
                         is_read = messageJson.optInt("is_read", 0)
-                    );
-                    messageListener?.invoke(message);
+                    )
+                    handler.post { // Post to main thread
+                        messageListener?.invoke(message)
+                    }
                 } catch (e: Exception) {
-                    Log.e("WebSocket", "Error parsing message: ${e.message}");
+                    Log.e("WebSocket", "Error parsing message: ${e.message}")
                 }
             }
 
@@ -67,26 +95,41 @@ object MessageWebSocketManager {
                 super.onFailure(webSocket, t, response)
                 Log.e("WebSocket", "Connection failed: ${t.message}")
                 isConnected = false
-
-                // Reconnect after a delay
-                Handler(Looper.getMainLooper()).postDelayed({
-                    connect(userId)
-                }, 5000)
+                isConnecting = false
+                scheduleReconnect()
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 super.onClosed(webSocket, code, reason)
                 Log.d("WebSocket", "Connection closed: $reason")
                 isConnected = false
-
-                // Reconnect if the connection was closed unexpectedly
-                if (code != 1000) { // 1000 is a normal closure
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        connect(userId)
-                    }, 5000)
+                isConnecting = false
+                if (code != 1000) { // Reconnect if not a normal closure
+                    scheduleReconnect()
                 }
             }
         })
+    }
+
+    private fun scheduleReconnect() {
+        if (reconnectAttempts >= maxReconnectAttempts) {
+            Log.e("WebSocket", "Max reconnect attempts reached for userId: $userId")
+            return
+        }
+
+        val delay = (5000L * (reconnectAttempts + 1)) // Exponential backoff: 5s, 10s, 15s, etc.
+        reconnectAttempts++
+        Log.d("WebSocket", "Scheduling reconnect for userId: $userId, attempt $reconnectAttempts, delay: $delay ms")
+        handler.postDelayed({
+            connect(userId)
+        }, delay)
+    }
+
+    fun reconnectIfNeeded() {
+        if (!isConnected && !isConnecting && userId != -1) {
+            Log.d("WebSocket", "Reconnecting as connection is down for userId: $userId")
+            connect(userId)
+        }
     }
 
     fun sendMessage(text: String, userId: Int, receiverId: Int) {
@@ -100,19 +143,31 @@ object MessageWebSocketManager {
             put("is_read", 0)
         }.toString()
 
-        webSocket?.send(messageJson)
+        if (webSocket != null && isConnected) {
+            webSocket?.send(messageJson)
+            Log.d("WebSocket", "Message sent: $messageJson")
+        } else {
+            Log.w("WebSocket", "Cannot send message, WebSocket not connected")
+            reconnectIfNeeded() // Attempt to reconnect if needed
+        }
     }
 
     fun closeConnection() {
+        Log.d("WebSocket", "Closing WebSocket connection")
         webSocket?.close(1000, "Closing WebSocket")
         webSocket = null
         isConnected = false
+        isConnecting = false
+        reconnectAttempts = 0
+        handler.removeCallbacksAndMessages(null) // Cancel any pending reconnects
     }
 
     fun reset() {
+        Log.d("WebSocket", "Resetting WebSocketManager")
         closeConnection()
         webSocket = null
         isConnected = false
+        isConnecting = false
         userId = -1
         messageListener = null
     }
@@ -121,7 +176,7 @@ object MessageWebSocketManager {
 object NotificationWebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private const val webSocketUrl = "ws://192.168.41.183:8081" // Use the notification-specific port
+    private const val webSocketUrl = "ws://192.168.0.30:8081" // Use the notification-specific port
     private var userId: Int = -1
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)

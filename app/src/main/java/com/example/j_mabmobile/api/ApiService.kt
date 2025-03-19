@@ -166,8 +166,8 @@ interface ApiService {
     @GET("ratings/average/{product_id}")
     fun getAverageRating(@Path("product_id") productId: Int): Call<AverageRatingResponse>
 
-    @GET("ratings/{product_id}")
-    fun getRatingByProductId(@Path("product_id") productId: Int): Call<RatingByIDResponse>
+    @GET("ratings/product/{product_id}")
+    fun getRatingByProductId(@Path("product_id") productId: Int): Call<RatingResponse>
 
 
     @POST("ratings")
