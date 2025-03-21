@@ -14,6 +14,17 @@ data class ApiResponse(
     val user: User?,
 )
 
+data class AdminResponse(
+    val success: Boolean,
+    val admins: List<AdminInfo>
+)
+
+data class AdminInfo(
+    val id: Int,
+    val first_name: String,
+    val last_name: String
+)
+
 data class User(
     val first_name: String?,
     val last_name: String?,

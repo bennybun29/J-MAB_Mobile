@@ -56,7 +56,6 @@ class CartAdapter(
         holder.itemQuantity.text = "${cartItem.quantity}"
 
         val updatedPrice = cartItem.product_price * cartItem.quantity
-        val formattedPrice = formatPrice(updatedPrice)
         holder.productPrice.text = "Price: ₱${cartItem.total_price}"
         holder.brand.text = "Brand: ${cartItem.product_brand}"
         holder.itemSize.text = "Size: ${cartItem.variant_size}"
@@ -86,15 +85,9 @@ class CartAdapter(
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
                 putExtra("product_id", cartItem.product_id)
                 putExtra("variant_id", cartItem.variant_id)
-                putExtra("product_image_url", cartItem.product_image)
-                putExtra("product_name", cartItem.product_name)
-                putExtra("product_brand", cartItem.product_brand)
-                putExtra("product_price", cartItem.product_price)
-                putExtra("product_description", cartItem.product_description)
-                putExtra("product_stock", cartItem.variant_stock)
-                putExtra("quantity", cartItem.quantity)
                 putExtra("jwt_token", token)
                 putExtra("user_id", userId)
+                putExtra("from_cart", true)
             }
             context.startActivity(intent)
         }

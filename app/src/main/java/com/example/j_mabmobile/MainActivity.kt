@@ -6,13 +6,18 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.databinding.ActivityMainBinding
+import com.google.android.material.bottomnavigation.BottomNavigationItemView
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 
 class MainActivity : AppCompatActivity() {
 
@@ -186,12 +191,7 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNavigation.selectedItemId = R.id.home_btn
         }
         else {
-            AlertDialog.Builder(this)
-                .setTitle("Close J-MAB")
-                .setMessage("Are you sure you want close the app?")
-                .setPositiveButton("Yes") { _, _ -> super.onBackPressed() }
-                .setNegativeButton("Cancel", null)
-                .show()
+            showCustomLogoutDialog()
         }
     }
 
@@ -292,19 +292,55 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateNotificationIcon(hasUnread: Boolean) {
-        val menuItem = binding.bottomNavigation.menu.findItem(R.id.notification_btn)
+        val bottomNavigationView = binding.bottomNavigation
+        val menuItemId = R.id.notification_btn
+
+        val badgeDrawable = bottomNavigationView.getOrCreateBadge(menuItemId)
+
         if (hasUnread) {
-            menuItem.setIcon(R.drawable.notification_unread)
+            badgeDrawable.isVisible = true
+            badgeDrawable.backgroundColor = ContextCompat.getColor(bottomNavigationView.context, R.color.red)
+            badgeDrawable.badgeTextColor = ContextCompat.getColor(bottomNavigationView.context, R.color.white)
+
+            badgeDrawable.clearNumber()
+            badgeDrawable.verticalOffset = 10
+            badgeDrawable.horizontalOffset = 10
         } else {
-            menuItem.setIcon(R.drawable.notification_icon)
+            badgeDrawable.isVisible = false
         }
-        // Force redraw of the navigation bar
-        binding.bottomNavigation.invalidate()
     }
+
 
     fun getNotificationViewModel(): NotificationViewModel {
         return notificationViewModel
     }
+
+    private fun showCustomLogoutDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.custom_close_app_dialog, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent) // Make background transparent
+
+        // Get buttons from custom layout
+        val btnYes = dialogView.findViewById<Button>(R.id.btnYes)
+        val btnNo = dialogView.findViewById<Button>(R.id.btnNo)
+
+        btnYes.setOnClickListener {
+            dialog.dismiss()
+            super.onBackPressed() // Close app
+        }
+
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
 
 
 }

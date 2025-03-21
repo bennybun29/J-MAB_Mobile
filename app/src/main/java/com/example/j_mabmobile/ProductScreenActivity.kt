@@ -78,13 +78,6 @@ class ProductScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_screen)
 
-        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
-        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        }
-
         apiService = RetrofitClient.getRetrofitInstance(this).create(ApiService::class.java)
 
         val productName: TextView = findViewById(R.id.item_text)
@@ -100,6 +93,7 @@ class ProductScreenActivity : AppCompatActivity() {
         val helpBtn: ImageButton = findViewById(R.id.helpBtn)
         val fromRecommended = intent.getBooleanExtra("from_recommended", false)
         val cardView = findViewById<CardView>(R.id.cardView)
+        val fromCart = intent.getBooleanExtra("from_cart", false)
         backButton = findViewById(R.id.backButton)
         imageCountTextView= findViewById(R.id.image_count)
         imageCarousel = findViewById(R.id.image_carousel)
@@ -129,6 +123,16 @@ class ProductScreenActivity : AppCompatActivity() {
         plusBtn = findViewById(R.id.plusBtn)
         quantityText = findViewById(R.id.quantityText)
 
+        if (fromCart) {
+            // Product details should come from the cart item, ensure they are set properly
+            productId = intent.getIntExtra("product_id", 0)
+            selectedVariantId = intent.getIntExtra("variant_id", 0)
+        } else {
+            // Coming from HomeFragment, use the home product details
+            productId = intent.getIntExtra("product_id", 0)
+            selectedVariantId = intent.getIntExtra("variant_id", 0)
+        }
+
         backBtn.setOnClickListener {
             if (fromRecommended) {
                 finish()
@@ -138,10 +142,11 @@ class ProductScreenActivity : AppCompatActivity() {
         }
 
         cartBtn.setOnClickListener {
-            onPause()
             val intent = Intent(this, CartActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
         }
+
 
         helpBtn.setOnClickListener {
             onPause()
@@ -467,38 +472,26 @@ class ProductScreenActivity : AppCompatActivity() {
     private fun setupBottomSheetBehavior() {
         val cardView = findViewById<CardView>(R.id.cardView)
         bottomSheetBehavior = BottomSheetBehavior.from(cardView)
+
+        // Initially set to hidden/collapsed
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { _, insets ->
-            val systemInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        // Wait for layout to be ready
+        imageCarousel.post {
+            // Get the position of the carousel
+            val carouselPosition = IntArray(2)
+            imageCarousel.getLocationOnScreen(carouselPosition)
 
-            // Calculate peek height and max height dynamically
-            imageCountTextView.post {
-                val imageCountLocation = IntArray(2)
-                imageCountTextView.getLocationOnScreen(imageCountLocation)
-                val imageCountBottom = imageCountLocation[1] + imageCountTextView.height
+            // Calculate the bottom position of the carousel plus some padding (e.g., 16dp)
+            val carouselBottom = carouselPosition[1] + imageCarousel.height
+            val padding = resources.getDimensionPixelSize(R.dimen.card_overlap) // Or any value you want
 
-                val screenHeight = resources.displayMetrics.heightPixels
-                bottomSheetBehavior.peekHeight = screenHeight - imageCountBottom - systemInsets.bottom
+            // Set peek height to show the card just below the carousel
+            val screenHeight = resources.displayMetrics.heightPixels
+            val peekHeight = screenHeight - carouselBottom - padding
 
-                cardView.layoutParams.height = screenHeight - systemInsets.bottom
-                cardView.requestLayout()
-
-                val backLocation = IntArray(2)
-                backButton.getLocationOnScreen(backLocation)
-                val topOffset = backLocation[1] + backButton.height + dp(20)
-
-                try {
-                    val behaviorClass = BottomSheetBehavior::class.java
-                    val field = behaviorClass.getDeclaredField("maxHeight")
-                    field.isAccessible = true
-                    field.set(bottomSheetBehavior, screenHeight - topOffset - systemInsets.bottom)
-                } catch (e: Exception) {
-                    Log.e("BottomSheet", "Could not set maxHeight: ${e.message}")
-                }
-            }
-
-            insets
+            // Set the calculated height
+            bottomSheetBehavior.peekHeight = peekHeight
         }
 
         // Handle BottomSheet state changes

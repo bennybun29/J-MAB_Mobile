@@ -1,6 +1,7 @@
 package com.example.j_mabmobile.api
 
 import com.example.j_mabmobile.model.AddressRequest
+import com.example.j_mabmobile.model.AdminResponse
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.CancelOrderRequest
@@ -145,6 +146,15 @@ interface ApiService {
     @GET("messages/user/{user_id}")
     fun getMessages(@Path("user_id") userId: Int): Call<MessageResponse>
 
+    @GET("messages/conversation/{admin_id}/{user_id}")
+    fun getConversation(
+        @Path("admin_id") adminId: Int,
+        @Path("user_id") userId: Int
+    ): Call<MessageResponse>
+
+    @GET("users/admins")
+    fun getAdmins(): Call<AdminResponse>
+
     //Notification Methods
     @GET("notifications/user/{user_id}")
     fun getNotifications(
@@ -154,7 +164,7 @@ interface ApiService {
     @PUT("notifications/read/{notification_id}")
     suspend fun markNotificationAsRead(
         @Path("notification_id") notificationId: Int,
-        @Body body: Any = emptyMap<String, Any>() // Sends {}
+        @Body body: Any = emptyMap<String, Any>()
     ): Response<ReadStatusResponse>
 
     @DELETE("notifications/{notification_id}")

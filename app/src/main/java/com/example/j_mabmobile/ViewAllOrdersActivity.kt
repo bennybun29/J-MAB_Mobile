@@ -32,11 +32,12 @@ class ViewAllOrdersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_all_orders)
 
-        val window = this.window
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-        window.statusBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
+        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
 
         // Initialize views
         backBtn = findViewById(R.id.backButton)

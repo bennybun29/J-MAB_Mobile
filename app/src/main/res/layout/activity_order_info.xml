@@ -246,6 +246,7 @@
                         android:layout_marginLeft="20dp"
                         android:textColor="@color/j_mab_blue"
                         android:layout_marginBottom="5dp"
+                        android:layout_marginTop="4dp"
                         android:textStyle="bold"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>

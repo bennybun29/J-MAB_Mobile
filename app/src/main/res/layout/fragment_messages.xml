@@ -104,6 +104,32 @@
 
         </LinearLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/selectAdminTextInputLayou"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toBottomOf="@id/imageView3"
+            android:background="#FBFCF8"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            app:hintEnabled="false">
+
+            <AutoCompleteTextView
+                android:id="@+id/adminAutoCompleteTextview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Select Admin to Message"
+                android:padding="10dp"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:inputType="none"
+                android:background="#FBFCF8"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewMessages"
@@ -111,7 +137,7 @@
             android:layout_height="0dp"
             android:layout_marginBottom="10dp"
             android:padding="10dp"
-            app:layout_constraintTop_toBottomOf="@id/imageView3"
+            app:layout_constraintTop_toBottomOf="@id/selectAdminTextInputLayou"
             app:layout_constraintBottom_toTopOf="@id/chat_input_layout"
             android:scrollbars="vertical"/>
 

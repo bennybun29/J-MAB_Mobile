@@ -1,4 +1,4 @@
 <resources>
       <dimen name="fab_margin">16dp</dimen>
-    <dimen name="card_overlap">60dp</dimen>
+    <dimen name="card_overlap">24dp</dimen>
 </resources>

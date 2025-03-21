@@ -239,7 +239,7 @@ class AccountFragment : Fragment() {
             showImagePickerDialog()
         }
         log_out_btn.setOnClickListener {
-            showLogoutDialog()
+            showCustomLogoutDialog()
         }
         viewAllOrdersTV.setOnClickListener{
             startActivity(Intent(activity, ViewAllOrdersActivity::class.java))
@@ -259,6 +259,36 @@ class AccountFragment : Fragment() {
             .setNegativeButton("Cancel", null)
             .show()
     }
+
+    private fun showCustomLogoutDialog() {
+        val dialogView = requireActivity().layoutInflater.inflate(R.layout.custom_logout_dialog, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent) // Make background transparent
+
+        // Get buttons from custom layout
+        val btnYes = dialogView.findViewById<Button>(R.id.btnYes)
+        val btnNo = dialogView.findViewById<Button>(R.id.btnNo)
+
+        btnYes.setOnClickListener {
+            dialog.dismiss()
+            clearUserData()
+            startActivity(Intent(activity, SignInActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            })
+        }
+
+        btnNo.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
 
     private fun showLogoutDialog() {
         AlertDialog.Builder(requireContext())

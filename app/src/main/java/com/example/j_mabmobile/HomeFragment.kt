@@ -51,10 +51,8 @@ class HomeFragment : Fragment() {
     private lateinit var dotsIndicator: WormDotsIndicator
     private lateinit var viewPager: ViewPager2
     private lateinit var bannerAdapter: BannerAdapter
-    private val handler = android.os.Handler(Looper.getMainLooper())
     private val cartViewModel: CartViewModel by viewModels()
     private var currentPage = 0
-    private var scrollYPosition = 0
 
 
     private var allProducts: List<Product> = listOf()

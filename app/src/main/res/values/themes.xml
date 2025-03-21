@@ -6,6 +6,7 @@
         <item name="colorPrimaryVariant">@color/j_mab_blue</item>
         <item name="android:statusBarColor">@color/j_mab_blue</item>
         <item name="android:windowLightStatusBar">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
     </style>
 
     <style name="Theme.JMABMobile" parent="Base.Theme.JMABMobile" />
