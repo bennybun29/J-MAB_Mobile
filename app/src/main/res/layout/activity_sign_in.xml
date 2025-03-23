@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="-20dp"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:text="WELCOME BACK!"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -96,6 +96,19 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/forgotPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot Password?"
+        app:layout_constraintTop_toBottomOf="@id/SignUpForm"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="44dp"
+        android:layout_marginTop="-8dp"
+        android:fontFamily="@font/dmsans"
+        android:textColor="@color/j_mab_blue"/>
+
+
     <Button
         android:id="@+id/signInBtn"
         android:layout_width="150dp"
@@ -104,7 +117,7 @@
         android:text="Sign In"
         android:textSize="15sp"
         android:fontFamily="@font/dmsans_bold"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="22dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/SignUpForm" />

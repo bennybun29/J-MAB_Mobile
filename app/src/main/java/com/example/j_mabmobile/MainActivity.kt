@@ -2,24 +2,34 @@ package com.example.j_mabmobile
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
+import android.Manifest
+import android.content.pm.ServiceInfo
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.j_mabmobile.api.NotificationWebSocketManager
+import com.example.j_mabmobile.api.WebSocketService
 import com.example.j_mabmobile.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val PERMISSION_REQUEST_NOTIFICATIONS = 101
+    }
 
     private lateinit var binding: ActivityMainBinding
     private var pendingProductName: String? = null
@@ -32,6 +42,36 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (intent.getBooleanExtra("navigate_to_home", false)) {
+            openFragment(HomeFragment())
+        }
+
+        // Check and request notification permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    PERMISSION_REQUEST_NOTIFICATIONS
+                )
+            }
+        }
+
+        // Start service
+        val serviceIntent = Intent(this, WebSocketService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= 35) { // Android 15
+                serviceIntent.putExtra("foregroundServiceType", ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            }
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         notificationViewModel = ViewModelProvider(this)[NotificationViewModel::class.java]
 
@@ -54,8 +94,6 @@ class MainActivity : AppCompatActivity() {
             // Connect to WebSocket for real-time updates
             NotificationWebSocketManager.connect(userId)
         }
-
-
 
         window.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -132,6 +170,11 @@ class MainActivity : AppCompatActivity() {
 
         if (intent.hasExtra("OPEN_FRAGMENT")) {
             when (intent.getStringExtra("OPEN_FRAGMENT")) {
+                "NOTIFICATION_FRAGMENT" -> {
+                    openFragment(NotificationFragment())
+                    binding.bottomNavigation.selectedItemId = R.id.notification_btn
+                    isNotificationFragmentOpen = true
+                }
                 "MESSAGE" -> {
                     // Store the parameters instead of creating the fragment here
                     pendingFromProductScreen = intent.getBooleanExtra("FROM_PRODUCT_SCREEN", false)
@@ -147,8 +190,28 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         setInitialIconsState()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == PERMISSION_REQUEST_NOTIFICATIONS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, you can show notifications
+            } else {
+                // Permission denied, inform the user
+                Toast.makeText(
+                    this,
+                    "Notification permission is required to receive alerts",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -156,27 +219,36 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
 
         if (intent.hasExtra("OPEN_FRAGMENT")) {
-            val fragment = MessagesFragment()
-            val bundle = Bundle()
+            when (intent.getStringExtra("OPEN_FRAGMENT")) {
+                "NOTIFICATION_FRAGMENT" -> {
+                    // Open the NotificationFragment
+                    openFragment(NotificationFragment())
+                    binding.bottomNavigation.selectedItemId = R.id.notification_btn
+                    isNotificationFragmentOpen = true
+                }
+                "MESSAGE" -> {
+                    // Handle the message fragment case as before
+                    val fragment = MessagesFragment()
+                    val bundle = Bundle()
 
-            val fromOrderInfo = intent.getBooleanExtra("FROM_ORDER_INFO", false)
-            val fromProductScreen = intent.getBooleanExtra("FROM_PRODUCT_SCREEN", false)
-            val productName = intent.getStringExtra("PRODUCT_NAME")
+                    val fromOrderInfo = intent.getBooleanExtra("FROM_ORDER_INFO", false)
+                    val fromProductScreen = intent.getBooleanExtra("FROM_PRODUCT_SCREEN", false)
+                    val productName = intent.getStringExtra("PRODUCT_NAME")
 
-            Log.d("MainActivity", "onNewIntent: fromOrderInfo=$fromOrderInfo, fromProductScreen=$fromProductScreen, productName=$productName")
+                    bundle.putBoolean("FROM_ORDER_INFO", fromOrderInfo)
+                    bundle.putBoolean("FROM_PRODUCT_SCREEN", fromProductScreen)
+                    if (productName != null) {
+                        bundle.putString("PRODUCT_NAME", productName)
+                    }
 
-            bundle.putBoolean("FROM_ORDER_INFO", fromOrderInfo)
-            bundle.putBoolean("FROM_PRODUCT_SCREEN", fromProductScreen)
-            if (productName != null) {
-                bundle.putString("PRODUCT_NAME", productName)
+                    fragment.arguments = bundle
+                    loadFragment(fragment)
+                    binding.bottomNavigation.selectedItemId = R.id.message_btn
+                }
             }
-
-            fragment.arguments = bundle
-            loadFragment(fragment)
-            binding.bottomNavigation.selectedItemId = R.id.message_btn
         }
     }
-
+    
     override fun onBackPressed() {
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
         Log.d("MainActivity", "onBackPressed: currentFragment=${currentFragment?.javaClass?.simpleName}")
@@ -209,7 +281,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun navigateToProductScreen(productId: String?) {
         if (productId != null) {
@@ -310,7 +381,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     fun getNotificationViewModel(): NotificationViewModel {
         return notificationViewModel
     }
@@ -340,7 +410,4 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
-
-
-
 }

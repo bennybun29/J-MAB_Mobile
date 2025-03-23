@@ -13,6 +13,33 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
+        <!-- Added "View" text at the upper right with a separator -->
+        <TextView
+            android:id="@+id/viewTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View"
+            android:textColor="@color/j_mab_blue"
+            android:textSize="12sp"
+            android:fontFamily="@font/dmsans_bold"
+            android:padding="4dp"
+            android:drawableLeft="@drawable/ic_view_icon"
+            android:drawablePadding="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/view_button_background"/>
+
+        <!-- Added a separator line -->
+        <View
+            android:id="@+id/separatorLine"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#EEEEEE"
+            app:layout_constraintTop_toBottomOf="@id/viewTV"
+            android:layout_marginTop="8dp"/>
+
         <ImageView
             android:id="@+id/item_image"
             android:layout_width="100dp"
@@ -20,37 +47,50 @@
             android:scaleType="centerCrop"
             android:src="@drawable/gulong"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separatorLine"
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginLeft="48dp"
+            android:layout_marginTop="8dp"
             tools:layout_editor_absoluteX="56dp" />
 
         <TextView
             android:id="@+id/item_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginTop="8dp"
             android:maxLines="1"
             android:ellipsize="end"
             android:fontFamily="@font/dmsans_bold"
             app:layout_constraintLeft_toRightOf="@id/item_image"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/productPriceTV"
+            app:layout_constraintStart_toStartOf="parent"
             android:text="Sample Text"
             android:textColor="@color/j_mab_blue"
             android:textSize="15sp"
             android:textStyle="bold"/>
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=">"
+            android:fontFamily="@font/dmsans_bold"
+            app:layout_constraintStart_toEndOf="@id/item_text"
+            app:layout_constraintTop_toTopOf="@id/item_text"
+            android:textSize="15sp"
+            android:textColor="@color/j_mab_blue"
+            android:layout_marginStart="8dp"/>
+
+
+        <TextView
             android:id="@+id/item_brand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cabin"
-            app:layout_constraintTop_toBottomOf="@id/item_text"
+            app:layout_constraintTop_toBottomOf="@id/separatorLine"
             android:text="Brand"
             android:textSize="10sp"
             android:layout_marginLeft="20dp"
+            android:layout_marginTop="8dp"
             app:layout_constraintLeft_toRightOf="@id/item_image"/>
 
         <TextView
@@ -73,11 +113,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Price:"
-            android:fontFamily="@font/dmsans"
-            app:layout_constraintTop_toTopOf="parent"
+            android:fontFamily="@font/dmsans_bold"
+            app:layout_constraintTop_toBottomOf="@id/separatorLine"
             app:layout_constraintRight_toRightOf="parent"
             android:textColor="@color/j_mab_blue"
-            android:layout_marginTop="12dp"
             android:layout_marginRight="8dp"
             android:textStyle="bold"/>
 
@@ -109,10 +148,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/all_orders_icon"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="@id/item_image"
+            app:layout_constraintBottom_toBottomOf="@id/item_image"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/item_image"/>
+
+        <Button
+            android:id="@+id/buyAgainBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="Buy Again"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/orderStatus"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/button_border"
+            android:textColor="@color/j_mab_blue"
+            android:gravity="center"
+            android:paddingVertical="0dp"/>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

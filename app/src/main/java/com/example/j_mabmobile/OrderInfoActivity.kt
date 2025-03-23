@@ -31,6 +31,7 @@ import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -130,7 +131,8 @@ class OrderInfoActivity : AppCompatActivity() {
         productBrandTV.text = boldText("Brand: ${productBrand}")
         quantityTV.text = boldText("Quantity: ${quantity.toString()}")
         item_size.text = boldText("Size: ${size}")
-        totalPriceTV.text = boldText("₱$totalPrice")
+        val formattedPrice = NumberFormat.getNumberInstance().format(totalPrice)
+        totalPriceTV.text = boldText("₱$formattedPrice")
         paymentMethodTV.text = boldText(paymentMethod)
         paymentStatusTV.text = boldText(paymentStatus)
         orderStatusTV.text = boldText(orderStatus)
@@ -172,8 +174,9 @@ class OrderInfoActivity : AppCompatActivity() {
             if (selectedRating > 0) {
                 val apiService = RetrofitClient.getApiService(this)
 
-                val productId = intent.getIntExtra("PRODUCT_ID", 0) // Retrieve order ID from intent
-                val ratingRequest = RatingRequest(productId, selectedRating)
+                val variantId = intent.getIntExtra("VARIANT_ID", 0) // Retrieve order ID from intent
+                Log.d("DEBUG", "Received Variant ID: $variantId")
+                val ratingRequest = RatingRequest(variantId, selectedRating)
 
                 apiService.postRating(ratingRequest).enqueue(object : Callback<PostRatingResponse> {
                     override fun onResponse(call: Call<PostRatingResponse>, response: Response<PostRatingResponse>) {
@@ -249,8 +252,8 @@ class OrderInfoActivity : AppCompatActivity() {
 
         // Proceed to cancel order when "Yes" is clicked
         btnConfirm.setOnClickListener {
-            alertDialog.dismiss() // Close the dialog
-            cancelOrder(orderId)  // Call cancel order function
+            alertDialog.dismiss()
+            cancelOrder(orderId)
         }
     }
 

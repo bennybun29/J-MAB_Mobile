@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
@@ -18,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.example.j_mabmobile.SignUpActivity
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
@@ -32,6 +34,7 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var signInBtn: Button
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
+    private lateinit var forgotPassword: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +44,7 @@ class SignInActivity : AppCompatActivity() {
         signInBtn = findViewById(R.id.signInBtn)
         emailEditText = findViewById(R.id.emailAddress)
         passwordEditText = findViewById(R.id.userPassword)
+        forgotPassword = findViewById(R.id.forgotPassword)
 
         signInBtn.isEnabled = false
         signInBtn.setBackgroundColor(Color.LTGRAY)
@@ -56,6 +60,7 @@ class SignInActivity : AppCompatActivity() {
         }
 
         setupSignUpLink()
+        setupForgotPasswordLink()
 
         signInBtn.setOnClickListener {
             val email = emailEditText.text.toString()
@@ -68,6 +73,28 @@ class SignInActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please fill in both email and password", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun setupForgotPasswordLink() {
+        val text = "Forgot Password?"
+        val spannableString = SpannableString(text)
+
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                startActivity(Intent(this@SignInActivity, ForgotPasswordEmailActivity::class.java))
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = Color.rgb(2, 37, 75) // Set the color
+                ds.isUnderlineText = true // Add underline
+            }
+        }
+
+        spannableString.setSpan(clickableSpan, 0, text.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        forgotPassword.text = spannableString
+        forgotPassword.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun setupSignUpLink() {

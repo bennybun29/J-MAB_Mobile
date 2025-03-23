@@ -12,6 +12,8 @@ import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.DeleteAddressRequest
 import com.example.j_mabmobile.model.DeleteAddressResponse
 import com.example.j_mabmobile.model.DeleteNotificationResponse
+import com.example.j_mabmobile.model.ForgotPasswordEmailRequest
+import com.example.j_mabmobile.model.ForgotPasswordEmailResponse
 import com.example.j_mabmobile.model.LogInRequest
 import com.example.j_mabmobile.model.MessageRequest
 import com.example.j_mabmobile.model.MessageResponse
@@ -24,11 +26,15 @@ import com.example.j_mabmobile.model.RatingByIDResponse
 import com.example.j_mabmobile.model.RatingRequest
 import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.ReadStatusResponse
+import com.example.j_mabmobile.model.ResetPasswordRequest
+import com.example.j_mabmobile.model.ResetPasswordResponse
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
 import com.example.j_mabmobile.model.UserProfileResponse
+import com.example.j_mabmobile.model.VerificationRequest
+import com.example.j_mabmobile.model.VerificationResponse
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -81,6 +87,21 @@ interface ApiService {
         @Path("userId") userId: Int,
         @Body request: DeleteAddressRequest
     ): Call<DeleteAddressResponse>
+
+    @POST("users/verify")
+    suspend fun verifyEmail(
+        @Body verificationRequest: VerificationRequest
+    ): Response<VerificationResponse>
+
+    @POST("users/forgotPassword")
+    fun forgotPassword(
+        @Body emailRequest: ForgotPasswordEmailRequest
+    ): Call<ForgotPasswordEmailResponse>
+
+    @POST("users/resetPassword")
+    fun resetPassword(
+        @Body resetPasswordRequest: ResetPasswordRequest
+    ): Call<ResetPasswordResponse>
 
     // Product Methods
     @GET("products")
@@ -173,11 +194,11 @@ interface ApiService {
     ): Call<DeleteNotificationResponse>
 
     //Ratings
-    @GET("ratings/average/{product_id}")
-    fun getAverageRating(@Path("product_id") productId: Int): Call<AverageRatingResponse>
+    @GET("ratings/average/{variant_id}/average")
+    fun getAverageRating(@Path("variant_id") variantId: Int): Call<AverageRatingResponse>
 
-    @GET("ratings/product/{product_id}")
-    fun getRatingByProductId(@Path("product_id") productId: Int): Call<RatingResponse>
+    @GET("ratings/variant/{variant_id}")
+    fun getRatingByVariantId(@Path("variant_id") variantId: Int): Call<RatingResponse>
 
 
     @POST("ratings")

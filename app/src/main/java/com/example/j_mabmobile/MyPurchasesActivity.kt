@@ -3,12 +3,18 @@ package com.example.j_mabmobile
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager2.widget.ViewPager2
 
 class MyPurchasesActivity : AppCompatActivity() {
 
@@ -18,9 +24,9 @@ class MyPurchasesActivity : AppCompatActivity() {
     lateinit var toReceiveBtn: Button
     lateinit var toRateBtn: Button
     lateinit var cancelledBtn: Button
+    lateinit var viewPager: ViewPager2
     lateinit var buttonScrollView: HorizontalScrollView
 
-    private var activeButton: Button? = null
     private var fromCheckout: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,42 +46,94 @@ class MyPurchasesActivity : AppCompatActivity() {
         toReceiveBtn = findViewById(R.id.toReceiveBtnFragment)
         toRateBtn = findViewById(R.id.toRateBtnFragment)
         cancelledBtn = findViewById(R.id.cancelledBtnFragment)
-        buttonScrollView = findViewById(R.id.categoryHorizontalScrollView) // Add this line to get the ScrollView
+        viewPager = findViewById(R.id.viewPager)
+        buttonScrollView = findViewById(R.id.categoryHorizontalScrollView)
+
+        val ordersViewModel = ViewModelProvider(this).get(OrdersViewModel::class.java)
+
+        val toPayBadge = findViewById<TextView>(R.id.toPayBadge)
+        val toShipBadge = findViewById<TextView>(R.id.toShipBadge)
+        val toReceiveBadge = findViewById<TextView>(R.id.toReceiveBadge)
+        val toRateBadge = findViewById<TextView>(R.id.toRateBadge)
+
+        ordersViewModel.toPayCount.observe(this) { count ->
+            updateBadge(toPayBadge, count)
+        }
+
+        ordersViewModel.toShipCount.observe(this) { count ->
+            updateBadge(toShipBadge, count)
+        }
+
+        ordersViewModel.toReceiveCount.observe(this) { count ->
+            updateBadge(toReceiveBadge, count)
+        }
+
+        ordersViewModel.toRateCount.observe(this) { count ->
+            updateBadge(toRateBadge, count)
+        }
+
+        // Set up ViewPager with adapter
+        val adapter = PurchasesPagerAdapter(this)
+        viewPager.adapter = adapter
 
         // Check if this activity was opened from CheckoutActivity
         fromCheckout = intent.getBooleanExtra("FROM_CHECKOUT", false)
 
         // Get the selected tab from Intent
         val activeTab = intent.getStringExtra("ACTIVE_TAB") ?: "TO_PAY"
-        setInitialFragment(activeTab)
+        val initialPosition = getPositionFromTab(activeTab)
 
-        backBtn.setOnClickListener {
-            onBackPressed()
-        }
-
+        // Set up button click listeners
         toPayBtn.setOnClickListener {
-            setActiveButton(toPayBtn)
-            loadFragment(ToPayFragment())
+            viewPager.currentItem = 0
+            scrollToSelectedButton(toPayBtn)
         }
 
         toShipBtn.setOnClickListener {
-            setActiveButton(toShipBtn)
-            loadFragment(ToShipFragment())
+            viewPager.currentItem = 1
+            scrollToSelectedButton(toShipBtn)
         }
 
         toReceiveBtn.setOnClickListener {
-            setActiveButton(toReceiveBtn)
-            loadFragment(ToReceiveFragment())
+            viewPager.currentItem = 2
+            scrollToSelectedButton(toReceiveBtn)
         }
 
         toRateBtn.setOnClickListener {
-            setActiveButton(toRateBtn)
-            loadFragment(ToRateFragment())
+            viewPager.currentItem = 3
+            scrollToSelectedButton(toRateBtn)
         }
 
-        cancelledBtn.setOnClickListener{
-            setActiveButton(cancelledBtn)
-            loadFragment(CancelledFragment())
+        cancelledBtn.setOnClickListener {
+            viewPager.currentItem = 4
+            scrollToSelectedButton(cancelledBtn)
+        }
+
+        // Set initial page
+        viewPager.currentItem = initialPosition
+        updateButtonSelection(initialPosition)
+
+        // Handle initial button scrolling with a delay to ensure layout is ready
+        buttonScrollView.post {
+            // First scroll immediately to position the view somewhat correctly
+            scrollToButtonByPosition(initialPosition)
+
+            // Then do a more precise scroll after a slight delay
+            Handler(Looper.getMainLooper()).postDelayed({
+                scrollToButtonByPosition(initialPosition)
+            }, 200)
+        }
+
+        // Register page change callback
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateButtonSelection(position)
+                scrollToButtonByPosition(position)
+            }
+        })
+
+        backBtn.setOnClickListener {
+            onBackPressed()
         }
     }
 
@@ -92,49 +150,74 @@ class MyPurchasesActivity : AppCompatActivity() {
         }
     }
 
-    private fun setInitialFragment(activeTab: String) {
-        val buttonToSelect = when (activeTab) {
-            "TO_PAY" -> toPayBtn
-            "TO_SHIP" -> toShipBtn
-            "TO_RECEIVE" -> toReceiveBtn
-            "TO_RATE" -> toRateBtn
-            "CANCELLED" -> cancelledBtn
+    private fun getPositionFromTab(activeTab: String): Int {
+        return when (activeTab) {
+            "TO_PAY" -> 0
+            "TO_SHIP" -> 1
+            "TO_RECEIVE" -> 2
+            "TO_RATE" -> 3
+            "CANCELLED" -> 4
+            else -> 0
+        }
+    }
+
+    private fun updateButtonSelection(position: Int) {
+        val buttons = listOf(toPayBtn, toShipBtn, toReceiveBtn, toRateBtn, cancelledBtn)
+        buttons.forEachIndexed { index, button ->
+            button.isSelected = index == position
+        }
+    }
+
+    private fun scrollToButtonByPosition(position: Int) {
+        val button = when (position) {
+            0 -> toPayBtn
+            1 -> toShipBtn
+            2 -> toReceiveBtn
+            3 -> toRateBtn
+            4 -> cancelledBtn
             else -> toPayBtn
         }
 
+        scrollToSelectedButton(button)
+    }
+
+    private fun scrollToSelectedButton(selectedButton: Button) {
         buttonScrollView.post {
-            val scrollX = when (activeTab) {
-                "CANCELLED" -> buttonToSelect.right - buttonScrollView.width
-                else -> buttonToSelect.left
+            // Get scroll view width
+            val scrollViewWidth = buttonScrollView.width
+
+            // Get linear layout that contains the buttons
+            val linearLayout = buttonScrollView.getChildAt(0) as LinearLayout
+
+            // Special handling for the last button (Cancelled)
+            if (selectedButton == cancelledBtn) {
+                // Calculate the maximum scrollable distance
+                val maxScrollX = linearLayout.width - scrollViewWidth
+
+                // Scroll to show the Cancelled button
+                if (maxScrollX > 0) {
+                    buttonScrollView.smoothScrollTo(maxScrollX, 0)
+                }
+            } else {
+                // For other buttons, center them or align left as appropriate
+                val buttonLeft = selectedButton.left
+                val buttonWidth = selectedButton.width
+
+                // Calculate position to center the button
+                val scrollTo = buttonLeft - (scrollViewWidth - buttonWidth) / 2
+                val finalScrollX = maxOf(0, scrollTo)
+
+                buttonScrollView.smoothScrollTo(finalScrollX, 0)
             }
-
-            buttonScrollView.smoothScrollTo(scrollX, 0)
         }
-
-        setActiveButton(buttonToSelect)
-
-        val fragment = when (activeTab) {
-            "TO_PAY" -> ToPayFragment()
-            "TO_SHIP" -> ToShipFragment()
-            "TO_RECEIVE" -> ToReceiveFragment()
-            "TO_RATE" -> ToRateFragment()
-            "CANCELLED" -> CancelledFragment()
-            else -> ToPayFragment()
-        }
-
-        loadFragment(fragment)
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
-    }
-
-    private fun setActiveButton(selectedButton: Button) {
-        activeButton?.isSelected = false
-
-        selectedButton.isSelected = true
-        activeButton = selectedButton
+    private fun updateBadge(badge: TextView, count: Int) {
+        if (count > 0) {
+            badge.visibility = View.VISIBLE
+            badge.text = if (count > 99) "99+" else count.toString()
+        } else {
+            badge.visibility = View.GONE
+        }
     }
 }

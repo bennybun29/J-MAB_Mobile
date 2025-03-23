@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
-
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- Required for Android 13+ -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Declare that a camera is NOT required -->
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
+    <!-- Queries for intents -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.PICK"/>
+            <action android:name="android.intent.action.PICK" />
         </intent>
         <intent>
-            <action android:name="android.media.action.IMAGE_CAPTURE"/>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
     </queries>
 
@@ -37,6 +41,23 @@
         tools:targetApi="31"
         android:name=".MyApp">
 
+        <!-- WebSocket Service -->
+        <service
+            android:name=".api.WebSocketService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Boot Receiver -->
+        <receiver
+            android:name=".api.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- File Provider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -47,19 +68,19 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-
+        <!-- Activities -->
         <activity
             android:name=".CheckoutActivity"
             android:exported="false"
             android:theme="@style/Theme.JMABMobile" />
+
         <activity
             android:name=".SplashScreenActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -69,66 +90,72 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:label="@string/title_activity_splash_screen"
-            android:theme="@style/Theme.JMABMobile.Fullscreen" >
-        </activity>
+            android:theme="@style/Theme.JMABMobile.Fullscreen" />
 
         <activity
             android:name=".NoInternetActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:windowSoftInputMode="adjustPan">
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".SignInActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".CartActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".AccountAndSecurityActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".MyAddressesActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".HelpActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".ProductScreenActivity"
-            android:exported="false" >
-        </activity>
+            android:exported="false" />
 
         <activity
             android:name=".MyPurchasesActivity"
             android:exported="false" />
 
-        <activity android:name=".NewAddressActivity"
-            android:exported="true"/>
+        <activity
+            android:name=".NewAddressActivity"
+            android:exported="true" />
 
-        <activity android:name=".EditAddressActivity"
-            android:exported="false"/>
+        <activity
+            android:name=".EditAddressActivity"
+            android:exported="false" />
 
-        <activity android:name=".OrderInfoActivity"
-            android:exported="false"/>
+        <activity
+            android:name=".OrderInfoActivity"
+            android:exported="false" />
 
-        <activity android:name=".ViewAllOrdersActivity"
-            android:exported="false"/>
+        <activity
+            android:name=".ViewAllOrdersActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".VerificationCodeRegisterActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ForgotPasswordEmailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ForgotPasswordCodeActivity"
+            android:exported="false" />
 
     </application>
-
 </manifest>

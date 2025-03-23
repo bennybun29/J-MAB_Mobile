@@ -19,6 +19,7 @@ import retrofit2.Response
 import java.text.NumberFormat
 import java.util.Locale
 import java.io.Serializable
+import java.util.concurrent.atomic.AtomicInteger
 
 class RecyclerAdapter(private val products: List<Product>, private val userId: Int) :
     RecyclerView.Adapter<RecyclerAdapter.ViewHolder>() {
@@ -50,8 +51,7 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
             .error(R.drawable.jmab_logo)
             .into(holder.imageView)
 
-        // Fetch the average rating from API
-        fetchAverageRating(context, product.product_id, holder)
+        fetchAverageRating(context, product, holder)
 
         holder.itemView.setOnClickListener {
             val context = it.context
@@ -105,34 +105,75 @@ class RecyclerAdapter(private val products: List<Product>, private val userId: I
         var currentRating: Float = 0f
     }
 
-    private fun fetchAverageRating(context: Context, productId: Int, holder: ViewHolder) {
-        RetrofitClient.getApiService(context).getAverageRating(productId)
-            .enqueue(object : Callback<AverageRatingResponse> {
-                override fun onResponse(
-                    call: Call<AverageRatingResponse>,
-                    response: Response<AverageRatingResponse>
-                ) {
-                    if (response.isSuccessful && response.body() != null) {
-                        val avgRating = response.body()?.average_rating ?: 0f
-                        if (avgRating > 0) {
-                            holder.ratingView.text = "⭐ $avgRating"
-                        } else {
-                            holder.ratingView.text = "⭐ No ratings yet"
-                        }
-                        // Store the rating in the ViewHolder
-                        holder.currentRating = avgRating
-                    } else {
-                        holder.ratingView.text = "⭐ No ratings yet"
-                        holder.currentRating = 0f
-                    }
-                }
+    private fun fetchAverageRating(context: Context, product: Product, holder: ViewHolder) {
+        // Create a list to track all rating calls
+        val ratingCalls = mutableListOf<Call<AverageRatingResponse>>()
+        val apiService = RetrofitClient.getApiService(context)
 
-                override fun onFailure(call: Call<AverageRatingResponse>, t: Throwable) {
-                    Log.e("API_ERROR", "Failed to fetch rating: ${t.message}")
-                    holder.ratingView.text = "⭐ No ratings yet"
-                    holder.currentRating = 0f
-                }
-            })
+        // Map to store variant ID and its rating
+        val variantRatings = mutableMapOf<Int, Float>()
+        val totalVariants = product.variants.size
+        val countDownLatch = AtomicInteger(totalVariants)
+
+        // Fetch ratings for all variants
+        for (variant in product.variants) {
+            val variantId = variant.variant_id
+
+            apiService.getAverageRating(variantId)
+                .enqueue(object : Callback<AverageRatingResponse> {
+                    override fun onResponse(
+                        call: Call<AverageRatingResponse>,
+                        response: Response<AverageRatingResponse>
+                    ) {
+                        if (response.isSuccessful && response.body() != null) {
+                            val avgRating = response.body()?.average_rating ?: 0f
+                            if (avgRating > 0) {
+                                // Store this variant's rating
+                                synchronized(variantRatings) {
+                                    variantRatings[variantId] = avgRating
+                                }
+                            }
+                        }
+
+                        // Decrement the counter after each response
+                        if (countDownLatch.decrementAndGet() == 0) {
+                            // All calls completed, now find the highest rated variant
+                            updateRatingDisplay(holder, variantRatings)
+                        }
+                    }
+
+                    override fun onFailure(call: Call<AverageRatingResponse>, t: Throwable) {
+                        Log.e("API_ERROR", "Failed to fetch rating for variant $variantId: ${t.message}")
+
+                        // Decrement the counter even on failure
+                        if (countDownLatch.decrementAndGet() == 0) {
+                            // All calls completed, now find the highest rated variant
+                            updateRatingDisplay(holder, variantRatings)
+                        }
+                    }
+                })
+        }
+    }
+
+    private fun updateRatingDisplay(holder: ViewHolder, variantRatings: Map<Int, Float>) {
+        if (variantRatings.isEmpty()) {
+            // No ratings found for any variant
+            holder.ratingView.text = "⭐ No ratings yet"
+            holder.currentRating = 0f
+            return
+        }
+
+        // Find the highest rated variant
+        val highestRatedEntry = variantRatings.maxByOrNull { it.value }
+
+        if (highestRatedEntry != null) {
+            val highestRating = highestRatedEntry.value
+            holder.ratingView.text = "⭐ ${String.format("%.1f", highestRating)}"
+            holder.currentRating = highestRating
+        } else {
+            holder.ratingView.text = "⭐ No ratings yet"
+            holder.currentRating = 0f
+        }
     }
 
     private fun getTokenFromSharedPreferences(context: Context): String? {

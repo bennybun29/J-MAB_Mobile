@@ -44,6 +44,37 @@ data class UserProfileResponse(
     val message: String?
 )
 
+data class VerificationRequest(
+    val email: String,
+    val code: Int
+)
+
+data class VerificationResponse(
+    val success: Boolean,
+    val message: String,
+)
+
+data class ResetPasswordRequest(
+    val email: String,
+    val reset_code: Int,
+    val new_password: String
+)
+
+data class ResetPasswordResponse(
+    val success: Boolean,
+    val errors: List<String>
+)
+
+
+data class ForgotPasswordEmailRequest(
+    val email: String
+)
+
+data class ForgotPasswordEmailResponse(
+    val success: Boolean,
+    val message: String,
+)
+
 
 data class AddressRequest(
     val addresses: List<UserAddresses>
@@ -89,6 +120,7 @@ data class ProductResponse(
 data class Product(
     val product_id: Int,
     val name: String,
+    val variant_id: Int,
     val description: String,
     val category: String,
     val subcategory: String?,
@@ -188,6 +220,7 @@ data class Order(
     val order_id: Int,
     val user_id: Int,
     val total_price: Double,
+    val variant_id: Int,
     val payment_method: String,
     val status: String,
     val payment_status: String,
@@ -273,7 +306,7 @@ data class Rating(
 )
 
 data class RatingRequest(
-    val product_id: Int,
+    val variant_id: Int,
     val rating: Float
 )
 

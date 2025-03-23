@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="-20dp"
-        android:fontFamily="@font/dmsans"
+        android:fontFamily="@font/dmsans_bold"
         android:text="WELCOME!"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,7 +63,6 @@
             android:fontFamily="@font/cabin"
             android:textStyle="italic"
             android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="15dp"
             android:drawableStart="@drawable/user_icon"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
@@ -83,14 +82,12 @@
             android:fontFamily="@font/cabin"
             android:textStyle="italic"
             android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="15dp"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
             android:inputType="textCapWords"
             android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
             />
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/SignUpForm"
@@ -101,7 +98,16 @@
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp">
 
-
+        <!-- Email error text with fixed height -->
+        <TextView
+            android:id="@+id/emailErrorText"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginHorizontal="30dp"
+            android:fontFamily="@font/dmsans"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:layout_marginBottom="4dp" />
 
         <EditText
             android:id="@+id/emailAddress"
@@ -113,18 +119,30 @@
             android:fontFamily="@font/cabin"
             android:textStyle="italic"
             android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="4dp"
             android:drawableStart="@drawable/email_icon"
             android:paddingStart="5dp"
             android:drawablePadding="10dp"
             android:inputType="textEmailAddress"/>
+
+        <!-- Password error text with fixed height -->
+        <TextView
+            android:id="@+id/passwordErrorText"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:layout_marginHorizontal="30dp"
+            android:fontFamily="@font/dmsans"
+            android:textColor="#D32F2F"
+            android:textSize="12sp"
+            android:layout_marginTop="-2dp"
+            android:layout_marginBottom="4dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="20dp"
             app:hintEnabled="false"
             app:endIconMode="password_toggle"
             app:endIconTint="@color/j_mab_blue">
@@ -166,9 +184,6 @@
                 android:paddingStart="10dp"
                 android:inputType="textPassword"/>
         </com.google.android.material.textfield.TextInputLayout>
-
-
-
     </LinearLayout>
 
     <Button

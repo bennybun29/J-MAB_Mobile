@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Order
 import com.squareup.picasso.Picasso
+import java.text.NumberFormat
 
 class OrdersAdapter(private val orders: MutableList<Order>) :
     RecyclerView.Adapter<OrdersAdapter.OrderViewHolder>() {
@@ -26,6 +27,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val status: TextView = itemView.findViewById(R.id.statusTV)
         val order_status: TextView = itemView.findViewById(R.id.orderStatus)
         val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
+        val viewItem: TextView = itemView.findViewById(R.id.viewTV)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -40,7 +42,8 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         holder.itemText.text = order.product_name
         holder.itemBrand.text = boldText("Brand: ", order.product_brand)
         holder.itemQuantity.text = boldText("Quantity: ", order.quantity.toString())
-        holder.productPrice.text = boldText("Price: ", order.total_price.toString())
+        val formattedPrice = NumberFormat.getNumberInstance().format(order.total_price)
+        holder.productPrice.text = boldText("Price: ", formattedPrice)
         holder.status.text = boldText("Payment Status: ", order.payment_status)
         holder.order_status.text = boldText("Order Status: ", order.status)
         holder.sizeTV.text = boldText("Size: ", order.variant_size)
@@ -52,11 +55,12 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
             .into(holder.itemImage)
 
         // Set click listener to pass data to OrderInfoActivity
-        holder.itemView.setOnClickListener {
+        holder.viewItem.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, OrderInfoActivity::class.java).apply {
                 putExtra("ORDER_ID", order.order_id)
                 putExtra("PRODUCT_ID", order.product_id)
+                putExtra("VARIANT_ID", order.variant_id)
                 putExtra("PRODUCT_NAME", order.product_name)
                 putExtra("PRODUCT_BRAND", order.product_brand)
                 putExtra("QUANTITY", order.quantity)

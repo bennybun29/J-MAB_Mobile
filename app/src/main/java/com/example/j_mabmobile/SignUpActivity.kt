@@ -39,6 +39,8 @@ class SignUpActivity : AppCompatActivity() {
     private lateinit var passwordTextField: EditText
     private lateinit var confirmPasswordTextField: EditText
     private lateinit var signUpBtn: Button
+    private lateinit var emailErrorText: TextView
+    private lateinit var passwordErrorText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,11 +62,21 @@ class SignUpActivity : AppCompatActivity() {
         passwordTextField = findViewById(R.id.userPassword)
         confirmPasswordTextField = findViewById(R.id.confirmPassword)
         signUpBtn = findViewById(R.id.signUpBtn)
+        emailErrorText = findViewById(R.id.emailErrorText)
+        passwordErrorText = findViewById(R.id.passwordErrorText)
 
         signUpBtn.isEnabled = false
         signUpBtn.setBackgroundColor(Color.LTGRAY)
 
-        emailTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        emailTextField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                validateEmail()
+                toggleSignUpButton()
+            }
+        })
+
         firstNameTextField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
@@ -123,8 +135,23 @@ class SignUpActivity : AppCompatActivity() {
             }
         })
 
-        passwordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
-        confirmPasswordTextField.addTextChangedListener(SimpleTextWatcher { toggleSignUpButton() })
+        passwordTextField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                validatePassword()
+                toggleSignUpButton()
+            }
+        })
+
+        confirmPasswordTextField.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                validateConfirmPassword()
+                toggleSignUpButton()
+            }
+        })
 
         val tvSignInHere = findViewById<TextView>(R.id.tvSignInHere)
         val text = "Already have an account? Sign in"
@@ -148,115 +175,108 @@ class SignUpActivity : AppCompatActivity() {
 
 
         signUpBtn.setOnClickListener {
-            val email = emailTextField.text.toString().trim()
-            val firstName = firstNameTextField.text.toString().trim()
-            val lastName = lastNameTextField.text.toString().trim()
-            val password = passwordTextField.text.toString().trim()
-            val confirmPassword = confirmPasswordTextField.text.toString().trim()
+            // Validate all fields one last time
+            val emailValid = validateEmail()
+            val passwordValid = validatePassword()
+            val confirmPasswordValid = validateConfirmPassword()
 
-            // Validate fields on button click
-            if (email.isEmpty() || firstName.isEmpty() || lastName.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            if (emailValid && passwordValid && confirmPasswordValid) {
+                val email = emailTextField.text.toString().trim()
+                val firstName = firstNameTextField.text.toString().trim()
+                val lastName = lastNameTextField.text.toString().trim()
+                val password = passwordTextField.text.toString().trim()
+
+                // All validations pass, proceed with sign-up request
+                val signUpRequest = SignUpRequest(firstName, lastName, email, password)
+                signUpUser(signUpRequest)
             }
-
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(this, "Invalid email format", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val errors = mutableListOf<String>()
-
-            if (password.length < 8) {
-                errors.add("at least 8 characters")
-            }
-
-            if (!password.any { it.isDigit() }) {
-                errors.add("at least one number")
-            }
-
-            if (!password.any { it.isUpperCase() }) {
-                errors.add("at least one uppercase letter")
-            }
-
-            if (errors.isNotEmpty()) {
-                val toast = Toast.makeText(this, "Password must contain ${errors.joinToString(", ")}", Toast.LENGTH_LONG)
-                toast.show()
-                return@setOnClickListener
-            }
-
-            if (password != confirmPassword) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            // If all validations pass, proceed with sign-up request
-            val signUpRequest = SignUpRequest(firstName, lastName, email, password)
-            signUpUser(signUpRequest)
         }
     }
 
-    private fun signUpUser(signUpRequest: SignUpRequest) {
-        val apiService = RetrofitClient.getRetrofitInstance(this)
-        val call = apiService.create(ApiService::class.java).register(signUpRequest)
+    private fun validateEmail(): Boolean {
+        val email = emailTextField.text.toString().trim()
 
-        call.enqueue(object : Callback<ApiResponse> {
-            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
-                if (response.isSuccessful) {
-                    val apiResponse = response.body()
-                    if (apiResponse != null) {
-                        Toast.makeText(this@SignUpActivity, apiResponse.message, Toast.LENGTH_SHORT).show()
-                        if (response.code() == 201) { // Successful registration
-                            val intent = Intent(this@SignUpActivity, MainActivity::class.java)
-                            startActivity(intent)
-                            finishAffinity()
-                        }
-                    }
-                } else {
-                    val errorBody = response.errorBody()?.string()
-                    if (errorBody != null) {
-                        try {
-                            val jsonObject = JSONObject(errorBody)
+        if (email.isEmpty()) {
+            showEmailError("Email is required")
+            return false
+        }
 
-                            // Extract error message from "errors" array
-                            val errorsArray = jsonObject.optJSONArray("errors")
-                            val errorMessage = if (errorsArray != null && errorsArray.length() > 0) {
-                                errorsArray.getString(0)  // Get the first error message
-                            } else {
-                                "An unknown error occurred"
-                            }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showEmailError("Invalid email format")
+            return false
+        }
 
-                            // Check if the error is specifically about email registration
-                            if (errorMessage.contains("Email is already registered", ignoreCase = true)) {
-                                Toast.makeText(this@SignUpActivity, "This email is already in use. Please sign in.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (e: Exception) {
-                            Toast.makeText(this@SignUpActivity, "An error occurred while processing your request.", Toast.LENGTH_SHORT).show()
-                        }
-                    } else {
-                        Toast.makeText(this@SignUpActivity, "An unknown error occurred", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Toast.makeText(this@SignUpActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        // Valid email
+        hideEmailError()
+        return true
     }
 
-    private fun getToken(): String? {
-        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("jwt_token", null)
+    private fun validatePassword(): Boolean {
+        val password = passwordTextField.text.toString().trim()
+
+        if (password.isEmpty()) {
+            showPasswordError("Password is required")
+            return false
+        }
+
+        val errors = mutableListOf<String>()
+
+        if (password.length < 8) {
+            errors.add("at least 8 characters")
+        }
+
+        if (!password.any { it.isDigit() }) {
+            errors.add("at least one number")
+        }
+
+        if (!password.any { it.isUpperCase() }) {
+            errors.add("at least one uppercase letter")
+        }
+
+        if (errors.isNotEmpty()) {
+            showPasswordError("Password must contain ${errors.joinToString(", ")}")
+            return false
+        }
+
+        // Valid password
+        hidePasswordError()
+        return true
     }
 
-    private fun isTokenValid(): Boolean {
-        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
-        val expiryTime = sharedPreferences.getLong("token_expiry_time", 0)
-        return System.currentTimeMillis() < expiryTime
+    private fun validateConfirmPassword(): Boolean {
+        val password = passwordTextField.text.toString().trim()
+        val confirmPassword = confirmPasswordTextField.text.toString().trim()
+
+        if (confirmPassword.isEmpty()) {
+            showPasswordError("Confirm password is required")
+            return false
+        }
+
+        if (password != confirmPassword) {
+            showPasswordError("Passwords do not match")
+            return false
+        }
+
+        // Valid confirmation
+        hidePasswordError()
+        return true
+    }
+
+    // Helper methods to show and hide specific errors
+    private fun showEmailError(message: String) {
+        emailErrorText.text = message
+    }
+
+    private fun hideEmailError() {
+        emailErrorText.text = ""
+    }
+
+    private fun showPasswordError(message: String) {
+        passwordErrorText.text = message
+    }
+
+    private fun hidePasswordError() {
+        passwordErrorText.text = ""
     }
 
     private fun toggleSignUpButton() {
@@ -273,5 +293,71 @@ class SignUpActivity : AppCompatActivity() {
             signUpBtn.isEnabled = false
             signUpBtn.setBackgroundColor(Color.LTGRAY)
         }
+    }
+
+    private fun signUpUser(signUpRequest: SignUpRequest) {
+        val apiService = RetrofitClient.getRetrofitInstance(this)
+        val call = apiService.create(ApiService::class.java).register(signUpRequest)
+
+        call.enqueue(object : Callback<ApiResponse> {
+            override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                if (response.code() == 201) {
+                    val apiResponse = response.body()
+                    if (apiResponse?.message?.contains("verify", ignoreCase = true) == true) {
+                        // Navigate to verification screen with email
+                        val intent = Intent(this@SignUpActivity, VerificationCodeRegisterActivity::class.java)
+                        intent.putExtra("email", signUpRequest.email)
+                        intent.putExtra("password", signUpRequest.password)
+                        startActivity(intent)
+                    } else {
+                        val intent = Intent(this@SignUpActivity, MainActivity::class.java)
+                        startActivity(intent)
+                        finishAffinity()
+                    }
+
+        } else {
+                    val errorBody = response.errorBody()?.string()
+                    if (errorBody != null) {
+                        try {
+                            val jsonObject = JSONObject(errorBody)
+
+                            // Extract error message from "errors" array
+                            val errorsArray = jsonObject.optJSONArray("errors")
+                            val errorMessage = if (errorsArray != null && errorsArray.length() > 0) {
+                                errorsArray.getString(0)  // Get the first error message
+                            } else {
+                                "An unknown error occurred"
+                            }
+
+                            // Check if the error is specifically about email registration
+                            if (errorMessage.contains("Email is already registered", ignoreCase = true)) {
+                                showEmailError("This email is already in use. Please sign in.")
+                            } else {
+                                // Show as a Toast if it's not a field-specific error
+                                Toast.makeText(this@SignUpActivity, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@SignUpActivity, "An error occurred while processing your request.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this@SignUpActivity, "An unknown error occurred", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                Toast.makeText(this@SignUpActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+    private fun getToken(): String? {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("jwt_token", null)
+    }
+
+    private fun isTokenValid(): Boolean {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        val expiryTime = sharedPreferences.getLong("token_expiry_time", 0)
+        return System.currentTimeMillis() < expiryTime
     }
 }

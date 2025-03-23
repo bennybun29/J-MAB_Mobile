@@ -41,13 +41,16 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.RatingByIDResponse
 import com.example.j_mabmobile.model.RatingResponse
+import com.example.j_mabmobile.model.Variant
 import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.atomic.AtomicInteger
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -72,6 +75,7 @@ class ProductScreenActivity : AppCompatActivity() {
     private var selectedVariantId: Int = 0
     private lateinit var ratingText: TextView
     private var productId: Int = 0
+    private var variantId: Int = 0
     private var token: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -280,42 +284,62 @@ class ProductScreenActivity : AppCompatActivity() {
 
         if (hasVariants) {
             // Filter out variants with zero stock
-            val availableVariants = variants.filter { it.stock > 0 }.map { it.size ?: "Default" }
+            val availableVariants = variants.filter { it.stock > 0 }
 
+            if (availableVariants.isEmpty()) {
+                // No variants with stock available
+                productVariation.visibility = View.VISIBLE
+                productVariation.text = "No variants available"
+                chooseVariationAutoCompleteTextView.visibility = View.GONE
+                chooseVariationTextInputLayout.visibility = View.GONE
+                return
+            }
+
+            // First get all variant names for the dropdown
+            val variantNames = availableVariants.map { it.size ?: "Default" }
+
+            // Create the mapping for variant details
             val variantMap = HashMap<String, Triple<Int, Double, Int>>()
-            variants.forEach { variant ->
+            availableVariants.forEach { variant ->
                 val variantName = variant.size ?: "Default"
-                val price = variant.price.toDoubleOrNull() ?: 0.0  // Convert price safely
+                val price = variant.price.toDoubleOrNull() ?: 0.0
                 variantMap[variantName] = Triple(variant.variant_id, price, variant.stock)
             }
 
-            if (availableVariants.isNotEmpty()) {
-                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, availableVariants)
+            // Find the highest rated variant
+            findHighestRatedVariant(availableVariants) { highestRatedVariant ->
+                // This code runs after we've determined the highest rated variant
+
+                // Set up dropdown adapter
+                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, variantNames)
                 chooseVariationAutoCompleteTextView.setAdapter(adapter)
                 chooseVariationAutoCompleteTextView.visibility = View.VISIBLE
                 chooseVariationTextInputLayout.visibility = View.VISIBLE
 
-                // Set the first available variant as default
-                val defaultVariantName = availableVariants[0]
+                // Determine default variant
+                val defaultVariant = highestRatedVariant ?: availableVariants.first()
+                val defaultVariantName = defaultVariant.size ?: "Default"
+
+                // Set default variant in dropdown
                 chooseVariationAutoCompleteTextView.setText(defaultVariantName, false)
 
                 // Update selectedVariantId and UI with default variant details
-                val defaultVariantDetails = variantMap[defaultVariantName]
-                if (defaultVariantDetails != null) {
-                    selectedVariantId = defaultVariantDetails.first // Get variant_id
-                    val newPrice = defaultVariantDetails.second // Get price
-                    val newStock = defaultVariantDetails.third // Get stock
+                selectedVariantId = defaultVariant.variant_id
+                val defaultPrice = defaultVariant.price.toDoubleOrNull() ?: 0.0
+                val defaultStock = defaultVariant.stock
 
-                    // Update UI
-                    priceTextView.text = "₱${formatPrice(newPrice)}"
-                    productStock.text = "Stock: $newStock"
+                // Update UI
+                priceTextView.text = "₱${formatPrice(defaultPrice)}"
+                productStock.text = "Stock: $defaultStock"
 
-                    Log.d("ProductScreenActivity", "Default Variant: $defaultVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
-                }
+                // Fetch and display ratings for the selected variant
+                fetchAndDisplayRatings(selectedVariantId)
+
+                Log.d("ProductScreenActivity", "Default Variant: $defaultVariantName, ID: $selectedVariantId, Price: $defaultPrice, Stock: $defaultStock")
 
                 // Handle dropdown selection when user changes it
                 chooseVariationAutoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
-                    val selectedVariantName = availableVariants[position]
+                    val selectedVariantName = variantNames[position]
                     val variantDetails = variantMap[selectedVariantName]
 
                     if (variantDetails != null) {
@@ -329,15 +353,12 @@ class ProductScreenActivity : AppCompatActivity() {
                         priceTextView.text = "₱${formatPrice(newPrice)}"
                         productStock.text = "Stock: $newStock"
 
+                        // Update ratings for the newly selected variant
+                        fetchAndDisplayRatings(selectedVariantId)
+
                         Log.d("ProductScreenActivity", "Selected Variant: $selectedVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
                     }
                 }
-            } else {
-                // No variants with stock available
-                productVariation.visibility = View.VISIBLE
-                productVariation.text = "No variants available"
-                chooseVariationAutoCompleteTextView.visibility = View.GONE
-                chooseVariationTextInputLayout.visibility = View.GONE
             }
         } else {
             // Product has no variants, use the main product details
@@ -346,7 +367,6 @@ class ProductScreenActivity : AppCompatActivity() {
             chooseVariationTextInputLayout.visibility = View.GONE
 
             // If there are no variants, we should still set a default variant ID
-            // This is assuming the product itself has a variant_id field or the first variant is the default
             selectedVariantId = if (variants.isNotEmpty()) variants[0].variant_id else 0
 
             // Set price and stock from the first/default variant or from product itself
@@ -355,6 +375,9 @@ class ProductScreenActivity : AppCompatActivity() {
 
             priceTextView.text = "₱${formatPrice(price)}"
             productStock.text = "Stock: $stock"
+
+            // Fetch ratings for the default variant
+            fetchAndDisplayRatings(selectedVariantId)
         }
 
         // Set up image carousel
@@ -386,9 +409,70 @@ class ProductScreenActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
+    }
 
-        // Fetch ratings
-        fetchAndDisplayRatings(productId)
+    private fun findHighestRatedVariant(variants: List<Variant>, callback: (Variant?) -> Unit) {
+        if (variants.isEmpty()) {
+            callback(null)
+            return
+        }
+
+        val variantRatings = mutableMapOf<Int, Float>()
+        val countDownLatch = AtomicInteger(variants.size)
+
+        for (variant in variants) {
+            apiService.getAverageRating(variant.variant_id).enqueue(object : Callback<AverageRatingResponse> {
+                override fun onResponse(call: Call<AverageRatingResponse>, response: Response<AverageRatingResponse>) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val avgRating = response.body()?.average_rating ?: 0f
+                        if (avgRating > 0) {
+                            synchronized(variantRatings) {
+                                variantRatings[variant.variant_id] = avgRating
+                            }
+                        }
+                    }
+
+                    if (countDownLatch.decrementAndGet() == 0) {
+                        // All API calls complete
+                        processHighestRatedVariant(variants, variantRatings, callback)
+                    }
+                }
+
+                override fun onFailure(call: Call<AverageRatingResponse>, t: Throwable) {
+                    Log.e("API_ERROR", "Failed to fetch rating for variant ${variant.variant_id}: ${t.message}")
+
+                    if (countDownLatch.decrementAndGet() == 0) {
+                        // All API calls complete (including failures)
+                        processHighestRatedVariant(variants, variantRatings, callback)
+                    }
+                }
+            })
+        }
+    }
+
+    private fun processHighestRatedVariant(
+        variants: List<Variant>,
+        variantRatings: Map<Int, Float>,
+        callback: (Variant?) -> Unit
+    ) {
+        if (variantRatings.isEmpty()) {
+            // No ratings found, use first variant
+            callback(variants.firstOrNull())
+            return
+        }
+
+        // Find the variant ID with highest rating
+        val highestRatedVariantId = variantRatings.maxByOrNull { it.value }?.key
+
+        // Find the corresponding variant object
+        val highestRatedVariant = if (highestRatedVariantId != null) {
+            variants.find { it.variant_id == highestRatedVariantId } ?: variants.firstOrNull()
+        } else {
+            variants.firstOrNull()
+        }
+
+        // Return the highest rated variant through callback
+        callback(highestRatedVariant)
     }
 
     private fun initializeBuyNowButton() {
@@ -641,14 +725,14 @@ class ProductScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchAndDisplayRatings(productId: Int) {
-        if (productId <= 0) {
+    private fun fetchAndDisplayRatings(variantId: Int) {
+        if (variantId <= 0) {
             ratingText.text = "⭐ No ratings yet"
             return
         }
 
-        // Call the API to get ratings
-        apiService.getRatingByProductId(productId).enqueue(object : Callback<RatingResponse> {
+        // Call the API to get ratings for the specific variant
+        apiService.getRatingByVariantId(variantId).enqueue(object : Callback<RatingResponse> {
             override fun onResponse(call: Call<RatingResponse>, response: Response<RatingResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
                     val ratingResponse = response.body()
@@ -666,7 +750,7 @@ class ProductScreenActivity : AppCompatActivity() {
                         }
 
                         // Log the rating for debugging
-                        Log.d("ProductScreenActivity", "Ratings fetched: ${ratingResponse.ratings.size} ratings, average: $averageRating for product $productId")
+                        Log.d("ProductScreenActivity", "Ratings fetched: ${ratingResponse.ratings.size} ratings, average: $averageRating for variant $variantId")
                     } else {
                         ratingText.text = "⭐ No ratings yet"
                     }

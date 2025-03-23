@@ -120,7 +120,6 @@ class MessagesFragment : Fragment() {
             val text = etMessage.text.toString().trim()
             if (text.isNotEmpty()) {
                 addLocalMessage(text)
-                sendMessageViaWebSocket(text)
                 sendMessageViaApi(text)
                 etMessage.text.clear()
             }
@@ -288,10 +287,6 @@ class MessagesFragment : Fragment() {
                 Log.d("MessagesFragment", "Message ignored: not in conversation with selectedAdminId=$selectedAdminId")
             }
         }
-    }
-
-    private fun sendMessageViaWebSocket(text: String) {
-        MessageWebSocketManager.sendMessage(text, userId, selectedAdminId)
     }
 
     private fun sendMessageViaApi(text: String) {
