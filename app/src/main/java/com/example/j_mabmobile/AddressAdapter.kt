@@ -1,7 +1,9 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +17,7 @@ import android.os.Looper
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
+import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 
 class AddressAdapter(
@@ -76,19 +79,38 @@ class AddressAdapter(
             }
 
             deleteAddressButton.setOnClickListener {
-                AlertDialog.Builder(itemView.context)
-                    .setTitle("Delete Address")
-                    .setMessage("Are you sure you want to delete this address?")
-                    .setPositiveButton("Delete") { _, _ ->
-                        addressViewModel.deleteAddress(address.id)
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                showDeleteAddressDialog(itemView.context, address.id)
             }
+
 
 
         }
     }
+
+    private fun showDeleteAddressDialog(context: android.content.Context, addressId: Int) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.custom_delete_address_dialog, null)
+        val dialogBuilder = AlertDialog.Builder(context)
+            .setView(dialogView)
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        alertDialog.show()
+
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnNo)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnYes)
+
+        // Dismiss dialog when "No" is clicked
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // Proceed to delete the address when "Yes" is clicked
+        btnConfirm.setOnClickListener {
+            addressViewModel.deleteAddress(addressId) // Call ViewModel to delete address
+            alertDialog.dismiss()
+        }
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.addresses_card, parent, false)

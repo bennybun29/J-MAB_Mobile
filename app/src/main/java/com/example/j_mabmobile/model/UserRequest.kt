@@ -54,6 +54,11 @@ data class VerificationResponse(
     val message: String,
 )
 
+data class VerifyCodeRequest(
+    val email: String,
+    val reset_code: Int
+)
+
 data class ResetPasswordRequest(
     val email: String,
     val reset_code: Int,

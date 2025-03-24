@@ -59,6 +59,9 @@ class OrderInfoActivity : AppCompatActivity() {
     private var selectedRating = 0f
     private lateinit var topCardView: CardView
     private lateinit var item_size: TextView
+    private lateinit var topCardViewDelivered: CardView
+    private lateinit var dateDeliveredTV: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_info)
@@ -99,7 +102,9 @@ class OrderInfoActivity : AppCompatActivity() {
         chatSeller = findViewById(R.id.chatSeller)
         contactSeller = findViewById(R.id.contactSeller)
         etaTV = findViewById(R.id.etaTV)
+        dateDeliveredTV = findViewById(R.id.dateDeliveredTV)
         topCardView = findViewById(R.id.topCardView)
+        topCardViewDelivered = findViewById(R.id.topCardViewDelivered)
         item_size = findViewById(R.id.item_size)
 
         // Retrieve data from intent
@@ -145,22 +150,38 @@ class OrderInfoActivity : AppCompatActivity() {
         address.text = boldText(formattedAddress)
 
 
+        topCardView.visibility = View.GONE
+        topCardViewDelivered.visibility = View.GONE
 
         // Hide buttons if order is cancelled or payment failed
         if (orderStatus.equals("cancelled", ignoreCase = true) ||
             (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true))) {
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
+            // Both top cards remain GONE
+        } else if (orderStatus.equals("delivered", ignoreCase = true) && paymentStatus.equals("paid", ignoreCase = true)) {
+            // Show delivered card view instead of the ETA card
+            topCardViewDelivered.visibility = View.VISIBLE
             topCardView.visibility = View.GONE
-        }
 
-        if (orderStatus.equals("delivered", ignoreCase = true) && paymentStatus.equals("paid", ignoreCase = true)) {
+            // Set the delivered date (you can use the formatted request time or calculate delivered date)
+            val deliveredDate = calculateFutureDate(requestTimeRaw, 5)
+            setBoldText(dateDeliveredTV, deliveredDate)
+
+            // The rest of your delivered status handling
             ratingLayout.visibility = View.VISIBLE
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
-            topCardView.visibility = View.GONE
+        } else if (orderStatus.equals("out for delivery", ignoreCase = true)) {
+            // Show the regular ETA card for orders in transit
+            topCardView.visibility = View.VISIBLE
+            topCardViewDelivered.visibility = View.GONE
+            cancelOrderBtn.visibility = View.GONE
+            confirmOrderBtn.visibility = View.GONE
         } else {
-            ratingLayout.visibility = View.GONE
+            // For other states (processing, etc.), show the regular ETA card
+            topCardView.visibility = View.VISIBLE
+            topCardViewDelivered.visibility = View.GONE
         }
 
         // Set click listeners for each star
@@ -300,8 +321,11 @@ class OrderInfoActivity : AppCompatActivity() {
         }
     }
 
-    // For ETA calculation (adding 5 days)
     private fun calculateEta(rawTime: String): String {
+        return calculateFutureDate(rawTime, 5)
+    }
+
+    private fun calculateFutureDate(rawTime: String, daysToAdd: Int): String {
         return try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
@@ -311,7 +335,7 @@ class OrderInfoActivity : AppCompatActivity() {
 
             if (date != null) {
                 calendar.time = date
-                calendar.add(Calendar.DAY_OF_MONTH, 5) // Add 5 days
+                calendar.add(Calendar.DAY_OF_MONTH, daysToAdd) // Add specified days
                 outputFormat.format(calendar.time)
             } else {
                 rawTime
@@ -320,6 +344,7 @@ class OrderInfoActivity : AppCompatActivity() {
             rawTime
         }
     }
+
 
 
 

@@ -18,6 +18,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ForgotPasswordEmailRequest
 import com.example.j_mabmobile.model.ForgotPasswordEmailResponse
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -29,6 +30,7 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageButton
     private lateinit var progressBar: LottieAnimationView
     private lateinit var overlayBackground: View
+    private lateinit var emailTIL: TextInputLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +38,7 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
 
         backBtn = findViewById(R.id.backBtn)
         emailEditText = findViewById(R.id.emailAddress)
+        emailTIL = findViewById(R.id.emailTIL)
         sendEmailButton = findViewById(R.id.send_email_button)
         progressBar = findViewById(R.id.progressBar)
         overlayBackground = findViewById(R.id.overlayBackground)
@@ -48,28 +51,26 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
         }
 
         emailEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Clear error when text changes
+                emailTIL.error = null
+                emailTIL.isErrorEnabled = false
+            }
+
             override fun afterTextChanged(s: Editable?) {
                 validateEmail()
             }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
-
 
         sendEmailButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
-            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (validateEmail()) {
                 sendForgotPasswordEmail(email)
-            } else {
-                val emailErrorText: TextView = findViewById(R.id.emailErrorText)
-                emailErrorText.text = "Invalid email"
-                sendEmailButton.setBackgroundColor(Color.LTGRAY)
             }
         }
     }
-
 
     private fun sendForgotPasswordEmail(email: String) {
         showLoading()
@@ -94,30 +95,38 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<ForgotPasswordEmailResponse>, t: Throwable) {
-                progressBar.visibility = View.GONE
+                hideLoading()
                 Toast.makeText(this@ForgotPasswordEmailActivity, "Error: ${t.localizedMessage}", Toast.LENGTH_LONG).show()
             }
         })
     }
 
-    private fun validateEmail() {
+    private fun validateEmail(): Boolean {
         val email = emailEditText.text.toString().trim()
-        val isValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-        val emailErrorText: TextView = findViewById(R.id.emailErrorText)
-
-        if (!isValid) {
-            emailErrorText.text = "Invalid email" // Set error text
+        if (email.isEmpty()) {
+            emailTIL.isErrorEnabled = true
+            emailTIL.error = "Email is required"
             sendEmailButton.setBackgroundColor(Color.LTGRAY)
             sendEmailButton.isEnabled = false
-        } else {
-            emailErrorText.text = "" // Clear error message
-            sendEmailButton.setBackgroundColor(ContextCompat.getColor(this, R.color.j_mab_blue)) // Replace with your original button color
-            sendEmailButton.isEnabled = true
+            return false
         }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailTIL.isErrorEnabled = true
+            emailTIL.error = "Invalid email format"
+            sendEmailButton.setBackgroundColor(Color.LTGRAY)
+            sendEmailButton.isEnabled = false
+            return false
+        }
+
+        // Clear error and enable button if validation passes
+        emailTIL.error = null
+        emailTIL.isErrorEnabled = false
+        sendEmailButton.setBackgroundColor(ContextCompat.getColor(this, R.color.j_mab_blue))
+        sendEmailButton.isEnabled = true
+        return true
     }
-
-
 
     private fun showLoading() {
         overlayBackground.visibility = View.VISIBLE
@@ -130,5 +139,4 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
         progressBar.pauseAnimation()
     }
-
 }

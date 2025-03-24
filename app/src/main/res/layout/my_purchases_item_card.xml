@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -38,6 +39,23 @@
             android:background="#EEEEEE"
             app:layout_constraintTop_toBottomOf="@id/viewTV"
             android:layout_marginTop="8dp"/>
+
+        <!-- Rate button that will be shown for TO_RATE status -->
+        <Button
+            android:id="@+id/rateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rate"
+            android:textColor="@color/j_mab_blue"
+            android:background="@drawable/button_border"
+            android:textAllCaps="false"
+            android:visibility="visible"
+            android:fontFamily="@font/dmsans_bold"
+            android:backgroundTint="@color/j_mab_blue"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="8dp"/>
 
         <ImageView
             android:id="@+id/item_image"
@@ -105,7 +123,6 @@
             android:layout_marginTop="4dp"
             app:layout_constraintLeft_toRightOf="@id/item_image"/>
 
-
         <TextView
             android:id="@+id/productPriceTV"
             android:layout_width="wrap_content"
@@ -147,7 +164,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/bar"
-app:layout_constraintTop_toBottomOf="@id/separatorLine"
+            app:layout_constraintTop_toBottomOf="@id/separatorLine"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/item_image"/>

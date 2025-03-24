@@ -8,6 +8,7 @@ import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +29,8 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val order_status: TextView = itemView.findViewById(R.id.orderStatus)
         val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
         val viewItem: TextView = itemView.findViewById(R.id.viewTV)
+        val separatorLine: View = itemView.findViewById(R.id.separatorLine)
+        val rateButton: Button = itemView.findViewById(R.id.rateButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -54,30 +57,73 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
             .error(R.drawable.jmab_logo)
             .into(holder.itemImage)
 
-        // Set click listener to pass data to OrderInfoActivity
-        holder.viewItem.setOnClickListener {
-            val context = holder.itemView.context
-            val intent = Intent(context, OrderInfoActivity::class.java).apply {
-                putExtra("ORDER_ID", order.order_id)
-                putExtra("PRODUCT_ID", order.product_id)
-                putExtra("VARIANT_ID", order.variant_id)
-                putExtra("PRODUCT_NAME", order.product_name)
-                putExtra("PRODUCT_BRAND", order.product_brand)
-                putExtra("QUANTITY", order.quantity)
-                putExtra("TOTAL_PRICE", order.total_price)
-                putExtra("PAYMENT_METHOD", order.payment_method)
-                putExtra("PAYMENT_STATUS", order.payment_status)
-                putExtra("ORDER_STATUS", order.status)
-                putExtra("PRODUCT_IMAGE", order.product_image)
-                putExtra("HOME_ADDRESS", order.home_address)
-                putExtra("BARANGAY", order.barangay)
-                putExtra("CITY", order.city)
-                putExtra("PRODUCT_IMAGE", order.product_image)
-                putExtra("REQUEST_TIME", order.created_at)
-                putExtra("REFERENCE", order.reference_number)
-                putExtra("SIZE", order.variant_size)
+        // Check if order is in "to rate" status
+        val isToRate = order.payment_status == "paid" && order.status == "delivered"
+
+        if (isToRate) {
+            // Hide the "View" button and separator line for "to rate" orders
+            holder.viewItem.visibility = View.GONE
+            holder.separatorLine.visibility = View.GONE
+
+            // Show the Rate button
+            holder.rateButton.visibility = View.VISIBLE
+
+            // Set click listener for Rate button
+            holder.rateButton.setOnClickListener {
+                val context = holder.itemView.context
+                val intent = Intent(context, OrderInfoActivity::class.java).apply {
+                    putExtra("ORDER_ID", order.order_id)
+                    putExtra("PRODUCT_ID", order.product_id)
+                    putExtra("VARIANT_ID", order.variant_id)
+                    putExtra("PRODUCT_NAME", order.product_name)
+                    putExtra("PRODUCT_BRAND", order.product_brand)
+                    putExtra("QUANTITY", order.quantity)
+                    putExtra("TOTAL_PRICE", order.total_price)
+                    putExtra("PAYMENT_METHOD", order.payment_method)
+                    putExtra("PAYMENT_STATUS", order.payment_status)
+                    putExtra("ORDER_STATUS", order.status)
+                    putExtra("PRODUCT_IMAGE", order.product_image)
+                    putExtra("HOME_ADDRESS", order.home_address)
+                    putExtra("BARANGAY", order.barangay)
+                    putExtra("CITY", order.city)
+                    putExtra("PRODUCT_IMAGE", order.product_image)
+                    putExtra("REQUEST_TIME", order.created_at)
+                    putExtra("REFERENCE", order.reference_number)
+                    putExtra("SIZE", order.variant_size)
+                }
+                context.startActivity(intent)
             }
-            context.startActivity(intent)
+        } else {
+            // For other statuses, show View button and separator line, hide Rate button
+            holder.viewItem.visibility = View.VISIBLE
+            holder.separatorLine.visibility = View.VISIBLE
+            holder.rateButton.visibility = View.GONE
+
+            // Set click listener for View button
+            holder.viewItem.setOnClickListener {
+                val context = holder.itemView.context
+                val intent = Intent(context, OrderInfoActivity::class.java).apply {
+                    putExtra("ORDER_ID", order.order_id)
+                    putExtra("PRODUCT_ID", order.product_id)
+                    putExtra("VARIANT_ID", order.variant_id)
+                    putExtra("PRODUCT_NAME", order.product_name)
+                    putExtra("PRODUCT_BRAND", order.product_brand)
+                    putExtra("QUANTITY", order.quantity)
+                    putExtra("TOTAL_PRICE", order.total_price)
+                    putExtra("PAYMENT_METHOD", order.payment_method)
+                    putExtra("PAYMENT_STATUS", order.payment_status)
+                    putExtra("ORDER_STATUS", order.status)
+                    putExtra("PRODUCT_IMAGE", order.product_image)
+                    putExtra("HOME_ADDRESS", order.home_address)
+                    putExtra("BARANGAY", order.barangay)
+                    putExtra("CITY", order.city)
+                    putExtra("PRODUCT_IMAGE", order.product_image)
+                    putExtra("REQUEST_TIME", order.created_at)
+                    putExtra("REFERENCE", order.reference_number)
+                    putExtra("SIZE", order.variant_size)
+                }
+                context.startActivity(intent)
+            }
         }
     }
 
@@ -87,7 +133,6 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         spannable.setSpan(StyleSpan(Typeface.BOLD), label.length, spannable.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spannable
     }
-
 
     override fun getItemCount(): Int {
         return orders.size

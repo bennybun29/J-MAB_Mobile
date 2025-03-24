@@ -21,10 +21,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.SignUpRequest
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,14 +36,19 @@ import java.util.logging.Handler
 
 class SignUpActivity : AppCompatActivity() {
 
-    private lateinit var emailTextField: EditText
+    private lateinit var emailTextField: TextInputEditText
     private lateinit var lastNameTextField: EditText
     private lateinit var firstNameTextField: EditText
-    private lateinit var passwordTextField: EditText
-    private lateinit var confirmPasswordTextField: EditText
+    private lateinit var passwordTextField: TextInputEditText
+    private lateinit var confirmPasswordTextField: TextInputEditText
     private lateinit var signUpBtn: Button
     private lateinit var emailErrorText: TextView
     private lateinit var passwordErrorText: TextView
+    private lateinit var loadingAnimation: LottieAnimationView
+    private lateinit var overlayBackground: View
+    private lateinit var emailTIL: TextInputLayout
+    private lateinit var passwordTIL: TextInputLayout
+    private lateinit var confirmPasswordTIL: TextInputLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,17 +70,22 @@ class SignUpActivity : AppCompatActivity() {
         passwordTextField = findViewById(R.id.userPassword)
         confirmPasswordTextField = findViewById(R.id.confirmPassword)
         signUpBtn = findViewById(R.id.signUpBtn)
-        emailErrorText = findViewById(R.id.emailErrorText)
-        passwordErrorText = findViewById(R.id.passwordErrorText)
+        loadingAnimation = findViewById(R.id.loadingAnimation)
+        overlayBackground = findViewById(R.id.overlayBackground)
+        emailTIL = findViewById(R.id.emailTIL)
+        passwordTIL = findViewById(R.id.passwordTIL)
+        confirmPasswordTIL = findViewById(R.id.confirmPasswordTIL)
 
         signUpBtn.isEnabled = false
         signUpBtn.setBackgroundColor(Color.LTGRAY)
 
         emailTextField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                emailTIL.error = null // Clear error on text change
+                emailTIL.isErrorEnabled = false
+            }
             override fun afterTextChanged(s: Editable?) {
-                validateEmail()
                 toggleSignUpButton()
             }
         })
@@ -137,18 +150,22 @@ class SignUpActivity : AppCompatActivity() {
 
         passwordTextField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                passwordTIL.error = null // Clear error on text change
+                passwordTIL.isErrorEnabled = false
+            }
             override fun afterTextChanged(s: Editable?) {
-                validatePassword()
                 toggleSignUpButton()
             }
         })
 
         confirmPasswordTextField.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                confirmPasswordTIL.error = null // Clear error on text change
+                passwordTIL.isErrorEnabled = false
+            }
             override fun afterTextChanged(s: Editable?) {
-                validateConfirmPassword()
                 toggleSignUpButton()
             }
         })
@@ -181,6 +198,12 @@ class SignUpActivity : AppCompatActivity() {
             val confirmPasswordValid = validateConfirmPassword()
 
             if (emailValid && passwordValid && confirmPasswordValid) {
+                // Show loading animation and overlay
+                showLoading(true)
+
+                // Disable the button to prevent multiple clicks
+                signUpBtn.isEnabled = false
+
                 val email = emailTextField.text.toString().trim()
                 val firstName = firstNameTextField.text.toString().trim()
                 val lastName = lastNameTextField.text.toString().trim()
@@ -193,21 +216,31 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            loadingAnimation.visibility = View.VISIBLE
+            overlayBackground.visibility = View.VISIBLE
+        } else {
+            loadingAnimation.visibility = View.GONE
+            overlayBackground.visibility = View.GONE
+        }
+    }
+
     private fun validateEmail(): Boolean {
         val email = emailTextField.text.toString().trim()
 
         if (email.isEmpty()) {
-            showEmailError("Email is required")
+            emailTIL.error = "Email is required"
             return false
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showEmailError("Invalid email format")
+            emailTIL.error = "Invalid email format"
             return false
         }
 
-        // Valid email
-        hideEmailError()
+        // Clear error if validation passes
+        emailTIL.error = null
         return true
     }
 
@@ -215,50 +248,41 @@ class SignUpActivity : AppCompatActivity() {
         val password = passwordTextField.text.toString().trim()
 
         if (password.isEmpty()) {
-            showPasswordError("Password is required")
+            passwordTIL.error = "Password is required"
             return false
         }
-
-        val errors = mutableListOf<String>()
 
         if (password.length < 8) {
-            errors.add("at least 8 characters")
-        }
-
-        if (!password.any { it.isDigit() }) {
-            errors.add("at least one number")
-        }
-
-        if (!password.any { it.isUpperCase() }) {
-            errors.add("at least one uppercase letter")
-        }
-
-        if (errors.isNotEmpty()) {
-            showPasswordError("Password must contain ${errors.joinToString(", ")}")
+            passwordTIL.error = "Password should be at least 8 characters"
             return false
         }
 
-        // Valid password
-        hidePasswordError()
+        val passwordRegex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).{8,}$"
+        if (!password.matches(passwordRegex.toRegex())) {
+            passwordTIL.error = "Password must contain at least one digit, one lowercase letter, and one uppercase letter"
+            return false
+        }
+
+        passwordTIL.error = null
         return true
     }
+
 
     private fun validateConfirmPassword(): Boolean {
         val password = passwordTextField.text.toString().trim()
         val confirmPassword = confirmPasswordTextField.text.toString().trim()
 
         if (confirmPassword.isEmpty()) {
-            showPasswordError("Confirm password is required")
+            confirmPasswordTIL.error = "Confirm password is required"
             return false
         }
 
         if (password != confirmPassword) {
-            showPasswordError("Passwords do not match")
+            confirmPasswordTIL.error = "Passwords do not match"
             return false
         }
 
-        // Valid confirmation
-        hidePasswordError()
+        confirmPasswordTIL.error = null
         return true
     }
 
@@ -280,11 +304,11 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun toggleSignUpButton() {
-        val allFieldsFilled = emailTextField.text.isNotEmpty() &&
-                firstNameTextField.text.isNotEmpty() &&
-                lastNameTextField.text.isNotEmpty() &&
-                passwordTextField.text.isNotEmpty() &&
-                confirmPasswordTextField.text.isNotEmpty()
+        val allFieldsFilled = emailTextField.text?.isNotEmpty() == true &&
+                firstNameTextField.text?.isNotEmpty() == true &&
+                lastNameTextField.text?.isNotEmpty() == true &&
+                passwordTextField.text?.isNotEmpty() == true &&
+                confirmPasswordTextField.text?.isNotEmpty() == true
 
         if (allFieldsFilled) {
             signUpBtn.isEnabled = true
@@ -301,6 +325,9 @@ class SignUpActivity : AppCompatActivity() {
 
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                // Hide loading animation
+                showLoading(false)
+
                 if (response.code() == 201) {
                     val apiResponse = response.body()
                     if (apiResponse?.message?.contains("verify", ignoreCase = true) == true) {
@@ -314,8 +341,10 @@ class SignUpActivity : AppCompatActivity() {
                         startActivity(intent)
                         finishAffinity()
                     }
+                } else {
+                    // Re-enable the button if there's an error
+                    signUpBtn.isEnabled = true
 
-        } else {
                     val errorBody = response.errorBody()?.string()
                     if (errorBody != null) {
                         try {
@@ -346,10 +375,15 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                // Hide loading and re-enable button
+                showLoading(false)
+                signUpBtn.isEnabled = true
+
                 Toast.makeText(this@SignUpActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
+
     private fun getToken(): String? {
         val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getString("jwt_token", null)

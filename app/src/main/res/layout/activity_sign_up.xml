@@ -99,45 +99,36 @@
         android:layout_marginLeft="10dp">
 
         <!-- Email error text with fixed height -->
-        <TextView
-            android:id="@+id/emailErrorText"
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_marginHorizontal="30dp"
-            android:fontFamily="@font/dmsans"
-            android:textColor="#D32F2F"
-            android:textSize="12sp"
-            android:layout_marginBottom="4dp" />
 
-        <EditText
-            android:id="@+id/emailAddress"
+        <!-- Replace the email error text and EditText with this -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailTIL"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:hint="Email"
+            android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:fontFamily="@font/cabin"
-            android:textStyle="italic"
-            android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="4dp"
-            android:drawableStart="@drawable/email_icon"
-            android:paddingStart="5dp"
-            android:drawablePadding="10dp"
-            android:inputType="textEmailAddress"/>
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            app:hintEnabled="false">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/rounded_textfield"
+                android:hint="Email"
+                android:fontFamily="@font/cabin"
+                android:textStyle="italic"
+                android:drawableStart="@drawable/email_icon"
+                android:paddingStart="5dp"
+                android:drawablePadding="10dp"
+                android:inputType="textEmailAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Password error text with fixed height -->
-        <TextView
-            android:id="@+id/passwordErrorText"
-            android:layout_width="match_parent"
-            android:layout_height="16dp"
-            android:layout_marginHorizontal="30dp"
-            android:fontFamily="@font/dmsans"
-            android:textColor="#D32F2F"
-            android:textSize="12sp"
-            android:layout_marginTop="-2dp"
-            android:layout_marginBottom="4dp"/>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordTIL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
@@ -162,6 +153,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/confirmPasswordTIL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
@@ -209,6 +201,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/signUpBtn" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/loadingAnimation"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:lottie_rawRes="@raw/multiple_circle_loading"
+        android:visibility="gone"
+        app:lottie_autoPlay="true"
+        android:elevation="16dp"
+        app:lottie_loop="true"/>
+
+    <View
+        android:id="@+id/overlayBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:elevation="12dp"/>
 
 
 

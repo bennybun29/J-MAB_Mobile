@@ -53,23 +53,32 @@
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp">
 
-        <EditText
-            android:id="@+id/emailAddress"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/emailTIL"
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginEnd="30dp"
-            android:drawableStart="@drawable/email_icon"
-            android:hint="Email"
-            android:fontFamily="@font/cabin"
-            android:textStyle="italic"
-            android:background="@drawable/rounded_textfield"
-            android:layout_marginBottom="15dp"
-            android:inputType="textEmailAddress"
-            android:paddingStart="5dp"
-            android:drawablePadding="10dp"/>
+            android:layout_marginBottom="20dp"
+            app:hintEnabled="false"
+            app:layout_constraintTop_toBottomOf="@id/tvCreateAccount">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:background="@drawable/rounded_textfield"
+                android:hint="Email"
+                android:fontFamily="@font/cabin"
+                android:textStyle="italic"
+                android:drawableStart="@drawable/email_icon"
+                android:paddingStart="5dp"
+                android:drawablePadding="10dp"
+                android:inputType="textEmailAddress"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordTIL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"

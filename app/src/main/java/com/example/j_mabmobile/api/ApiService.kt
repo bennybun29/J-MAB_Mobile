@@ -35,6 +35,7 @@ import com.example.j_mabmobile.model.UpdateProfileResponse
 import com.example.j_mabmobile.model.UserProfileResponse
 import com.example.j_mabmobile.model.VerificationRequest
 import com.example.j_mabmobile.model.VerificationResponse
+import com.example.j_mabmobile.model.VerifyCodeRequest
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
@@ -93,9 +94,14 @@ interface ApiService {
         @Body verificationRequest: VerificationRequest
     ): Response<VerificationResponse>
 
-    @POST("users/forgotPassword")
+    @POST("users/requestCode")
     fun forgotPassword(
         @Body emailRequest: ForgotPasswordEmailRequest
+    ): Call<ForgotPasswordEmailResponse>
+
+    @POST("users/verifyCode")
+    fun verifyCode(
+        @Body verifyCodeRequest: VerifyCodeRequest
     ): Call<ForgotPasswordEmailResponse>
 
     @POST("users/resetPassword")

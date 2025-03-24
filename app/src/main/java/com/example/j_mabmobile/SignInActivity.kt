@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextPaint
+import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
@@ -24,6 +26,7 @@ import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.LogInRequest
+import com.google.android.material.textfield.TextInputLayout
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
@@ -35,6 +38,8 @@ class SignInActivity : AppCompatActivity() {
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var forgotPassword: TextView
+    private lateinit var emailTIL: TextInputLayout
+    private lateinit var passwordTIL: TextInputLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +50,8 @@ class SignInActivity : AppCompatActivity() {
         emailEditText = findViewById(R.id.emailAddress)
         passwordEditText = findViewById(R.id.userPassword)
         forgotPassword = findViewById(R.id.forgotPassword)
+        emailTIL = findViewById(R.id.emailTIL)
+        passwordTIL = findViewById(R.id.passwordTIL)
 
         signInBtn.isEnabled = false
         signInBtn.setBackgroundColor(Color.LTGRAY)
@@ -62,15 +69,39 @@ class SignInActivity : AppCompatActivity() {
         setupSignUpLink()
         setupForgotPasswordLink()
 
-        signInBtn.setOnClickListener {
-            val email = emailEditText.text.toString()
-            val password = passwordEditText.text.toString()
+        emailEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            if (email.isNotEmpty() && password.isNotEmpty()) {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                emailTIL.error = null // Clear error on text change
+                emailTIL.isErrorEnabled = false
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                checkFields() // Update button state
+            }
+        })
+
+        passwordEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                passwordTIL.error = null // Clear error on text change
+                passwordTIL.isErrorEnabled = false
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                checkFields() // Update button state
+            }
+        })
+
+
+        signInBtn.setOnClickListener {
+            if (validateInputs()) {
+                val email = emailEditText.text.toString()
+                val password = passwordEditText.text.toString()
                 val logInRequest = LogInRequest(email, password)
                 loginUser(logInRequest)
-            } else {
-                Toast.makeText(this, "Please fill in both email and password", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -300,6 +331,41 @@ class SignInActivity : AppCompatActivity() {
             signInBtn.isEnabled = false
             signInBtn.setBackgroundColor(Color.LTGRAY) // Greyed out when not clickable
         }
+    }
+
+    private fun validateInputs(): Boolean {
+        val email = emailEditText.text.toString().trim()
+        val password = passwordEditText.text.toString().trim()
+        var isValid = true
+
+        // Validate email
+        if (email.isEmpty()) {
+            emailTIL.error = "Email cannot be empty"
+            isValid = false
+        } else if (!isValidEmail(email)) {
+            emailTIL.error = "Please enter a valid email address"
+            isValid = false
+        } else {
+            emailTIL.error = null
+        }
+
+        // Validate password
+        if (password.isEmpty()) {
+            passwordTIL.error = "Password cannot be empty"
+            isValid = false
+        } else if (password.length < 8) {
+            passwordTIL.error = "Password should be at least 8 characters"
+            isValid = false
+        } else {
+            passwordTIL.error = null
+        }
+
+        return isValid
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        return email.matches(emailPattern.toRegex())
     }
 
 }

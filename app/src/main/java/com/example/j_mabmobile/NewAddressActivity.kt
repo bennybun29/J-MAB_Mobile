@@ -3,10 +3,12 @@ package com.example.j_mabmobile
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -160,12 +162,27 @@ class NewAddressActivity : AppCompatActivity() {
     }
 
     private fun showConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Unsaved Changes?")
-            .setMessage("You haven’t saved your address yet. Do you want to leave without saving?")
-            .setPositiveButton("Leave Without Saving") { _, _ -> finish() }
-            .setNegativeButton("Stay and Save", null)
-            .show()
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.custom_address_alert_dialog, null)
+        val dialogBuilder = AlertDialog.Builder(this)
+            .setView(dialogView)
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        alertDialog.show()
+
+        // Get dialog buttons
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnNo)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnYes)
+
+        // Dismiss dialog when "No" is clicked
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // Proceed to cancel order when "Yes" is clicked
+        btnConfirm.setOnClickListener {
+            finish()
+        }
     }
 
 
