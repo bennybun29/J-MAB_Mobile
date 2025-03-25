@@ -94,7 +94,7 @@ class EditAddressActivity : AppCompatActivity() {
     }
 
     private fun setupCityDropdown() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, pangasinanCities)
+        val adapter = ArrayAdapter(this, R.layout.custom_spinner_dropdown_item, pangasinanCities)
         cityAutoCompleteTextView.setAdapter(adapter)
 
         cityAutoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
@@ -109,7 +109,7 @@ class EditAddressActivity : AppCompatActivity() {
     private fun updateBarangayDropdown(selectedCity: String) {
         // Use the barangay map from PangasinanLocations
         val barangays = PangasinanLocations.barangayMap[selectedCity] ?: emptyList()
-        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, barangays)
+        val adapter = ArrayAdapter(this, R.layout.custom_spinner_dropdown_item, barangays)
         barangayAutoCompleteTextView.setAdapter(adapter)
         barangayAutoCompleteTextView.setText("", false) // Clear previous selection
         barangayAutoCompleteTextView.isEnabled = true

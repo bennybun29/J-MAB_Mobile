@@ -131,7 +131,7 @@ class MessagesFragment : Fragment() {
         // This will be populated once we fetch admins from the server
         val dropdownAdapter = ArrayAdapter(
             requireContext(),
-            android.R.layout.simple_dropdown_item_1line,
+            R.layout.custom_spinner_dropdown_item,
             mutableListOf<String>()
         )
 
@@ -167,7 +167,7 @@ class MessagesFragment : Fragment() {
                     val adminNames = adminList.map { it.getFullName() }
                     val dropdownAdapter = ArrayAdapter(
                         requireContext(),
-                        android.R.layout.simple_dropdown_item_1line,
+                        R.layout.custom_spinner_dropdown_item,
                         adminNames
                     )
                     adminAutoCompleteTextView.setAdapter(dropdownAdapter)

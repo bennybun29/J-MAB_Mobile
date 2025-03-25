@@ -271,9 +271,8 @@
                             android:layout_marginBottom="10dp"
                             android:layout_marginLeft="14dp"
                             android:layout_marginRight="14dp"
-                            android:visibility="gone"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                            android:background="#D3D3D3"
+                            android:visibility="visible"
+                            style="@style/CustomTextInputLayout"
                             app:hintEnabled="false">
 
                             <AutoCompleteTextView
@@ -286,7 +285,7 @@
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp"
                                 android:inputType="none"
-                                android:background="@color/white"/>
+                                android:background="@null"/>
                         </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>

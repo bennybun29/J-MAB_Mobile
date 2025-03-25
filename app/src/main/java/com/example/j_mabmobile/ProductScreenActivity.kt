@@ -313,7 +313,7 @@ class ProductScreenActivity : AppCompatActivity() {
                 // This code runs after we've determined the highest rated variant
 
                 // Set up dropdown adapter
-                val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, variantNames)
+                val adapter = ArrayAdapter(this, R.layout.custom_spinner_dropdown_item, variantNames)
                 chooseVariationAutoCompleteTextView.setAdapter(adapter)
                 chooseVariationAutoCompleteTextView.visibility = View.VISIBLE
                 chooseVariationTextInputLayout.visibility = View.VISIBLE

@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
@@ -106,11 +107,10 @@ class HomeFragment : Fragment() {
         val adapter = ArrayAdapter.createFromResource(
             requireContext(),
             R.array.spinner_filter,
-            android.R.layout.simple_spinner_dropdown_item
+            R.layout.custom_spinner_item
         )
 
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
+        adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
         spinner.adapter = adapter
 
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -325,7 +325,12 @@ class HomeFragment : Fragment() {
 
 
     private fun showSuggestions() {
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, suggestionList)
+        // Create a custom adapter with custom layout
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.custom_spinner_item,  // Create this custom layout
+            suggestionList
+        )
 
         listPopupWindow.setAdapter(adapter)
         listPopupWindow.anchorView = searchView
@@ -337,7 +342,6 @@ class HomeFragment : Fragment() {
             val selectedItem = suggestionList[position]
             searchView.setQuery(selectedItem, false)
             listPopupWindow.dismiss()
-
             searchView.requestFocus()
         }
 

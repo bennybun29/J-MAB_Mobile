@@ -36,5 +36,18 @@
         <item name="queryBackground">@null</item>
     </style>
 
+    <style name="CustomTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <!-- Customize background color -->
+        <item name="boxBackgroundColor">#FBFCF8</item>
+
+        <!-- Customize outline color -->
+        <item name="boxStrokeColor">@color/j_mab_blue</item>
+
+        <!-- Customize hint text color -->
+        <item name="hintTextColor">#0A387A</item>
+
+        <!-- Customize dropdown icon color -->
+        <item name="endIconTint">@color/j_mab_blue</item>
+    </style>
 
 </resources>

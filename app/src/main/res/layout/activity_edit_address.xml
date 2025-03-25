@@ -67,18 +67,25 @@
             android:fontFamily="@font/dmsans_bold"
             android:textColor="@color/j_mab_blue" />
 
-        <EditText
-            android:id="@+id/provinceEditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Pangasinan"
-            android:background="#D3D3D3"
-            android:padding="10dp"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:layout_marginBottom="10dp"
-            android:focusable="false"/>
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+            <EditText
+                android:id="@+id/provinceEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pangasinan"
+                android:background="@null"
+                android:padding="10dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/j_mab_blue"
+                android:textSize="16sp"
+                android:layout_marginBottom="10dp"
+                android:focusable="false"
+                android:inputType="none"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -94,8 +101,7 @@
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="10dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-            android:background="#D3D3D3"
+            style="@style/CustomTextInputLayout"
             app:hintEnabled="false">
 
             <AutoCompleteTextView
@@ -107,7 +113,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 android:inputType="none"
-                android:background="#D3D3D3"/>
+                android:background="@null"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -124,8 +130,7 @@
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="10dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-            android:background="#D3D3D3"
+            style="@style/CustomTextInputLayout"
             app:hintEnabled="false">
 
             <AutoCompleteTextView
@@ -136,7 +141,7 @@
                 android:padding="10dp"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:background="#D3D3D3"
+                android:background="@null"
                 android:inputType="none"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -147,20 +152,27 @@
             android:fontFamily="@font/dmsans_bold"
             android:textColor="@color/j_mab_blue" />
 
-        <EditText
-            android:id="@+id/homeAddressEditText"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Enter Home Address"
-            android:background="#D3D3D3"
-            android:padding="10dp"
             android:layout_marginTop="8dp"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:layout_marginBottom="10dp"
-            android:imeOptions="actionDone"
-            android:singleLine="true" />
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:hintEnabled="false">
 
+            <EditText
+                android:id="@+id/homeAddressEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:padding="10dp"
+                android:layout_marginTop="8dp"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:hint="Enter Home Address"
+                android:layout_marginBottom="10dp"
+                android:imeOptions="actionDone"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
     <LinearLayout
