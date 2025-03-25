@@ -46,7 +46,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         holder.itemBrand.text = boldText("Brand: ", order.product_brand)
         holder.itemQuantity.text = boldText("Quantity: ", order.quantity.toString())
         val formattedPrice = NumberFormat.getNumberInstance().format(order.total_price)
-        holder.productPrice.text = boldText("Price: ", formattedPrice)
+        holder.productPrice.text = boldText("Price: ₱", formattedPrice)
         holder.status.text = boldText("Payment Status: ", order.payment_status)
         holder.order_status.text = boldText("Order Status: ", order.status)
         holder.sizeTV.text = boldText("Size: ", order.variant_size)
@@ -63,7 +63,6 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         if (isToRate) {
             // Hide the "View" button and separator line for "to rate" orders
             holder.viewItem.visibility = View.GONE
-            holder.separatorLine.visibility = View.GONE
 
             // Show the Rate button
             holder.rateButton.visibility = View.VISIBLE
@@ -96,7 +95,6 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         } else {
             // For other statuses, show View button and separator line, hide Rate button
             holder.viewItem.visibility = View.VISIBLE
-            holder.separatorLine.visibility = View.VISIBLE
             holder.rateButton.visibility = View.GONE
 
             // Set click listener for View button
@@ -124,6 +122,14 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
                 }
                 context.startActivity(intent)
             }
+        }
+
+        holder.itemText.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, ProductScreenActivity::class.java).apply {
+                putExtra("product_id", order.product_id)
+            }
+            context.startActivity(intent)
         }
     }
 

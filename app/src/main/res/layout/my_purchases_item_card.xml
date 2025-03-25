@@ -19,10 +19,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="View"
-            android:textColor="@color/j_mab_blue"
+            android:textColor="@color/white"
             android:textSize="12sp"
+            android:gravity="center"
             android:fontFamily="@font/dmsans_bold"
-            android:padding="4dp"
+            android:padding="8dp"
             android:drawableLeft="@drawable/ic_view_icon"
             android:drawablePadding="4dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -37,24 +38,24 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="#EEEEEE"
-            app:layout_constraintTop_toBottomOf="@id/viewTV"
-            android:layout_marginTop="8dp"/>
+            app:layout_constraintTop_toBottomOf="@id/item_text"
+            android:layout_marginTop="10dp"/>
 
         <!-- Rate button that will be shown for TO_RATE status -->
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/rateButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Rate"
-            android:textColor="@color/j_mab_blue"
-            android:background="@drawable/button_border"
+            android:textColor="@color/white"
             android:textAllCaps="false"
             android:visibility="visible"
             android:fontFamily="@font/dmsans_bold"
-            android:backgroundTint="@color/j_mab_blue"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:backgroundTint="#FA8C16"
+            app:layout_constraintTop_toBottomOf="@id/item_image"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginBottom="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginRight="8dp"/>
 
         <ImageView
@@ -63,9 +64,10 @@
             android:layout_height="100dp"
             android:scaleType="centerCrop"
             android:src="@drawable/gulong"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/productPriceTV"
             app:layout_constraintTop_toBottomOf="@id/separatorLine"
             app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="16dp"
             android:layout_marginLeft="48dp"
             tools:layout_editor_absoluteX="56dp" />
 
@@ -74,91 +76,102 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:layout_marginLeft="20dp"
             android:maxLines="1"
             android:ellipsize="end"
             android:fontFamily="@font/dmsans_bold"
-            app:layout_constraintLeft_toRightOf="@id/item_image"
-            app:layout_constraintTop_toBottomOf="@id/separatorLine"
-            app:layout_constraintRight_toLeftOf="@id/productPriceTV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             android:text="Sample Text"
             android:textColor="@color/j_mab_blue"
             android:textSize="15sp"
             android:textStyle="bold"/>
 
         <TextView
-            android:id="@+id/item_brand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/cabin"
-            app:layout_constraintTop_toBottomOf="@id/item_text"
-            android:text="Brand"
-            android:textSize="10sp"
-            android:layout_marginLeft="20dp"
-            app:layout_constraintLeft_toRightOf="@id/item_image"/>
+            android:text=">"
+            android:fontFamily="@font/dmsans_bold"
+            app:layout_constraintStart_toEndOf="@id/item_text"
+            app:layout_constraintTop_toTopOf="@id/item_text"
+            android:textSize="15sp"
+            android:textColor="@color/j_mab_blue"
+            android:layout_marginStart="8dp"/>
 
-        <TextView
-            android:id="@+id/sizeTV"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/item_brand"
-            app:layout_constraintLeft_toRightOf="@id/item_image"
-            android:text="Size:"
-            android:fontFamily="@font/cabin"
-            android:textSize="10sp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="4dp"/>
+            app:layout_constraintTop_toBottomOf="@id/separatorLine"
+            app:layout_constraintStart_toEndOf="@id/item_image"
+            app:layout_constraintBottom_toBottomOf="@id/item_image"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/item_quantity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/cabin"
-            app:layout_constraintTop_toBottomOf="@id/sizeTV"
-            android:text="Quantity:"
-            android:background="@drawable/bottom_options_border"
-            android:textSize="8sp"
-            android:padding="4dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="4dp"
-            app:layout_constraintLeft_toRightOf="@id/item_image"/>
+            <TextView
+                android:id="@+id/item_brand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:text="Brand"
+                android:textSize="10sp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="8dp"/>
+
+            <TextView
+                android:id="@+id/sizeTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size:"
+                android:fontFamily="@font/cabin"
+                android:textSize="10sp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/item_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/cabin"
+                android:text="Quantity:"
+                android:background="@drawable/bottom_options_border"
+                android:textSize="12sp"
+                android:padding="4dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="4dp"/>
+            <TextView
+                android:id="@+id/statusTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status:"
+                android:fontFamily="@font/cabin"
+                android:textSize="12sp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/orderStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Order Status:"
+                android:fontFamily="@font/cabin"
+                android:textSize="12sp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="4dp"/>
+
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/productPriceTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Price:"
-            android:fontFamily="@font/dmsans"
-            app:layout_constraintTop_toBottomOf="@id/separatorLine"
-            app:layout_constraintRight_toRightOf="parent"
+            android:fontFamily="@font/dmsans_bold"
+            app:layout_constraintTop_toBottomOf="@id/item_image"
+            app:layout_constraintStart_toStartOf="@id/item_image"
             android:textColor="@color/j_mab_blue"
             android:layout_marginTop="12dp"
             android:layout_marginRight="8dp"
             android:textStyle="bold"/>
 
-        <TextView
-            android:id="@+id/statusTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/item_quantity"
-            app:layout_constraintLeft_toRightOf="@id/item_image"
-            android:text="Status:"
-            android:fontFamily="@font/cabin"
-            android:textSize="12sp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="4dp"/>
-
-        <TextView
-            android:id="@+id/orderStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/statusTV"
-            app:layout_constraintLeft_toRightOf="@id/item_image"
-            android:text="Order Status:"
-            android:fontFamily="@font/cabin"
-            android:textSize="12sp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="4dp"/>
 
         <ImageView
             android:layout_width="wrap_content"

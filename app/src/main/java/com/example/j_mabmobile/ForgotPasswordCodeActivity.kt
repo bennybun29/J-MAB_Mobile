@@ -2,6 +2,7 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,6 +16,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
@@ -45,6 +47,9 @@ class ForgotPasswordCodeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password_code)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.black_overlay)
+
 
         // Initialize API service
         apiService = RetrofitClient.getApiService(this)

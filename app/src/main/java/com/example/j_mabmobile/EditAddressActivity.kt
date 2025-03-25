@@ -3,12 +3,14 @@ package com.example.j_mabmobile
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
@@ -38,25 +40,7 @@ class EditAddressActivity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private var addressId: Int = -1
     private var isFormChanged = false
-
-    // Cities and Barangay Data
-    private val pangasinanCities = listOf(
-        "Alaminos", "Binmaley", "Bugallon", "Calasiao", "Dagupan",
-        "Lingayen", "Malasiqui", "Mangaldan", "San Carlos", "Urdaneta"
-    )
-
-    private val barangayMap = mapOf(
-        "Alaminos" to listOf("Alos", "Amandiego", "Amangbangan", "Balangobong", "Balayang"),
-        "Binmaley" to listOf("Balogo", "Basing", "Buenlag", "Caloocan Norte", "Caloocan Sur"),
-        "Bugallon" to listOf("Angarian", "Bacabac", "Bolaoen", "Cabayaoasan", "Gueset"),
-        "Calasiao" to listOf("Ambonao", "Banaoang", "Bued", "Cabilocaan", "Dinalaoan"),
-        "Dagupan" to listOf("Bacayao Norte", "Bacayao Sur", "Barangay I", "Barangay II", "Barangay III"),
-        "Lingayen" to listOf("Aliwekwek", "Baay", "Balangobong", "Balococ", "Bantayan"),
-        "Malasiqui" to listOf("Agdao", "Alacan", "Alitaya", "Amacalan", "Ampid"),
-        "Mangaldan" to listOf("Alitaya", "Amansabina", "Anolid", "Banaoang", "Bantayan"),
-        "San Carlos" to listOf("Abanon", "Agdao", "Anando", "Antipangol", "Aponit"),
-        "Urdaneta" to listOf("Anonas", "Bactad East", "Bactad West", "Bayaoas", "Bolaoen")
-    )
+    private val pangasinanCities = PangasinanLocations.pangasinanCities
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +78,10 @@ class EditAddressActivity : AppCompatActivity() {
         // Populate fields with existing data
         address?.let {
             cityAutoCompleteTextView.setText(it.city, false)
+
+            // Update barangay dropdown based on the selected city
+            updateBarangayDropdown(it.city)
+
             barangayAutoCompleteTextView.setText(it.barangay, false)
             homeAddressEditText.setText(it.home_address)
         }
@@ -117,8 +105,10 @@ class EditAddressActivity : AppCompatActivity() {
         }
     }
 
+
     private fun updateBarangayDropdown(selectedCity: String) {
-        val barangays = barangayMap[selectedCity] ?: emptyList()
+        // Use the barangay map from PangasinanLocations
+        val barangays = PangasinanLocations.barangayMap[selectedCity] ?: emptyList()
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, barangays)
         barangayAutoCompleteTextView.setAdapter(adapter)
         barangayAutoCompleteTextView.setText("", false) // Clear previous selection
@@ -160,12 +150,27 @@ class EditAddressActivity : AppCompatActivity() {
     }
 
     private fun showConfirmationDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Unsaved Changes?")
-            .setMessage("You haven’t saved your address yet. Do you want to leave without saving?")
-            .setPositiveButton("Leave Without Saving") { _, _ -> finish() }
-            .setNegativeButton("Stay and Save", null)
-            .show()
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.custom_address_alert_dialog, null)
+        val dialogBuilder = AlertDialog.Builder(this)
+            .setView(dialogView)
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        alertDialog.show()
+
+        // Get dialog buttons
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnNo)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnYes)
+
+        // Dismiss dialog when "No" is clicked
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // Proceed to cancel order when "Yes" is clicked
+        btnConfirm.setOnClickListener {
+            finish()
+        }
     }
 
     private fun updateAddress() {

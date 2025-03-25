@@ -19,6 +19,8 @@ import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,6 +29,9 @@ class EditSecurityDialog : DialogFragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var apiService: ApiService
+    private lateinit var passwordInputLayout: TextInputLayout
+    private lateinit var passwordEditText: TextInputEditText
+    private lateinit var saveButton: Button
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
@@ -36,29 +41,32 @@ class EditSecurityDialog : DialogFragment() {
         sharedPreferences = requireContext().getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         apiService = RetrofitClient.getApiService(requireContext())
 
-        val editPassword = view.findViewById<EditText>(R.id.editPassword)
-        val saveButton = view.findViewById<Button>(R.id.saveChangesButton)
-        val cancelButton = view.findViewById<TextView>(R.id.cancelButton)
+        passwordInputLayout = view.findViewById(R.id.passwordInputLayout)
+        passwordEditText = view.findViewById(R.id.editPassword)
+        saveButton = view.findViewById(R.id.saveChangesButton)
+        val cancelButton: TextView = view.findViewById(R.id.cancelButton)
 
         updateSaveButtonState(saveButton, false)
 
-        editPassword.addTextChangedListener(object : TextWatcher {
+        passwordEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                updateSaveButtonState(saveButton, editPassword.text.toString().isNotEmpty())
+                validatePassword()
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
 
         saveButton.setOnClickListener {
-            val newPassword = editPassword.text.toString().trim()
-            updatePassword(newPassword)
+            if (validatePassword()) {
+                val newPassword = passwordEditText.text.toString().trim()
+                updatePassword(newPassword)
+            }
         }
 
         cancelButton.setOnClickListener {
-            if (editPassword.text.toString().isNotEmpty()) {
+            if (passwordEditText.text.toString().isNotEmpty()) {
                 showCancelConfirmationDialog()
             } else {
                 dismiss()
@@ -72,6 +80,41 @@ class EditSecurityDialog : DialogFragment() {
     override fun onStart() {
         super.onStart()
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+    }
+
+    private fun validatePassword(): Boolean {
+        val password = passwordEditText.text.toString()
+
+        // Clear previous errors
+        passwordInputLayout.error = null
+
+        when {
+            password.isEmpty() -> {
+                passwordInputLayout.error = "Password cannot be empty"
+                updateSaveButtonState(saveButton, false)
+                return false
+            }
+            password.length < 8 -> {
+                passwordInputLayout.error = "Password must be at least 8 characters long"
+                updateSaveButtonState(saveButton, false)
+                return false
+            }
+            !password.any { it.isUpperCase() } -> {
+                passwordInputLayout.error = "Password must contain at least one uppercase letter"
+                updateSaveButtonState(saveButton, false)
+                return false
+            }
+            !password.any { it.isDigit() } -> {
+                passwordInputLayout.error = "Password must contain at least one number"
+                updateSaveButtonState(saveButton, false)
+                return false
+            }
+            else -> {
+                passwordInputLayout.error = null
+                updateSaveButtonState(saveButton, true)
+                return true
+            }
+        }
     }
 
     private fun updateSaveButtonState(button: Button, isEnabled: Boolean) {

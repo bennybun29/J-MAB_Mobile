@@ -43,7 +43,6 @@ class MessagesFragment : Fragment() {
     private lateinit var adapter: MessagesAdapter
     private lateinit var etMessage: EditText
     private lateinit var apiService: ApiService
-    private lateinit var adminSpinner: Spinner
     private var userId: Int = -1
     private var selectedAdminId: Int = 1
     private val messagesList = mutableListOf<Message>()
@@ -148,7 +147,6 @@ class MessagesFragment : Fragment() {
                     messagesList.clear()
                     adapter.updateMessages(messagesList)
                     fetchConversation()
-                    fetchMessages()
                     setupWebSocketConnection()
                 }
             }
@@ -187,13 +185,11 @@ class MessagesFragment : Fragment() {
 
                     // Now fetch messages for the selected admin
                     fetchConversation()
-                    fetchMessages()
                 } else {
                     Toast.makeText(requireContext(), "Failed to load admins", Toast.LENGTH_SHORT).show()
                     // Fallback to default admin ID
                     selectedAdminId = 1
                     fetchConversation()
-                    fetchMessages()
                 }
             }
 
@@ -203,7 +199,6 @@ class MessagesFragment : Fragment() {
                 // Fallback to default admin ID
                 selectedAdminId = 1
                 fetchConversation()
-                fetchMessages()
             }
         })
     }
@@ -254,37 +249,36 @@ class MessagesFragment : Fragment() {
     }
 
     private fun setupWebSocketConnection() {
+        // Make sure you're connected
         MessageWebSocketManager.connect(userId)
-        Log.d("MessagesFragment", "Setting up WebSocket message listener")
+
+        // Set up the message listener
         MessageWebSocketManager.messageListener = { message ->
-            Log.d("MessagesFragment", "New message received: $message")
+            // Filter messages for this conversation only
             if ((message.sender_id == userId && message.receiver_id == selectedAdminId) ||
                 (message.sender_id == selectedAdminId && message.receiver_id == userId)) {
+
+                // Make sure we're in a valid state to update UI
                 viewLifecycleOwner.lifecycleScope.launch {
                     if (isAdded && !isDetached) {
-                        Log.d("MessagesFragment", "Processing message: $message")
-                        // Remove temporary message if it matches content
+                        // Check if this is a response to our temporary message
                         lastTempMessage?.let { temp ->
                             if (temp.message == message.message && temp.sender_id == message.sender_id &&
                                 temp.receiver_id == message.receiver_id) {
+                                // Remove temporary message
                                 messagesList.remove(temp)
                                 lastTempMessage = null
-                                Log.d("MessagesFragment", "Removed temporary message: $temp")
                             }
                         }
-                        // Add server message if not already present
+
+                        // Add the server message if it's not a duplicate
                         if (!messagesList.any { it.id == message.id }) {
                             messagesList.add(message)
                             adapter.updateMessages(messagesList)
                             recyclerView.scrollToPosition(adapter.itemCount - 1)
-                            Log.d("MessagesFragment", "Added server message: $message")
-                        } else {
-                            Log.d("MessagesFragment", "Duplicate message ignored: ${message.id}")
                         }
                     }
                 }
-            } else {
-                Log.d("MessagesFragment", "Message ignored: not in conversation with selectedAdminId=$selectedAdminId")
             }
         }
     }

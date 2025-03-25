@@ -2,6 +2,7 @@ package com.example.j_mabmobile
 
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -35,6 +36,9 @@ class ForgotPasswordEmailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password_email)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.black_overlay)
+
 
         backBtn = findViewById(R.id.backBtn)
         emailEditText = findViewById(R.id.emailAddress)

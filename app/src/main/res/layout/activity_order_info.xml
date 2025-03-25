@@ -55,8 +55,11 @@
 
     <!-- ScrollView to make the content scrollable -->
     <ScrollView
+        android:id="@+id/mainScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/imageView3"
         app:layout_constraintBottom_toTopOf="@id/cancleHorizontal"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +67,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp">
 
             <!-- Top CardView -->
             <androidx.cardview.widget.CardView
@@ -121,7 +125,7 @@
                         android:id="@+id/cardEndImage"
                         android:layout_width="76dp"
                         android:layout_height="76dp"
-                        android:src="@drawable/delivery_truck"
+                        android:src="@drawable/delivery_truck__3_"
                         android:scaleType="centerCrop"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -138,6 +142,7 @@
                 app:cardElevation="4dp"
                 android:backgroundTint="@color/j_mab_blue"
                 android:layout_margin="12dp"
+                android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -207,12 +212,79 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <androidx.cardview.widget.CardView
+                android:id="@+id/topCardViewOutForDelivery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@color/j_mab_blue"
+                android:layout_margin="12dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/outForDeliveryTV"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Out for delivery!"
+                            android:textColor="@color/white"
+                            android:textSize="18sp"
+                            android:fontFamily="@font/dmsans_bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toTopOf="@id/etaTV"/>
+
+                        <TextView
+                            android:id="@+id/parcelisOnTheWay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Prepare for the arrival of your parcel today"
+                            app:layout_constraintTop_toBottomOf="@id/etaTitleTV"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:textSize="12sp"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:fontFamily="@font/dmsans"
+                            android:textColor="@color/white"/>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/outfordeliveryimage"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:src="@drawable/out_for_delivery"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginEnd="8dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/cardViewsBarrier"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="topCardView,topCardViewDelivered" />
+                app:constraint_referenced_ids="topCardView,topCardViewDelivered, topCardViewOutForDelivery" />
 
             <!-- Delivery Address -->
             <TextView
@@ -452,13 +524,13 @@
                 android:id="@+id/supportCenter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/orderInformationCV"
+                app:layout_constraintTop_toBottomOf="@id/ratingLayout"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="16dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="4dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="16dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -508,6 +580,11 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp"
+                app:layout_constraintTop_toBottomOf="@id/supportCenter"/>
+
             <LinearLayout
                 android:id="@+id/ratingLayout"
                 android:layout_width="match_parent"
@@ -516,7 +593,7 @@
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                app:layout_constraintTop_toBottomOf="@id/supportCenter">
+                app:layout_constraintTop_toBottomOf="@id/orderInformationCV">
 
                 <LinearLayout
                     android:id="@+id/starContainer"

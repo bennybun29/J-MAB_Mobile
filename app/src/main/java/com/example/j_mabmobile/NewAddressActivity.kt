@@ -41,25 +41,8 @@ class NewAddressActivity : AppCompatActivity() {
     private lateinit var saveButton: Button
     private lateinit var sharedPreferences: SharedPreferences
     private var isFormChanged = false
+    private val pangasinanCities = PangasinanLocations.pangasinanCities
 
-    private val pangasinanCities = listOf(
-        "Alaminos", "Binmaley", "Bugallon", "Calasiao", "Dagupan",
-        "Lingayen", "Malasiqui", "Mangaldan", "San Carlos", "Urdaneta"
-    )
-
-    // Map of cities to their barangays
-    private val barangayMap = mapOf(
-        "Alaminos" to listOf("Alos", "Amandiego", "Amangbangan", "Balangobong", "Balayang"),
-        "Binmaley" to listOf("Balogo", "Basing", "Buenlag", "Caloocan Norte", "Caloocan Sur"),
-        "Bugallon" to listOf("Angarian", "Bacabac", "Bolaoen", "Cabayaoasan", "Gueset"),
-        "Calasiao" to listOf("Ambonao", "Banaoang", "Bued", "Cabilocaan", "Dinalaoan"),
-        "Dagupan" to listOf("Bacayao Norte", "Bacayao Sur", "Barangay I", "Barangay II", "Barangay III"),
-        "Lingayen" to listOf("Aliwekwek", "Baay", "Balangobong", "Balococ", "Bantayan"),
-        "Malasiqui" to listOf("Agdao", "Alacan", "Alitaya", "Amacalan", "Ampid"),
-        "Mangaldan" to listOf("Alitaya", "Amansabina", "Anolid", "Banaoang", "Bantayan"),
-        "San Carlos" to listOf("Abanon", "Agdao", "Anando", "Antipangol", "Aponit"),
-        "Urdaneta" to listOf("Anonas", "Bactad East", "Bactad West", "Bayaoas", "Bolaoen")
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,7 +87,7 @@ class NewAddressActivity : AppCompatActivity() {
             val selectedCity = pangasinanCities[position]
 
             // Get the barangays for the selected city
-            val barangays = barangayMap[selectedCity] ?: listOf()
+            val barangays = PangasinanLocations.barangayMap[selectedCity] ?: listOf()
 
             // Update barangay dropdown
             val barangayAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, barangays)

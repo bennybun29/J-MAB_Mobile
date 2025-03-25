@@ -30,13 +30,23 @@
                 android:textColor="@color/j_mab_blue"
                 android:layout_gravity="center"/>
 
-            <EditText
-                android:id="@+id/editPassword"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordInputLayout"
                 android:layout_width="match_parent"
-                android:fontFamily="@font/dmsans"
                 android:layout_height="wrap_content"
-                android:hint="Enter New Password"
-                android:inputType="text"/>
+                android:fontFamily="@font/dmsans"
+                app:passwordToggleEnabled="true"
+                app:errorEnabled="true"
+                app:errorTextColor="@android:color/holo_red_light">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter New Password"
+                    android:fontFamily="@font/dmsans"
+                    android:inputType="textPassword"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/saveChangesButton"

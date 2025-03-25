@@ -61,6 +61,9 @@ class OrderInfoActivity : AppCompatActivity() {
     private lateinit var item_size: TextView
     private lateinit var topCardViewDelivered: CardView
     private lateinit var dateDeliveredTV: TextView
+    private lateinit var orderInfoTitle: TextView
+    private lateinit var supportCenterCV: CardView
+    private lateinit var topCardViewOutForDelivery: CardView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +108,10 @@ class OrderInfoActivity : AppCompatActivity() {
         dateDeliveredTV = findViewById(R.id.dateDeliveredTV)
         topCardView = findViewById(R.id.topCardView)
         topCardViewDelivered = findViewById(R.id.topCardViewDelivered)
+        topCardViewOutForDelivery = findViewById(R.id.topCardViewOutForDelivery)
         item_size = findViewById(R.id.item_size)
+        orderInfoTitle = findViewById(R.id.orderInfoTitle)
+        supportCenterCV  = findViewById(R.id.supportCenter)
 
         // Retrieve data from intent
         val orderID = intent.getIntExtra("ORDER_ID", 0)
@@ -129,9 +135,19 @@ class OrderInfoActivity : AppCompatActivity() {
         val etaTime = calculateEta(requestTimeRaw)
         setBoldText(etaTV, etaTime)
 
-        // Format requestTime
+        val titleText = when (orderStatus.lowercase()) {
+            "pending" -> "To Pay"
+            "processing" -> "To Ship"
+            "out for delivery" -> "To Receive"
+            "delivered" -> "To Rate"
+            "cancelled" -> "Cancelled Orders"
+            "failed" -> "Failed Orders"
+            else -> "Order Details"
+        }
 
-// Apply bold formatting and capitalize the values
+
+        orderInfoTitle.text = boldText(titleText)
+
         productNameTV.text = boldText(productName)
         productBrandTV.text = boldText("Brand: ${productBrand}")
         quantityTV.text = boldText("Quantity: ${quantity.toString()}")
@@ -144,7 +160,6 @@ class OrderInfoActivity : AppCompatActivity() {
         referenceID.text = boldTextOnly(reference)  // Keep original formatting (bold only, no capitalization)
         requestTimeTV.text = boldText(formattedRequestTime)
 
-// Format and capitalize the address properly
         val formattedAddress = listOf(homeAddress, baranggay, city, "Pangasinan")
             .joinToString(", ") { it.replaceFirstChar { c -> if (c.isLowerCase()) c.titlecase() else c.toString() } }
         address.text = boldText(formattedAddress)
@@ -172,10 +187,12 @@ class OrderInfoActivity : AppCompatActivity() {
             ratingLayout.visibility = View.VISIBLE
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
+            supportCenterCV.visibility = View.GONE
         } else if (orderStatus.equals("out for delivery", ignoreCase = true)) {
             // Show the regular ETA card for orders in transit
-            topCardView.visibility = View.VISIBLE
+            topCardView.visibility = View.GONE
             topCardViewDelivered.visibility = View.GONE
+            topCardViewOutForDelivery.visibility = View.VISIBLE
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
         } else {

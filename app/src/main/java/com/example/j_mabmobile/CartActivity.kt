@@ -3,9 +3,12 @@ package com.example.j_mabmobile
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
@@ -14,6 +17,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -117,7 +121,7 @@ class CartActivity : AppCompatActivity() {
 
             if (selectedCartIds.isNotEmpty()) {
                 val cartIdsString = selectedCartIds
-                showDeleteConfirmationDialog(cartIdsString)
+                showConfirmationDialog(cartIdsString)
             } else {
                 Toast.makeText(this, "No items selected", Toast.LENGTH_SHORT).show()
             }
@@ -151,22 +155,29 @@ class CartActivity : AppCompatActivity() {
         cartViewModel.fetchCartItems(userId, this) // Refresh cart badge when returning
     }
 
+    private fun showConfirmationDialog(cartIds: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.custom_remove_from_cart_dialog, null)
+        val dialogBuilder = AlertDialog.Builder(this)
+            .setView(dialogView)
 
-    private fun showDeleteConfirmationDialog(cartIds: String) {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle("Confirm Deletion")
-        builder.setMessage("Are you sure you want to delete the selected items?")
-
-        builder.setPositiveButton("Delete") { _, _ ->
-            deleteMultipleItems(cartIds)
-        }
-
-        builder.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.dismiss()
-        }
-
-        val alertDialog = builder.create()
+        val alertDialog = dialogBuilder.create()
+        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         alertDialog.show()
+
+        // Get dialog buttons
+        val btnCancel = dialogView.findViewById<Button>(R.id.btnNo)
+        val btnConfirm = dialogView.findViewById<Button>(R.id.btnYes)
+
+        // Dismiss dialog when "No" is clicked
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        // Proceed to cancel order when "Yes" is clicked
+        btnConfirm.setOnClickListener {
+            deleteMultipleItems(cartIds)
+            alertDialog.dismiss()
+        }
     }
 
 

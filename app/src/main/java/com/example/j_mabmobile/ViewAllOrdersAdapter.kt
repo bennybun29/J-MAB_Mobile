@@ -37,6 +37,7 @@ class ViewAllOrdersAdapter(private val orders: MutableList<Order>) :
         val orderStatus: TextView = itemView.findViewById(R.id.orderStatus)
         val viewItem: TextView = itemView.findViewById(R.id.viewTV)
         val buyAgainBtn: Button = itemView.findViewById(R.id.buyAgainBtn)
+        val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -52,9 +53,10 @@ class ViewAllOrdersAdapter(private val orders: MutableList<Order>) :
         holder.itemBrand.text = boldText("Brand: ", order.product_brand)
         holder.itemQuantity.text = boldText("Quantity: ", order.quantity.toString())
         val formattedPrice = NumberFormat.getNumberInstance().format(order.total_price)
-        holder.productPrice.text = boldText("Price: ", formattedPrice)
+        holder.productPrice.text = boldText("Price: ₱", formattedPrice)
         holder.status.text = boldText("Payment Status: ", order.payment_status)
         holder.orderStatus.text = boldText("Order Status: ", order.status)
+        holder.sizeTV.text = boldText("Size: ", order.variant_size)
 
         Picasso.get()
             .load(order.product_image)
