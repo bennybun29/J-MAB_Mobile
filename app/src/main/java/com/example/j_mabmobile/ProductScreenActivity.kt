@@ -383,7 +383,7 @@ class ProductScreenActivity : AppCompatActivity() {
         }
 
         // Set up image carousel
-        val imageUrls = listOf(product.image_url, product.image_url, product.image_url)
+        val imageUrls = listOf(product.image_url)
         val adapter = ImageCarouselAdapter(imageUrls)
         imageCarousel.adapter = adapter
 
@@ -502,7 +502,10 @@ class ProductScreenActivity : AppCompatActivity() {
                                 alertDialog.show()
 
                                 dialogView.findViewById<Button>(R.id.btnYes).setOnClickListener {
-                                    val intent = Intent(this@ProductScreenActivity, CartActivity::class.java)
+                                    val intent = Intent(this@ProductScreenActivity, CartActivity::class.java).apply {
+                                        // Pass the variant_id to the cart activity
+                                        putExtra("VARIANT_ID", selectedVariantId)
+                                    }
                                     startActivity(intent)
                                     alertDialog.dismiss()
                                 }

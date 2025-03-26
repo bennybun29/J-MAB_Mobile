@@ -92,6 +92,21 @@
                 android:layout_marginTop="5dp"
                 android:textSize="12sp"/>
 
+            <!-- Add these elements near the userLocationTV in the existing layout -->
+            <TextView
+                android:id="@+id/noAddressErrorTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Address Here"
+                android:textColor="@color/red"
+                android:fontFamily="@font/dmsans"
+                android:textSize="10sp"
+                android:visibility="visible"
+                app:layout_constraintTop_toBottomOf="@id/changeAddressBtn"
+                app:layout_constraintEnd_toEndOf="@id/changeAddressBtn"
+                app:layout_constraintStart_toStartOf="@id/changeAddressBtn"
+                android:layout_marginTop="5dp"/>
+
             <Button
                 android:id="@+id/changeAddressBtn"
                 android:layout_width="wrap_content"
@@ -155,7 +170,7 @@
                 android:layout_marginTop="-15dp"/>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/securityCardView"
+                android:id="@+id/paymentDetailsCardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:elevation="5dp"
@@ -178,17 +193,14 @@
                         android:fontFamily="@font/dmsans_bold" />
 
                     <TextView
+                        android:id="@+id/subtotalItemCountTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="SUBTOTAL (# ITEM(S))"
                         android:layout_marginTop="8dp"/>
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="SHIPPING FEE"/>
-
-                    <TextView
+                        android:id="@+id/subtotalAmountTV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="SUBTOTAL"/>

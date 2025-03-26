@@ -113,7 +113,7 @@
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"
-                    android:src="@drawable/trash_icon"
+                    android:src="@drawable/trash_icon_address"
                     android:contentDescription="Delete Address" />
 
             </LinearLayout>

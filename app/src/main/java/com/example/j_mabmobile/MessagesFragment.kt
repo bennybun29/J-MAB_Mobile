@@ -30,6 +30,7 @@ import com.example.j_mabmobile.model.Message
 import com.example.j_mabmobile.model.MessageRequest
 import com.example.j_mabmobile.model.MessageResponse
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -115,6 +116,8 @@ class MessagesFragment : Fragment() {
             etMessage.setSelection(etMessage.text.length)
         }
 
+
+
         btnSend.setOnClickListener {
             val text = etMessage.text.toString().trim()
             if (text.isNotEmpty()) {
@@ -153,10 +156,17 @@ class MessagesFragment : Fragment() {
         }
     }
 
-    // Updated fetchAdmins to handle first_name and last_name
     private fun fetchAdmins() {
         apiService.getAdmins().enqueue(object : Callback<AdminResponse> {
             override fun onResponse(call: Call<AdminResponse>, response: Response<AdminResponse>) {
+                // Check if the fragment is added and not detached before processing the response
+                if (!isAdded || isDetached) {
+                    return
+                }
+
+                // Safely use requireContext() only if the fragment is attached
+                val context = context ?: return
+
                 if (response.isSuccessful && response.body()?.success == true) {
                     adminList.clear()
                     response.body()?.admins?.forEach {
@@ -166,7 +176,7 @@ class MessagesFragment : Fragment() {
                     // Update dropdown with admin full names
                     val adminNames = adminList.map { it.getFullName() }
                     val dropdownAdapter = ArrayAdapter(
-                        requireContext(),
+                        context,
                         R.layout.custom_spinner_dropdown_item,
                         adminNames
                     )
@@ -186,7 +196,7 @@ class MessagesFragment : Fragment() {
                     // Now fetch messages for the selected admin
                     fetchConversation()
                 } else {
-                    Toast.makeText(requireContext(), "Failed to load admins", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Failed to load admins", Toast.LENGTH_SHORT).show()
                     // Fallback to default admin ID
                     selectedAdminId = 1
                     fetchConversation()
@@ -194,8 +204,15 @@ class MessagesFragment : Fragment() {
             }
 
             override fun onFailure(call: Call<AdminResponse>, t: Throwable) {
+                // Check if the fragment is added and not detached before processing the failure
+                if (!isAdded || isDetached) {
+                    return
+                }
+
+                val context = context ?: return
+
                 Log.e("MessagesFragment", "Error fetching admins: ${t.message}")
-                Toast.makeText(requireContext(), "Error loading admins", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Error loading admins", Toast.LENGTH_SHORT).show()
                 // Fallback to default admin ID
                 selectedAdminId = 1
                 fetchConversation()
@@ -322,38 +339,40 @@ class MessagesFragment : Fragment() {
         Log.d("MessagesFragment", "Added local message: $tempMessage")
     }
 
-    // Fetch conversation with selected admin
     private fun fetchConversation() {
-        apiService.getConversation(selectedAdminId, userId).enqueue(object : Callback<MessageResponse> {
-            override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
-                if (isAdded && !isDetached) {
-                    if (response.isSuccessful && response.body()?.success == true) {
-                        response.body()?.messages?.let { messages ->
-                            messagesList.clear()
-                            messagesList.addAll(messages.reversed()) // Reverse to show oldest first
-                            adapter.updateMessages(messagesList)
-                            toggleEmptyState()
-                            recyclerView.post {
-                                if (adapter.itemCount > 0) {
-                                    recyclerView.scrollToPosition(adapter.itemCount - 1)
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(1000)
+            apiService.getConversation(selectedAdminId, userId).enqueue(object : Callback<MessageResponse> {
+                override fun onResponse(call: Call<MessageResponse>, response: Response<MessageResponse>) {
+                    if (isAdded && !isDetached) {
+                        if (response.isSuccessful && response.body()?.success == true) {
+                            response.body()?.messages?.let { messages ->
+                                messagesList.clear()
+                                messagesList.addAll(messages.reversed())
+                                adapter.updateMessages(messagesList)
+                                toggleEmptyState()
+                                recyclerView.post {
+                                    if (adapter.itemCount > 0) {
+                                        recyclerView.scrollToPosition(adapter.itemCount - 1)
+                                    }
                                 }
+                                Log.d("MessagesFragment", "Fetched conversation: ${messagesList.size} messages with admin $selectedAdminId")
                             }
-                            Log.d("MessagesFragment", "Fetched conversation: ${messagesList.size} messages with admin $selectedAdminId")
+                        } else {
+                            toggleEmptyState()
+                            Log.e("MessagesFragment", "Error fetching conversation: ${response.code()}")
                         }
-                    } else {
-                        toggleEmptyState()
-                        Log.e("MessagesFragment", "Error fetching conversation: ${response.code()}")
                     }
                 }
-            }
-            override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
-                if (isAdded && !isDetached) {
-                    Log.e("MessagesFragment", "Error fetching conversation: ${t.message}")
-                    Toast.makeText(requireContext(), "Error loading messages", Toast.LENGTH_SHORT).show()
-                    toggleEmptyState()
+                override fun onFailure(call: Call<MessageResponse>, t: Throwable) {
+                    if (isAdded && !isDetached) {
+                        Log.e("MessagesFragment", "Error fetching conversation: ${t.message}")
+                        Toast.makeText(requireContext(), "Error loading messages", Toast.LENGTH_SHORT).show()
+                        toggleEmptyState()
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 
     // Keep the original fetchMessages as a backup/alternative

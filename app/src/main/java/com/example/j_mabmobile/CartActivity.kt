@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowInsetsController
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -59,14 +60,6 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
-        window.statusBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
-        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        }
-
-
         backBtn = findViewById(R.id.backBtn)
         recyclerViewCart = findViewById(R.id.recyclerViewCart)
         totalPriceTV = findViewById(R.id.totalPriceTV)
@@ -77,12 +70,20 @@ class CartActivity : AppCompatActivity() {
         checkoutBtn = findViewById(R.id.checkoutBtn)
         horizontal_linear_layout = findViewById(R.id.horizontal_linear_layout)
         cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
+        val variantIdToSelect = intent.getIntExtra("VARIANT_ID", -1)
 
         cartViewModel.cartItems.observe(this) { cartList ->
             cartItems.clear()
             cartItems.addAll(cartList)
             cartAdapter.notifyDataSetChanged()
             updateEmptyCartUI(cartList.isEmpty())
+
+            if (variantIdToSelect != -1) {
+                val itemToSelect = cartList.find { it.variant_id == variantIdToSelect }
+                itemToSelect?.let {
+                    cartAdapter.selectSpecificItem(it)
+                }
+            }
         }
 
 
@@ -372,5 +373,4 @@ class CartActivity : AppCompatActivity() {
         checkoutBtn.isEnabled = isEnabled
         checkoutBtn.setBackgroundColor(if (isEnabled) getColor(R.color.j_mab_blue) else getColor(R.color.LTGRAY))
     }
-
 }

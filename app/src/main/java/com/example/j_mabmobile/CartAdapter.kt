@@ -184,4 +184,11 @@ class CartAdapter(
             "%.2f".format(price)
         }
     }
+
+    fun selectSpecificItem(cartItem: CartItem) {
+        selectedItems.add(cartItem)
+        notifyDataSetChanged()
+        updateTotalPrice()
+        checkIfAllSelected()
+    }
 }

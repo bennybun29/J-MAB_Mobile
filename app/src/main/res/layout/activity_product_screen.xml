@@ -122,6 +122,7 @@
                 android:textSize="14sp"
                 android:background="@color/j_mab_blue"
                 android:padding="8dp"
+                android:visibility="gone"
                 android:layout_gravity="bottom|start"/>
         </FrameLayout>
 

@@ -48,13 +48,6 @@ class EditAddressActivity : AppCompatActivity() {
 
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
-        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
-        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        }
-
         backBtn = findViewById(R.id.backButton)
         cityAutoCompleteTextView = findViewById(R.id.cityAutoCompleteTextView)
         barangayAutoCompleteTextView = findViewById(R.id.barangayAutoCompleteTextView)

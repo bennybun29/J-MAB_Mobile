@@ -50,6 +50,17 @@
                 android:fontFamily="@font/dmsans"
                 android:textColor="@android:color/darker_gray"
                 android:text="Notification message goes here." />
+
+            <TextView
+                android:id="@+id/notificationDateTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="8sp"
+                android:fontFamily="@font/dmsans"
+                android:textColor="@android:color/darker_gray"
+                android:text="Date goes here"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="4dp"/>
         </LinearLayout>
 
         <ImageButton

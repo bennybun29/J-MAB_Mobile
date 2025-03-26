@@ -12,6 +12,8 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -20,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -64,13 +67,6 @@ class CheckoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout)
 
-        window.statusBarColor = resources.getColor(R.color.j_mab_blue, theme)
-        window.navigationBarColor = resources.getColor(R.color.j_mab_blue, theme)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        }
-
         val exitConfirmationCard = findViewById<CardView>(R.id.exitConfirmationCard)
         val confirmExitBtn = findViewById<Button>(R.id.confirmExitBtn)
         val cancelExitBtn = findViewById<Button>(R.id.cancelExitBtn)
@@ -92,21 +88,17 @@ class CheckoutActivity : AppCompatActivity() {
         addressViewModel.addresses.observe(this) { addresses ->
             val defaultAddress = addresses.find { it.is_default }
             if (defaultAddress != null) {
-                // ✅ Create a bold SpannableString for the address
                 val fullAddress = "${defaultAddress.home_address}, ${defaultAddress.barangay}, ${defaultAddress.city}, Pangasinan"
                 val spannableString = SpannableString(fullAddress)
 
-                // ✅ Make home address bold
                 val homeAddressStart = 0
                 val homeAddressEnd = defaultAddress.home_address.length
                 spannableString.setSpan(StyleSpan(Typeface.BOLD), homeAddressStart, homeAddressEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-                // ✅ Make barangay bold
                 val barangayStart = fullAddress.indexOf(defaultAddress.barangay)
                 val barangayEnd = barangayStart + defaultAddress.barangay.length
                 spannableString.setSpan(StyleSpan(Typeface.BOLD), barangayStart, barangayEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-                // ✅ Make city bold
                 val cityStart = fullAddress.indexOf(defaultAddress.city)
                 val cityEnd = cityStart + defaultAddress.city.length
                 spannableString.setSpan(StyleSpan(Typeface.BOLD), cityStart, cityEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -115,18 +107,19 @@ class CheckoutActivity : AppCompatActivity() {
                 val pangasinanEnd = pangasinanStart + "Pangasinan".length
                 spannableString.setSpan(StyleSpan(Typeface.BOLD), pangasinanStart, pangasinanEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-
-                // ✅ Set the bold text to TextView
                 userLocationTV.text = spannableString
 
-                // ✅ Store the default address ID
                 defaultAddressId = defaultAddress.id
+                findViewById<View>(R.id.noAddressErrorTV).visibility = View.GONE
+                changeAddressBtn.setBackgroundColor(ContextCompat.getColor(this, R.color.j_mab_blue))
             } else {
-                userLocationTV.text = "No default address found"
-            }
+                userLocationTV.text = "No address added"
+                defaultAddressId = null
+
+                val noAddressErrorTV = findViewById<TextView>(R.id.noAddressErrorTV)
+                noAddressErrorTV.visibility = View.VISIBLE }
         }
 
-        // ✅ Fetch addresses when the screen loads
         addressViewModel.fetchAddresses()
 
         progressBar.visibility = View.GONE
@@ -213,6 +206,7 @@ class CheckoutActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+        updatePaymentDetailsCard()
         updateTotalPrice()
 
     }
@@ -290,9 +284,10 @@ class CheckoutActivity : AppCompatActivity() {
             return
         }
 
-        // ✅ Check if there's a selected address
+        // Modify address check to show toast and highlight change address button
         if (defaultAddressId == null) {
-            Toast.makeText(this, "Please select an address before checkout", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please add an address before checkout", Toast.LENGTH_SHORT).show()
+            changeAddressBtn.startAnimation(getShakeAnimation())
             return
         }
 
@@ -389,6 +384,20 @@ class CheckoutActivity : AppCompatActivity() {
             Log.d("CheckoutActivity", "Deleting cart items: ${selectedCartItems.map { it.cart_id }}")
             cartViewModel.removeCheckedOutItems(selectedCartItems)
         }
+    }
+
+    private fun updatePaymentDetailsCard() {
+        val subtotalItemCount = selectedCartItems.size
+        val subtotalAmount = selectedCartItems.sumOf { it.total_price }
+        val shippingFee = 50.00 // Example flat rate shipping fee
+
+        findViewById<TextView>(R.id.subtotalItemCountTV).text = "SUBTOTAL ($subtotalItemCount ITEM(S))"
+        findViewById<TextView>(R.id.subtotalAmountTV).text = "SUBTOTAL: ₱${String.format("%.2f", subtotalAmount)}"
+
+    }
+
+    private fun getShakeAnimation(): Animation {
+        return AnimationUtils.loadAnimation(this, R.anim.shake_animation)
     }
 
 }
