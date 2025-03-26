@@ -16,7 +16,7 @@ object MessageWebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
     private var isConnecting = false
-    private const val webSocketUrl = "ws://192.168.100.27:8080"
+    private const val webSocketUrl = "ws://10.0.2.2:8080"
     private var userId: Int = -1
     private val handler = Handler(Looper.getMainLooper())
     private var reconnectAttempts = 0
@@ -176,7 +176,7 @@ object MessageWebSocketManager {
 object NotificationWebSocketManager {
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private const val webSocketUrl = "ws://192.168.100.27:8081" // Use the notification-specific port
+    private const val webSocketUrl = "ws://10.0.2.2:8081" // Use the notification-specific port
     private var userId: Int = -1
     private val client = OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)

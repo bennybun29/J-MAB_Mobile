@@ -21,6 +21,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ApiResponse
@@ -68,6 +69,8 @@ class OrderInfoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_order_info)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         val ratingLayout = findViewById<View>(R.id.ratingLayout)
         stars = arrayOf(

@@ -48,6 +48,8 @@ class NewAddressActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_address)
 
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+
         // Initialize SharedPreferences correctly
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 

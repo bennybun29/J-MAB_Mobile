@@ -32,6 +32,8 @@ class ViewAllOrdersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_view_all_orders)
 
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+
         // Initialize views
         backBtn = findViewById(R.id.backButton)
         recyclerViewAllOrders = findViewById(R.id.recyclerViewAllOrders)

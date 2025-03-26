@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +27,8 @@ class MyAddressesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_addresses)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         // ✅ Initialize ViewModel
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]

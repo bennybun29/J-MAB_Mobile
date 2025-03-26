@@ -60,6 +60,8 @@ class CartActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cart)
 
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+
         backBtn = findViewById(R.id.backBtn)
         recyclerViewCart = findViewById(R.id.recyclerViewCart)
         totalPriceTV = findViewById(R.id.totalPriceTV)

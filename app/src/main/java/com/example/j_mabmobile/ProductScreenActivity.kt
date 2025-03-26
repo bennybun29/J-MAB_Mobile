@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.RatingByIDResponse
@@ -77,6 +78,8 @@ class ProductScreenActivity : AppCompatActivity() {
     private var productId: Int = 0
     private var variantId: Int = 0
     private var token: String? = null
+    private lateinit var overlayBG: View
+    private lateinit var loadingAnimation: LottieAnimationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +115,8 @@ class ProductScreenActivity : AppCompatActivity() {
         shimmerLayout = findViewById(R.id.shimmerLayout)
         bottomSheetBehavior = BottomSheetBehavior.from(cardView)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        overlayBG = findViewById(R.id.overlayBG)
+        loadingAnimation = findViewById(R.id.loadingAnimation)
 
         // Get the product ID from intent
         productId = intent.getIntExtra("product_id", 0)
@@ -479,9 +484,15 @@ class ProductScreenActivity : AppCompatActivity() {
 
     private fun initializeBuyNowButton() {
         val buyNowBtn: Button = findViewById(R.id.buyNowBtn)
+        val overlayBG: View = findViewById(R.id.overlayBG)
+        val loadingAnimation: LottieAnimationView = findViewById(R.id.loadingAnimation)
 
         buyNowBtn.setOnClickListener {
             token?.let {
+                // Show overlay and loading animation before network call
+                overlayBG.visibility = View.VISIBLE
+                loadingAnimation.visibility = View.VISIBLE
+
                 CoroutineScope(Dispatchers.Main).launch {
                     try {
                         // First, check if the product already exists in the cart
@@ -492,6 +503,10 @@ class ProductScreenActivity : AppCompatActivity() {
                             val existingCartItem = cartItems.find { it.variant_id == selectedVariantId }
 
                             if (existingCartItem != null) {
+                                // Hide overlay and loading animation
+                                overlayBG.visibility = View.GONE
+                                loadingAnimation.visibility = View.GONE
+
                                 // Show custom dialog if product already exists in the cart
                                 val dialogView = layoutInflater.inflate(R.layout.custom_cart_dialog, null)
                                 val dialogBuilder = AlertDialog.Builder(this@ProductScreenActivity)
@@ -514,7 +529,6 @@ class ProductScreenActivity : AppCompatActivity() {
                                     alertDialog.dismiss()
                                 }
 
-                                alertDialog.show()
                                 return@launch
                             }
                         }
@@ -547,6 +561,10 @@ class ProductScreenActivity : AppCompatActivity() {
                         }
                     } catch (e: Exception) {
                         Toast.makeText(this@ProductScreenActivity, "Error: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                    } finally {
+                        // Ensure overlay and loading animation are hidden in all cases
+                        overlayBG.visibility = View.GONE
+                        loadingAnimation.visibility = View.GONE
                     }
                 }
             }

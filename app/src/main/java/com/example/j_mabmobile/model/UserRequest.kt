@@ -269,6 +269,12 @@ data class MessageResponse(
     val perPage: Int
 )
 
+data class SendNotifRequest(
+    val user_id: Int,
+    val title: String,
+    val message: String
+)
+
 data class NotificationResponse(
     val success: Boolean,
     val notifications: List<Notification>,

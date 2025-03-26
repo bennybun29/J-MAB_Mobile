@@ -2,6 +2,7 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
@@ -31,6 +32,8 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CheckoutRequest
 import com.example.j_mabmobile.model.CheckoutResponse
+import com.example.j_mabmobile.model.NotificationResponse
+import com.example.j_mabmobile.model.SendNotifRequest
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
@@ -59,6 +62,7 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var addressViewModel: AddressViewModel
     private var defaultAddressId: Int? = null
     private var isFromBuyNow = false
+    private lateinit var sharedPreferences: SharedPreferences
 
 
 
@@ -66,6 +70,8 @@ class CheckoutActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         val exitConfirmationCard = findViewById<CardView>(R.id.exitConfirmationCard)
         val confirmExitBtn = findViewById<Button>(R.id.confirmExitBtn)
@@ -80,8 +86,8 @@ class CheckoutActivity : AppCompatActivity() {
         overlayBackground = findViewById(R.id.overlayBackground)
         cartViewModel = ViewModelProvider(this)[CartViewModel::class.java]
         isFromBuyNow = intent.getBooleanExtra("from_buy_now", false)
-
-        userLocationTV = findViewById(R.id.userLocationTV)  // Ensure this is initialized
+        sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        userLocationTV = findViewById(R.id.userLocationTV)
 
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
 
@@ -328,6 +334,32 @@ class CheckoutActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     val checkoutResponse = response.body()
                     if (checkoutResponse != null && checkoutResponse.success) {
+
+                        val firstName = getUserFirstName()
+                        val lastName = getUserLastName()
+                        // Send notification to admin
+                        val productNames = selectedCartItems.map { it.product_name }.joinToString(", ")
+                        val notificationRequest = SendNotifRequest(
+                            user_id = 1, // Admin user ID
+                            title = "New Order!",
+                            message = "Order placed by User ID $userId and Username $firstName $lastName\nProducts: $productNames"
+                        )
+
+                        apiService.sendNotification(notificationRequest).enqueue(object : Callback<NotificationResponse> {
+                            override fun onResponse(call: Call<NotificationResponse>, response: Response<NotificationResponse>) {
+                                if (response.isSuccessful && response.body()?.success == true) {
+                                    Log.d("CheckoutActivity", "Notification sent to admin successfully")
+                                } else {
+                                    Log.e("CheckoutActivity", "Failed to send notification to admin")
+                                }
+                            }
+
+                            override fun onFailure(call: Call<NotificationResponse>, t: Throwable) {
+                                Log.e("CheckoutActivity", "Error sending notification to admin", t)
+                            }
+                        })
+
+                        // Existing payment method-specific logic
                         checkoutResponse.payment_link?.let {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
                             startActivity(intent)
@@ -398,6 +430,14 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun getShakeAnimation(): Animation {
         return AnimationUtils.loadAnimation(this, R.anim.shake_animation)
+    }
+
+    private fun getUserFirstName(): String? {
+        return sharedPreferences.getString("first_name", null)
+    }
+
+    private fun getUserLastName(): String? {
+        return sharedPreferences.getString("last_name", null)
     }
 
 }

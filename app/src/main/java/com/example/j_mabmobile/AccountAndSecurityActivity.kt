@@ -14,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.User
 import com.example.j_mabmobile.model.UserProfileResponse
@@ -48,6 +49,8 @@ class AccountAndSecurityActivity : AppCompatActivity() {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         }
          */
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         editPersonalInfoButton = findViewById(R.id.editPersonalInfoButton)
         editSecurityButton = findViewById(R.id.editSecurityButton)

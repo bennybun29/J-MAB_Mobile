@@ -46,6 +46,8 @@ class EditAddressActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_address)
 
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
+
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
         backBtn = findViewById(R.id.backButton)

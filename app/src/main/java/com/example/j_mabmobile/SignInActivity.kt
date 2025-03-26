@@ -1,5 +1,6 @@
 package com.example.j_mabmobile
 
+import android.animation.Animator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -21,6 +22,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.SignUpActivity
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
@@ -163,6 +165,14 @@ class SignInActivity : AppCompatActivity() {
     }
 
     private fun loginUser(logInRequest: LogInRequest) {
+        // Find the overlay and loading animation views
+        val overlayBG: View = findViewById(R.id.overlayBG)
+        val loadingAnimation: LottieAnimationView = findViewById(R.id.loadingAnimation)
+
+        // Show overlay and loading animation
+        overlayBG.visibility = View.VISIBLE
+        loadingAnimation.visibility = View.VISIBLE
+
         val apiService = RetrofitClient.getRetrofitInstance(this)
         val call = apiService.create(ApiService::class.java).login(logInRequest)
 
@@ -208,10 +218,36 @@ class SignInActivity : AppCompatActivity() {
                         saveBirthday(birthday)
                     }
 
-                    Toast.makeText(this@SignInActivity, apiResponse?.message ?: "Login successful", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@SignInActivity, MainActivity::class.java))
-                    finishAffinity()
+                    // Wait for animation to complete before navigating
+                    loadingAnimation.addAnimatorListener(object : Animator.AnimatorListener {
+                        override fun onAnimationStart(animator: Animator) {}
+
+                        override fun onAnimationEnd(animator: Animator) {
+                            // Hide overlay and animation
+                            overlayBG.visibility = View.GONE
+                            loadingAnimation.visibility = View.GONE
+
+                            // Show success toast
+                            Toast.makeText(
+                                this@SignInActivity,
+                                apiResponse?.message ?: "Login successful",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            // Navigate to MainActivity
+                            startActivity(Intent(this@SignInActivity, MainActivity::class.java))
+                            finishAffinity()
+                        }
+
+                        override fun onAnimationCancel(animator: Animator) {}
+
+                        override fun onAnimationRepeat(animator: Animator) {}
+                    })
                 } else {
+                    // Hide overlay and animation in case of error
+                    overlayBG.visibility = View.GONE
+                    loadingAnimation.visibility = View.GONE
+
                     try {
                         val errorResponse = response.errorBody()?.string()
                         errorResponse?.let {
@@ -225,11 +261,14 @@ class SignInActivity : AppCompatActivity() {
                         Toast.makeText(this@SignInActivity, "Error parsing response", Toast.LENGTH_SHORT).show()
                         Log.e("SignInError", "Error parsing JSON", e)
                     }
-
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                // Hide overlay and animation in case of network failure
+                overlayBG.visibility = View.GONE
+                loadingAnimation.visibility = View.GONE
+
                 Log.e("LoginError", "Network error: ${t.message}", t)
                 Toast.makeText(this@SignInActivity, "Invalid email or password.", Toast.LENGTH_SHORT).show()
             }

@@ -28,6 +28,7 @@ import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.ReadStatusResponse
 import com.example.j_mabmobile.model.ResetPasswordRequest
 import com.example.j_mabmobile.model.ResetPasswordResponse
+import com.example.j_mabmobile.model.SendNotifRequest
 import com.example.j_mabmobile.model.SignUpRequest
 import com.example.j_mabmobile.model.UpdateCartRequest
 import com.example.j_mabmobile.model.UpdateProfileRequest
@@ -183,6 +184,11 @@ interface ApiService {
     fun getAdmins(): Call<AdminResponse>
 
     //Notification Methods
+    @POST("notifications")
+    fun sendNotification(
+        @Body sendNotifRequest: SendNotifRequest
+    ): Call<NotificationResponse>
+
     @GET("notifications/user/{user_id}")
     fun getNotifications(
         @Path("user_id") userId: Int

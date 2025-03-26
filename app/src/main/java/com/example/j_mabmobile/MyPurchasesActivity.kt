@@ -12,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
@@ -32,6 +33,8 @@ class MyPurchasesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_purchases)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         backBtn = findViewById(R.id.backButton)
         toPayBtn = findViewById(R.id.toPayBtnFragment)

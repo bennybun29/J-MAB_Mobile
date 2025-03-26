@@ -14,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 
 class HelpActivity : AppCompatActivity() {
 
@@ -26,6 +27,8 @@ class HelpActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_help)
+
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.j_mab_blue)
 
         backBtn = findViewById(R.id.backBtn)
         tvGlobeNumber = findViewById(R.id.tvGlobeNumber)

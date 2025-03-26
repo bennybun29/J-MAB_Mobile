@@ -236,6 +236,10 @@ class VerificationCodeRegisterActivity : AppCompatActivity() {
 
     // Method to call the API for email verification
     private fun verifyEmail(code: Int) {
+        // Find views
+        val verificationSuccessfulProgressBar: LottieAnimationView = findViewById(R.id.verificationSuccessfulProgressBar)
+        val overlayBackground: View = findViewById(R.id.overlayBackground)
+
         // Show loading indicator
         showLoading(true)
 
@@ -256,7 +260,30 @@ class VerificationCodeRegisterActivity : AppCompatActivity() {
                         val verificationResponse = response.body()
                         Log.d("VERIFICATION", "Success response: ${verificationResponse?.message}")
                         if (verificationResponse?.success == true) {
-                            performAutoLogin()
+                            // Show overlay and success animation
+                            overlayBackground.visibility = View.VISIBLE
+                            verificationSuccessfulProgressBar.visibility = View.VISIBLE
+
+                            // Play animation only once
+                            verificationSuccessfulProgressBar.playAnimation()
+
+                            // Add listener to handle navigation after animation
+                            verificationSuccessfulProgressBar.addAnimatorListener(object : Animator.AnimatorListener {
+                                override fun onAnimationStart(animator: Animator) {}
+
+                                override fun onAnimationEnd(animator: Animator) {
+                                    // Hide overlay and animation
+                                    overlayBackground.visibility = View.GONE
+                                    verificationSuccessfulProgressBar.visibility = View.GONE
+
+                                    // Perform auto login
+                                    performAutoLogin()
+                                }
+
+                                override fun onAnimationCancel(animator: Animator) {}
+
+                                override fun onAnimationRepeat(animator: Animator) {}
+                            })
                         } else {
                             // Verification failed with API error message
                             Toast.makeText(this@VerificationCodeRegisterActivity,
@@ -424,6 +451,7 @@ class VerificationCodeRegisterActivity : AppCompatActivity() {
 
         // Disable buttons and clickable text views
         verifyButton.isEnabled = false
+        verifyButton.setBackgroundColor(Color.LTGRAY)
         tvResendCode.isEnabled = false
         tvSignInHere.isEnabled = false
     }
