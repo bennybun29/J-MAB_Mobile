@@ -2,6 +2,7 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
@@ -38,6 +39,7 @@ class ViewAllOrdersAdapter(private val orders: MutableList<Order>) :
         val viewItem: TextView = itemView.findViewById(R.id.viewTV)
         val buyAgainBtn: Button = itemView.findViewById(R.id.buyAgainBtn)
         val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
+        val receiptButton: Button = itemView.findViewById(R.id.receiptButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -58,17 +60,58 @@ class ViewAllOrdersAdapter(private val orders: MutableList<Order>) :
         holder.orderStatus.text = boldText("Order Status: ", order.status)
         holder.sizeTV.text = boldText("Size: ", order.variant_size)
 
+        /*val statusBackground = when (order.status.lowercase()) {
+            "pending" -> R.drawable.bg_status_pending
+            "processing" -> R.drawable.bg_status_processing
+            "out for delivery" -> R.drawable.bg_status_out_for_delivery
+            "delivered" -> R.drawable.bg_status_delivered
+            "failed delivery" -> R.drawable.bg_status_failed_delivery
+            "cancelled" -> R.drawable.bg_status_cancelled
+            else -> R.drawable.bg_status_default
+        }
+        holder.orderStatus.setBackgroundResource(statusBackground)*/
+
+        val statusColor = when (order.status.lowercase()) {
+            "pending" -> Color.parseColor("#455A64")
+            "processing" -> Color.parseColor("#4A90E2")
+            "out for delivery" -> Color.parseColor("#FFA500")
+            "delivered" -> Color.parseColor("#4CAF50")
+            "failed delivery" -> Color.parseColor("#F44336")
+            "cancelled" -> Color.parseColor("#9E9E9E")
+            else -> Color.BLACK
+        }
+
+        val orderStatusText = boldText("Order Status: ", order.status)
+        holder.orderStatus.text = orderStatusText
+        holder.orderStatus.setTextColor(statusColor)
+
+
         Picasso.get()
             .load(order.product_image)
             .placeholder(R.drawable.jmab_logo)
             .error(R.drawable.jmab_logo)
             .into(holder.itemImage)
 
+        holder.receiptButton.visibility = if (order.status.lowercase() == "delivered") {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+        holder.receiptButton.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, ReceiptViewActivity::class.java).apply {
+                putExtra("ORDER_ID", order.order_id)
+            }
+            context.startActivity(intent)
+        }
+
         holder.viewItem.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, OrderInfoActivity::class.java).apply {
                 putExtra("ORDER_ID", order.order_id)
                 putExtra("PRODUCT_ID", order.product_id)
+                putExtra("VARIANT_ID", order.variant_id)
                 putExtra("PRODUCT_NAME", order.product_name)
                 putExtra("PRODUCT_BRAND", order.product_brand)
                 putExtra("QUANTITY", order.quantity)

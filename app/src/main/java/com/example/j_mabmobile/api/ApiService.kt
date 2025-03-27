@@ -26,6 +26,7 @@ import com.example.j_mabmobile.model.RatingByIDResponse
 import com.example.j_mabmobile.model.RatingRequest
 import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.ReadStatusResponse
+import com.example.j_mabmobile.model.ReceiptResponse
 import com.example.j_mabmobile.model.ResetPasswordRequest
 import com.example.j_mabmobile.model.ResetPasswordResponse
 import com.example.j_mabmobile.model.SendNotifRequest
@@ -212,7 +213,17 @@ interface ApiService {
     @GET("ratings/variant/{variant_id}")
     fun getRatingByVariantId(@Path("variant_id") variantId: Int): Call<RatingResponse>
 
+    @GET("ratings/userRated/{user_id}")
+    fun hasRated(
+        @Path("user_id") userId: Int
+    ): Call<RatingResponse>
 
     @POST("ratings")
     fun postRating(@Body request: RatingRequest): Call<PostRatingResponse>
+
+    //Receipt
+    @GET("receipts/orders/{order_id}")
+    fun getReceiptByOrderID(
+        @Path("order_id") orderId: Int
+    ): Call<ReceiptResponse>
 }

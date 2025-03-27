@@ -55,8 +55,7 @@ class CartAdapter(
         holder.itemName.text = cartItem.product_name
         holder.itemQuantity.text = "${cartItem.quantity}"
 
-        val updatedPrice = cartItem.product_price * cartItem.quantity
-        holder.productPrice.text = "Price: ₱${cartItem.total_price}"
+        holder.productPrice.text = "Price: ₱${formatPrice(cartItem.total_price)}"
         holder.brand.text = "Brand: ${cartItem.product_brand}"
         holder.itemSize.text = "Size: ${cartItem.variant_size}"
 

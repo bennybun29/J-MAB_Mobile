@@ -323,11 +323,36 @@ data class RatingRequest(
 
 data class RatingResponse(
     val success: Boolean,
+    val items: List<OrderItem> = emptyList(),
     val ratings: List<Rating>,
     val page: Int,
     val perPage: Int,
     val totalRatings: Int,
     val totalPages: Int
+)
+
+data class OrderItem(
+    val order_item_id: Int,
+    val order_id: Int,
+    val product_id: Int,
+    val variant_id: Int,
+    val reference_number: String,
+    val product_name: String,
+    val variant_size: String,
+    val brand: String,
+    val model: String,
+    val category: String,
+    val quantity: Int,
+    val price: String,
+    val subtotal: String,
+    val payment_method: String,
+    val status: String,
+    val order_created_at: String,
+    val home_address: String,
+    val city: String,
+    val barangay: String,
+    val rating_status: String,
+    val rating: Int
 )
 
 data class AverageRatingResponse(
@@ -341,3 +366,38 @@ data class PostRatingResponse(
     val message: String,
     val rating_id: Int
 )
+
+data class ReceiptResponse(
+    val success: Boolean,
+    val receipt: Receipt
+)
+
+@Parcelize
+data class Receipt(
+    val receipt_id: Int,
+    val order_id: Int,
+    val user_id: Int,
+    val order_reference: String,
+    val total_amount: String,
+    val payment_method: String,
+    val payment_status: String,
+    val bill_to: ReceiptAddress,
+    val ship_to: ReceiptAddress,
+    val items: List<ReceiptItem>
+) : Parcelable
+
+@Parcelize
+data class ReceiptAddress(
+    val name: String,
+    val address: String
+) : Parcelable
+
+@Parcelize
+data class ReceiptItem(
+    val model: String,
+    val variant: String,
+    val quantity: Int,
+    val description: String,
+    val unit_price: String,
+    val amount: String
+) : Parcelable

@@ -1,18 +1,22 @@
 package com.example.j_mabmobile
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.view.Gravity.CENTER
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -28,6 +32,7 @@ import com.example.j_mabmobile.model.ApiResponse
 import com.example.j_mabmobile.model.CancelOrderRequest
 import com.example.j_mabmobile.model.PostRatingResponse
 import com.example.j_mabmobile.model.RatingRequest
+import com.example.j_mabmobile.model.RatingResponse
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
@@ -165,7 +170,10 @@ class OrderInfoActivity : AppCompatActivity() {
 
         // Hide buttons if order is cancelled or payment failed
         if (orderStatus.equals("cancelled", ignoreCase = true) ||
-            (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true))) {
+            (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true)) ||
+            orderStatus.equals("processing", ignoreCase = true)) {
+            cancelOrderBtn.visibility = View.GONE
+            confirmOrderBtn.visibility = View.GONE
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
             // Both top cards remain GONE
@@ -202,6 +210,9 @@ class OrderInfoActivity : AppCompatActivity() {
                 updateStars(i + 1f)
             }
         }
+
+        // Check if the variant has already been rated
+        checkRatingStatus()
 
         submitButton.setOnClickListener {
             if (selectedRating > 0) {
@@ -393,6 +404,69 @@ class OrderInfoActivity : AppCompatActivity() {
         val spannable = SpannableString(value)
         spannable.setSpan(StyleSpan(Typeface.BOLD), 0, value.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spannable
+    }
+
+    private fun checkRatingStatus() {
+        val userId = getUserID()
+        val variantId = intent.getIntExtra("VARIANT_ID", 0)
+
+        val apiService = RetrofitClient.getApiService(this)
+
+        apiService.hasRated(userId).enqueue(object : Callback<RatingResponse> {
+            override fun onResponse(call: Call<RatingResponse>, response: Response<RatingResponse>) {
+                if (response.isSuccessful) {
+                    val ratedItems = response.body()?.items ?: emptyList()
+
+                    // Find the specific rated item for this variant
+                    val ratedItem = ratedItems.find {
+                        it.variant_id == variantId && it.rating_status == "Rated"
+                    }
+
+                    if (ratedItem != null) {
+                        // If item is rated and has a rating between 1-5
+                        ratedItem.rating?.let { rating ->
+                            if (rating in 1..5) {
+                                // Disable further rating
+                                disableRating()
+
+                                // Set the existing rating
+                                updateStars(rating.toFloat())
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<RatingResponse>, t: Throwable) {
+                Log.e("RatingCheck", "Failed to check rating status", t)
+            }
+        })
+    }
+
+    private fun disableRating() {
+        // Disable star clicks
+        for (star in stars) {
+            star.isClickable = false
+            star.isEnabled = false
+        }
+
+        // Hide submit button
+        findViewById<Button>(R.id.submitRatingButton).visibility = View.GONE
+
+        // Optionally, show a message that item has been rated
+        val ratingLayout = findViewById<View>(R.id.ratingLayout)
+        val alreadyRatedTextView = TextView(this)
+        alreadyRatedTextView.text = "This item has already been rated"
+        alreadyRatedTextView.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
+        alreadyRatedTextView.gravity = Gravity.CENTER
+
+        // Replace or add the TextView to the rating layout
+        (ratingLayout as ViewGroup).addView(alreadyRatedTextView)
+    }
+
+    private fun getUserID(): Int {
+        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getInt("user_id", 1)
     }
 
 }

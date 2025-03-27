@@ -1,3 +1,4 @@
 <paths>
     <external-files-path name="images" path="Android/data/com.example.j_mabmobile/files/DCIM/" />
+    <external-files-path name="my_pdfs" path="." />
 </paths>

@@ -243,8 +243,9 @@
         android:id="@+id/overlayBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#80000000"
+        android:background="#36000000"
         android:visibility="gone"
+        android:focusable="false"
         android:elevation="5dp"/>
 
     <androidx.cardview.widget.CardView

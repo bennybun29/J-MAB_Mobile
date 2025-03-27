@@ -172,8 +172,12 @@ class CheckoutActivity : AppCompatActivity() {
         }
 
         overlayBackground.setOnClickListener {
-            exitConfirmationCard.visibility = View.GONE
-            overlayBackground.visibility = View.GONE
+            // Only allow dismissing the overlay if it's NOT from a COD payment
+            if (selectedPaymentMethod != "cod") {
+                val exitConfirmationCard = findViewById<CardView>(R.id.exitConfirmationCard)
+                exitConfirmationCard.visibility = View.GONE
+                overlayBackground.visibility = View.GONE
+            }
         }
 
         changeAddressBtn = findViewById(R.id.changeAddressBtn)

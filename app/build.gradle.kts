@@ -56,6 +56,8 @@ dependencies {
     implementation("com.airbnb.android:lottie:6.0.0")
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.tbuonomo:dotsindicator:4.3")
+    implementation("com.itextpdf:itext7-core:7.1.15")
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:padding="16dp">
+
+    <!-- Back Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/backBtnCV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="25dp"
+        android:layout_marginTop="15dp"
+        app:cardElevation="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="10dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <ImageButton
+            android:id="@+id/backBtn"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/back_btn_product_screen"
+            android:background="@null"
+            android:scaleType="centerInside"/>
+    </androidx.cardview.widget.CardView>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/backBtnCV"
+        app:layout_constraintBottom_toTopOf="@id/btnSavePdf">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:padding="16dp"
+            android:elevation="4dp">
+
+            <!-- Receipt Header -->
+            <TextView
+                android:id="@+id/tvReceiptTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Receipt"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Order Reference -->
+            <TextView
+                android:id="@+id/tvOrderReference"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Bill To Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bill To:"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+            <TextView
+                android:id="@+id/tvBillToName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tvBillToAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Ship To Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ship To:"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+            <TextView
+                android:id="@+id/tvShipToName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tvShipToAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Payment Details -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Payment Details:"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+            <TextView
+                android:id="@+id/tvPaymentMethod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tvPaymentStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Items Table Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:background="#E0E0E0"
+                android:padding="8dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="Item"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Quantity"
+                    android:textStyle="bold"
+                    android:textAlignment="center"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Price"
+                    android:textStyle="bold"
+                    android:textAlignment="textEnd"/>
+            </LinearLayout>
+
+            <!-- Items Recycler View -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvReceiptItems"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+            <!-- Total Amount -->
+            <TextView
+                android:id="@+id/tvTotalAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="textEnd"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_marginTop="16dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Save PDF Button -->
+    <Button
+        android:id="@+id/btnSavePdf"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save as PDF"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

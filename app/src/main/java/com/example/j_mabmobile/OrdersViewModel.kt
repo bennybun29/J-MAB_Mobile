@@ -10,6 +10,7 @@ import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.Order
 import com.example.j_mabmobile.model.OrderResponse
+import com.example.j_mabmobile.model.RatingResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -60,66 +61,83 @@ class OrdersViewModel(application: Application) : AndroidViewModel(application) 
 
         val apiService = RetrofitClient.getRetrofitInstance(context).create(ApiService::class.java)
 
-        apiService.getOrders(userId).enqueue(object : Callback<OrderResponse> {
-            override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
-                Log.d("DEBUG", "Response Code: ${response.code()}")
-
-                if (response.isSuccessful && response.body() != null) {
-                    val orders = response.body()?.orders ?: emptyList()
-
-                    val validOrders = orders.filterNot {
-                        it.status == "failed delivery"  // Keep cancelled orders
-                    }
-
-                    _allOrders.postValue(validOrders)
-
-                    val toPayOrders = validOrders.filter {
-                        (it.payment_status == "pending" && it.payment_method == "gcash") ||
-                                (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "pending")
-                    }
-
-                    val toShipOrders = validOrders.filter {
-                        (it.payment_status == "paid" && it.status == "processing") ||
-                                (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "processing")
-                    }
-
-                    val toReceiveOrders = validOrders.filter {
-                        (it.payment_status == "paid" && it.status == "out for delivery") ||
-                                (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "out for delivery")
-                    }
-
-                    val toRateOrders = validOrders.filter {
-                        it.payment_status == "paid" && it.status == "delivered"
-                    }
-
-                    val cancelledOrders = validOrders.filter {
-                        ( it.payment_status == "failed" && it.status == "cancelled" ) || (it.status == "cancelled")
-                    }
-
-                    // Update LiveData
-                    _toPayCount.postValue(toPayOrders.size)
-                    _toPayOrders.postValue(toPayOrders)
-
-                    _toShipCount.postValue(toShipOrders.size)
-                    _toShipOrders.postValue(toShipOrders)
-
-                    _toReceiveCount.postValue(toReceiveOrders.size)
-                    _toReceiveOrders.postValue(toReceiveOrders)
-
-                    _toRateCount.postValue(toRateOrders.size)
-                    _toRateOrders.postValue(toRateOrders)
-
-                    _cancelledCount.postValue(cancelledOrders.size)
-                    _cancelledOrders.postValue(cancelledOrders)
-
-
+        apiService.hasRated(userId).enqueue(object : Callback<RatingResponse> {
+            override fun onResponse(call: Call<RatingResponse>, response: Response<RatingResponse>) {
+                val ratedVariantIds = if (response.isSuccessful) {
+                    response.body()?.items
+                        ?.filter { it.rating_status == "Rated" }
+                        ?.map { it.variant_id }
+                        ?: emptyList()
                 } else {
-                    clearAllLists()
+                    emptyList()
                 }
-            }
 
-            override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
-                Log.e("DEBUG", "Failed to fetch orders", t)
+                apiService.getOrders(userId).enqueue(object : Callback<OrderResponse> {
+                    override fun onResponse(call: Call<OrderResponse>, response: Response<OrderResponse>) {
+                        Log.d("DEBUG", "Response Code: ${response.code()}")
+
+                        if (response.isSuccessful && response.body() != null) {
+                            val orders = response.body()?.orders ?: emptyList()
+
+                            val validOrders = orders
+
+                            _allOrders.postValue(validOrders)
+
+                            val toPayOrders = validOrders.filter {
+                                (it.payment_status == "pending" && it.payment_method == "gcash") ||
+                                        (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "pending")
+                            }
+
+                            val toShipOrders = validOrders.filter {
+                                (it.payment_status == "paid" && it.status == "processing") ||
+                                        (it.payment_status == "pending" && it.payment_method == "cod" && it.status == "processing")
+                            }
+
+                            val toReceiveOrders = validOrders.filter {
+                                (it.payment_status == "paid" && (it.status == "out for delivery" || it.status == "failed delivery")) ||
+                                        (it.payment_status == "pending" && it.payment_method == "cod" && (it.status == "out for delivery" || it.status == "failed delivery"))
+                            }
+
+                            val toRateOrders = validOrders.filter {
+                                it.payment_status == "paid" &&
+                                        it.status == "delivered" &&
+                                        !ratedVariantIds.contains(it.variant_id)
+                            }
+
+                            val cancelledOrders = validOrders.filter {
+                                ( it.payment_status == "failed" && it.status == "cancelled" ) || (it.status == "cancelled")
+                            }
+
+                            // Update LiveData
+                            _toPayCount.postValue(toPayOrders.size)
+                            _toPayOrders.postValue(toPayOrders)
+
+                            _toShipCount.postValue(toShipOrders.size)
+                            _toShipOrders.postValue(toShipOrders)
+
+                            _toReceiveCount.postValue(toReceiveOrders.size)
+                            _toReceiveOrders.postValue(toReceiveOrders)
+
+                            _toRateCount.postValue(toRateOrders.size)
+                            _toRateOrders.postValue(toRateOrders)
+
+                            _cancelledCount.postValue(cancelledOrders.size)
+                            _cancelledOrders.postValue(cancelledOrders)
+
+
+                        } else {
+                            clearAllLists()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<OrderResponse>, t: Throwable) {
+                        Log.e("DEBUG", "Failed to fetch orders", t)
+                        clearAllLists()
+                    }
+                })
+            }
+            override fun onFailure(call: Call<RatingResponse>, t: Throwable) {
+                Log.e("DEBUG", "Failed to fetch rated items", t)
                 clearAllLists()
             }
         })

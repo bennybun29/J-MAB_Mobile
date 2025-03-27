@@ -138,9 +138,16 @@ class EditSecurityDialog : DialogFragment() {
 
     private fun updatePassword(newPassword: String) {
         val userId = sharedPreferences.getInt("user_id", -1)
+        val oldPassword = sharedPreferences.getString("user_password", "") ?: ""
 
         if (userId == -1) {
             Toast.makeText(requireContext(), "User ID not found!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check if the new password is the same as the old password
+        if (newPassword == oldPassword) {
+            Toast.makeText(requireContext(), "New password must be different from the current password", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -160,6 +167,9 @@ class EditSecurityDialog : DialogFragment() {
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {
                     if (response.isSuccessful && response.body()?.success == true) {
+                        // Update the stored password in SharedPreferences
+                        sharedPreferences.edit().putString("user_password", newPassword).apply()
+
                         Toast.makeText(requireContext(), "Password updated successfully!", Toast.LENGTH_SHORT).show()
                         dismiss()
                     } else {

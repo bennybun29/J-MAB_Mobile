@@ -161,6 +161,11 @@
             android:name=".ResetPasswordActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ReceiptViewActivity"
+            android:exported="false" />
+
+
 
     </application>
 </manifest>

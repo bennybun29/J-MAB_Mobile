@@ -1,6 +1,7 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
@@ -31,6 +32,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val viewItem: TextView = itemView.findViewById(R.id.viewTV)
         val separatorLine: View = itemView.findViewById(R.id.separatorLine)
         val rateButton: Button = itemView.findViewById(R.id.rateButton)
+        val receiptButton: Button = itemView.findViewById(R.id.receiptButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -51,13 +53,26 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         holder.order_status.text = boldText("Order Status: ", order.status)
         holder.sizeTV.text = boldText("Size: ", order.variant_size)
 
+        val statusColor = when (order.status.lowercase()) {
+            "pending" -> Color.parseColor("#455A64")
+            "processing" -> Color.parseColor("#4A90E2")
+            "out for delivery" -> Color.parseColor("#FFA500")
+            "delivered" -> Color.parseColor("#4CAF50")
+            "failed delivery" -> Color.parseColor("#F44336")
+            "cancelled" -> Color.parseColor("#9E9E9E")
+            else -> Color.BLACK
+        }
+
+        val orderStatusText = boldText("Order Status: ", order.status)
+        holder.order_status.text = orderStatusText
+        holder.order_status.setTextColor(statusColor)
+
         Picasso.get()
             .load(order.product_image)
             .placeholder(R.drawable.jmab_logo)
             .error(R.drawable.jmab_logo)
             .into(holder.itemImage)
 
-        // Check if order is in "to rate" status
         val isToRate = order.payment_status == "paid" && order.status == "delivered"
 
         if (isToRate) {
@@ -66,6 +81,15 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
 
             // Show the Rate button
             holder.rateButton.visibility = View.VISIBLE
+            holder.receiptButton.visibility = View.VISIBLE
+
+            holder.receiptButton.setOnClickListener{
+                val context = holder.itemView.context
+                val intent = Intent(context, ReceiptViewActivity::class.java).apply {
+                    putExtra("ORDER_ID", order.order_id)
+                }
+                context.startActivity(intent)
+            }
 
             // Set click listener for Rate button
             holder.rateButton.setOnClickListener {
@@ -92,6 +116,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
                 }
                 context.startActivity(intent)
             }
+
         } else {
             // For other statuses, show View button and separator line, hide Rate button
             holder.viewItem.visibility = View.VISIBLE
