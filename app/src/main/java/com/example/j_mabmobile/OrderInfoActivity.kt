@@ -165,7 +165,7 @@ class OrderInfoActivity : AppCompatActivity() {
         address.text = boldText(formattedAddress)
 
 
-        topCardView.visibility = View.GONE
+        topCardView.visibility = View.VISIBLE
         topCardViewDelivered.visibility = View.GONE
 
         // Hide buttons if order is cancelled or payment failed
