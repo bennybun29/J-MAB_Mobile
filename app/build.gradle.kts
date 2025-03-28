@@ -57,6 +57,8 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
     implementation("com.tbuonomo:dotsindicator:4.3")
     implementation("com.itextpdf:itext7-core:7.1.15")
+    implementation("com.google.zxing:core:3.4.1")
+    implementation("com.google.zxing:javase:3.4.1")
 
 
     implementation(libs.androidx.core.ktx)

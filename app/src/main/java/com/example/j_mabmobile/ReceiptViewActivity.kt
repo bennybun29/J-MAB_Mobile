@@ -18,6 +18,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.j_mabmobile.databinding.ActivityReceiptViewBinding
 import com.example.j_mabmobile.model.Receipt
+import com.google.zxing.WriterException
+import com.google.zxing.qrcode.QRCodeWriter
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 
@@ -89,6 +93,67 @@ class ReceiptViewActivity : AppCompatActivity() {
         }
     }
 
+    //Comment out this function pag hindi maganda gamitin HAHAHA
+    private fun generateReceiptQRCode(receipt: Receipt): Bitmap {
+        // Create a compact JSON representation of key receipt details
+        val qrCodeContent = JSONObject().apply {
+            put("order_reference", receipt.order_reference)
+            put("total_amount", receipt.total_amount)
+            put("payment_status", receipt.payment_status)
+
+            // Add bill to details
+            val billToObj = JSONObject().apply {
+                put("name", receipt.bill_to.name)
+                put("address", receipt.bill_to.address)
+            }
+            put("bill_to", billToObj)
+
+            // Add item summary
+            val itemsArray = JSONArray()
+            receipt.items.forEach { item ->
+                val itemObj = JSONObject().apply {
+                    put("model", item.model)
+                    put("variant", item.variant)
+                    put("quantity", item.quantity)
+                    put("amount", item.amount)
+                }
+                itemsArray.put(itemObj)
+            }
+            put("items", itemsArray)
+        }.toString()
+
+        // Generate QR Code
+        val qrCodeWriter = QRCodeWriter()
+        try {
+            val bitMatrix = qrCodeWriter.encode(
+                qrCodeContent,
+                com.google.zxing.BarcodeFormat.QR_CODE,
+                512,
+                512
+            )
+
+            val width = bitMatrix.width
+            val height = bitMatrix.height
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    bitmap.setPixel(
+                        x,
+                        y,
+                        if (bitMatrix.get(x, y)) Color.BLACK else Color.WHITE
+                    )
+                }
+            }
+
+            return bitmap
+        } catch (e: WriterException) {
+            e.printStackTrace()
+            // Return a placeholder or handle error as needed
+            return Bitmap.createBitmap(512, 512, Bitmap.Config.RGB_565)
+        }
+    }
+
     private fun displayReceiptDetails(receipt: Receipt) {
         binding.apply {
             tvOrderReference.text = "Order Ref: ${receipt.order_reference}"
@@ -112,6 +177,11 @@ class ReceiptViewActivity : AppCompatActivity() {
 
             // Total Amount
             tvTotalAmount.text = "Total: ₱${receipt.total_amount}"
+
+
+            //Comment this out pag hindi maganda gamitin HAHAHA
+            val qrCodeBitmap = generateReceiptQRCode(receipt)
+            binding.ivReceiptQrCode.setImageBitmap(qrCodeBitmap)
         }
     }
 

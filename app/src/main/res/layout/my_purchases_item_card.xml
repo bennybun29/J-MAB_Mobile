@@ -24,6 +24,8 @@
             android:gravity="center"
             android:fontFamily="@font/dmsans_bold"
             android:padding="8dp"
+            android:focusable="true"
+            android:clickable="true"
             android:drawableLeft="@drawable/ic_view_icon"
             android:drawablePadding="4dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -99,6 +101,9 @@
             android:text="Sample Text"
             android:textColor="@color/j_mab_blue"
             android:textSize="15sp"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground"
             android:layout_marginStart="4dp"
             android:textStyle="bold"/>
 

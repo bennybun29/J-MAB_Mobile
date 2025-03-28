@@ -168,15 +168,18 @@ class OrderInfoActivity : AppCompatActivity() {
         topCardView.visibility = View.VISIBLE
         topCardViewDelivered.visibility = View.GONE
 
-        // Hide buttons if order is cancelled or payment failed
-        if (orderStatus.equals("cancelled", ignoreCase = true) ||
-            (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true)) ||
-            orderStatus.equals("processing", ignoreCase = true)) {
+// Hide buttons if order is cancelled or payment failed
+        if (orderStatus.equals("cancelled", ignoreCase = true)) {
+            // Only for cancelled orders, hide the top card view
+            topCardView.visibility = View.GONE
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
+        } else if (orderStatus.equals("cancelled", ignoreCase = true) && paymentStatus.equals("failed", ignoreCase = true)) {
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
-            // Both top cards remain GONE
+        } else if (orderStatus.equals("processing", ignoreCase = true)) {
+            cancelOrderBtn.visibility = View.GONE
+            confirmOrderBtn.visibility = View.GONE
         } else if (orderStatus.equals("delivered", ignoreCase = true) && paymentStatus.equals("paid", ignoreCase = true)) {
             // Show delivered card view instead of the ETA card
             topCardViewDelivered.visibility = View.VISIBLE
@@ -199,7 +202,7 @@ class OrderInfoActivity : AppCompatActivity() {
             cancelOrderBtn.visibility = View.GONE
             confirmOrderBtn.visibility = View.GONE
         } else {
-            // For other states (processing, etc.), show the regular ETA card
+            // For other states, show the regular ETA card
             topCardView.visibility = View.VISIBLE
             topCardViewDelivered.visibility = View.GONE
         }
@@ -226,6 +229,7 @@ class OrderInfoActivity : AppCompatActivity() {
                     override fun onResponse(call: Call<PostRatingResponse>, response: Response<PostRatingResponse>) {
                         if (response.isSuccessful && response.body()?.success == true) {
                             Toast.makeText(this@OrderInfoActivity, "Rating submitted successfully!", Toast.LENGTH_SHORT).show()
+                            disableRating()
                         } else {
                             Toast.makeText(this@OrderInfoActivity, "Failed to submit rating", Toast.LENGTH_SHORT).show()
                             Log.e("RATING_ERROR", "Response: ${response.errorBody()?.string()}")

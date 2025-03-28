@@ -95,6 +95,8 @@
         android:paddingBottom="3dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
+        android:focusable="true"
+        android:clickable="true"
         android:background="@drawable/red_rectangle_background"
         android:drawableStart="@drawable/trash_icon"
         android:drawablePadding="5dp"/>

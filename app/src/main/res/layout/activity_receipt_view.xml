@@ -45,6 +45,12 @@
             android:padding="16dp"
             android:elevation="4dp">
 
+            <ImageView
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:src="@drawable/jmab_no_bg"
+                android:layout_gravity="center"/>
+
             <!-- Receipt Header -->
             <TextView
                 android:id="@+id/tvReceiptTitle"
@@ -156,6 +162,14 @@
                 android:textAlignment="textEnd"
                 android:textStyle="bold"
                 android:textSize="18sp"
+                android:layout_marginTop="16dp"/>
+
+            <!--Comment this out pag hindi gagamitin-->
+            <ImageView
+                android:id="@+id/ivReceiptQrCode"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
                 android:layout_marginTop="16dp"/>
         </LinearLayout>
     </ScrollView>

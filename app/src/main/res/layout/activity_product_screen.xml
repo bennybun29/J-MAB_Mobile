@@ -354,8 +354,11 @@
                     android:text="-"
                     android:gravity="center"
                     android:textStyle="bold"
+                    android:focusable="true"
+                    android:clickable="true"
                     android:textSize="16sp"
-                    android:textColor="@color/j_mab_blue" />
+                    android:textColor="@color/j_mab_blue"
+                    android:background="?attr/selectableItemBackground"/>
 
                 <View
                     android:layout_width="1dp"
@@ -385,8 +388,11 @@
                     android:gravity="center"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:focusable="true"
+                    android:clickable="true"
                     android:layout_marginStart="5dp"
-                    android:textColor="@color/j_mab_blue" />
+                    android:textColor="@color/j_mab_blue"
+                    android:background="?attr/selectableItemBackground"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -400,6 +406,7 @@
             android:gravity="center"
             android:clickable="true"
             android:focusable="true"
+            android:background="?attr/selectableItemBackground"
             android:onClick="onAddToCartClicked">
 
             <ImageView

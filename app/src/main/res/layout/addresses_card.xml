@@ -103,6 +103,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"
                     android:src="@drawable/edit_icon"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:contentDescription="Edit Address"
                     app:tint="@color/black"/>
 
@@ -113,6 +115,8 @@
                     android:layout_height="32dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"
+                    android:focusable="true"
+                    android:clickable="true"
                     android:src="@drawable/trash_icon_address"
                     android:contentDescription="Delete Address" />
 
