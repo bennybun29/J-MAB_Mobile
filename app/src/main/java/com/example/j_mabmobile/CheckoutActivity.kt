@@ -63,6 +63,8 @@ class CheckoutActivity : AppCompatActivity() {
     private var defaultAddressId: Int? = null
     private var isFromBuyNow = false
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var userNameTV: TextView
+    private lateinit var userPhoneNumberTV: TextView
 
 
 
@@ -88,6 +90,15 @@ class CheckoutActivity : AppCompatActivity() {
         isFromBuyNow = intent.getBooleanExtra("from_buy_now", false)
         sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         userLocationTV = findViewById(R.id.userLocationTV)
+        userNameTV = findViewById(R.id.userNameTV)
+        userPhoneNumberTV = findViewById(R.id.userPhoneNumberTV)
+
+        val firstName = getUserFirstName()
+        val lastName = getUserLastName()
+        val phoneNumber = getUserPhoneNumber()
+
+        userNameTV.text = "${firstName} ${lastName}"
+        userPhoneNumberTV.text = phoneNumber ?: "No phone number"
 
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
 
@@ -442,6 +453,10 @@ class CheckoutActivity : AppCompatActivity() {
 
     private fun getUserLastName(): String? {
         return sharedPreferences.getString("last_name", null)
+    }
+
+    private fun getUserPhoneNumber(): String? {
+        return sharedPreferences.getString("phone_number", null)
     }
 
 }

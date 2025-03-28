@@ -30,9 +30,9 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         val order_status: TextView = itemView.findViewById(R.id.orderStatus)
         val sizeTV: TextView = itemView.findViewById(R.id.sizeTV)
         val viewItem: TextView = itemView.findViewById(R.id.viewTV)
-        val separatorLine: View = itemView.findViewById(R.id.separatorLine)
         val rateButton: Button = itemView.findViewById(R.id.rateButton)
         val receiptButton: Button = itemView.findViewById(R.id.receiptButton)
+        val arrowToProduct: TextView = itemView.findViewById(R.id.arrowToProduct)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): OrderViewHolder {
@@ -150,6 +150,14 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
         }
 
         holder.itemText.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, ProductScreenActivity::class.java).apply {
+                putExtra("product_id", order.product_id)
+            }
+            context.startActivity(intent)
+        }
+
+        holder.arrowToProduct.setOnClickListener{
             val context = holder.itemView.context
             val intent = Intent(context, ProductScreenActivity::class.java).apply {
                 putExtra("product_id", order.product_id)

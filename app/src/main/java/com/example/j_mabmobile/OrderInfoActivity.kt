@@ -168,7 +168,6 @@ class OrderInfoActivity : AppCompatActivity() {
         topCardView.visibility = View.VISIBLE
         topCardViewDelivered.visibility = View.GONE
 
-// Hide buttons if order is cancelled or payment failed
         if (orderStatus.equals("cancelled", ignoreCase = true)) {
             // Only for cancelled orders, hide the top card view
             topCardView.visibility = View.GONE
@@ -203,7 +202,7 @@ class OrderInfoActivity : AppCompatActivity() {
             confirmOrderBtn.visibility = View.GONE
         } else {
             // For other states, show the regular ETA card
-            topCardView.visibility = View.VISIBLE
+            topCardView.visibility = View.GONE
             topCardViewDelivered.visibility = View.GONE
         }
 
