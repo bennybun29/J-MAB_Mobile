@@ -331,15 +331,28 @@
                         android:layout_gravity="left"
                         android:layout_marginTop="4dp"/>
 
-                    <Spinner
-                        android:id="@+id/spinner_options"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/selectFilterTextInputLayout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingEnd="30dp"
                         android:layout_marginStart="8dp"
                         app:layout_constraintStart_toEndOf="@id/sortByTV"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:background="#FBFCF8"
+                        style="@style/CustomTextInputLayout"
+                        app:hintEnabled="false">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/filterAutoCompleteTextview"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingEnd="30dp"
+                            android:textColor="@android:color/black"
+                            android:textSize="14sp"
+                            android:inputType="none"
+                            android:background="@null"/>
+                    </com.google.android.material.textfield.TextInputLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

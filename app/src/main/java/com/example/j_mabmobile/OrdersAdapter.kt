@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
@@ -63,9 +64,15 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
             else -> Color.BLACK
         }
 
-        val orderStatusText = boldText("Order Status: ", order.status)
+        val orderStatusText = SpannableString("Order Status: ${order.status}")
+        orderStatusText.setSpan(
+            ForegroundColorSpan(statusColor),
+            "Order Status: ".length,
+            orderStatusText.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
         holder.order_status.text = orderStatusText
-        holder.order_status.setTextColor(statusColor)
 
         Picasso.get()
             .load(order.product_image)
@@ -179,7 +186,7 @@ class OrdersAdapter(private val orders: MutableList<Order>) :
 
     fun updateOrders(newOrders: List<Order>) {
         orders.clear()
-        orders.addAll(newOrders)
+        orders.addAll(newOrders.reversed())
         notifyDataSetChanged()
     }
 }

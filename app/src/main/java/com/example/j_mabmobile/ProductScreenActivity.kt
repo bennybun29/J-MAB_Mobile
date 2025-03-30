@@ -2,19 +2,13 @@ package com.example.j_mabmobile
 
 import ImageCarouselAdapter
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.MotionEvent
 import android.view.View
-import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
-import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CartRequest
 import com.example.j_mabmobile.model.Product
 import kotlinx.coroutines.CoroutineScope
@@ -36,22 +29,22 @@ import java.text.NumberFormat
 import java.util.Locale
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.ProductResponse
-import com.example.j_mabmobile.model.RatingByIDResponse
 import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.Variant
-import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.atomic.AtomicInteger
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.JustifyContent
 
 class ProductScreenActivity : AppCompatActivity() {
 
@@ -76,7 +69,6 @@ class ProductScreenActivity : AppCompatActivity() {
     private var selectedVariantId: Int = 0
     private lateinit var ratingText: TextView
     private var productId: Int = 0
-    private var variantId: Int = 0
     private var token: String? = null
     private lateinit var overlayBG: View
     private lateinit var loadingAnimation: LottieAnimationView
@@ -274,10 +266,9 @@ class ProductScreenActivity : AppCompatActivity() {
         val productDescription: TextView = findViewById(R.id.item_description)
         val productStock: TextView = findViewById(R.id.stock_text)
         val productBrand: TextView = findViewById(R.id.brand_text)
-        val productVariation: TextView = findViewById(R.id.variationTV)
         val priceTextView: TextView = findViewById(R.id.priceTextView)
-        val chooseVariationAutoCompleteTextView = findViewById<AutoCompleteTextView>(R.id.chooseVariationAutoCompleteTextView)
-        val chooseVariationTextInputLayout = findViewById<TextInputLayout>(R.id.chooseVariationTextInputLayout)
+        val variantLabel: TextView = findViewById(R.id.variantLabel)
+        val variantRecyclerView: RecyclerView = findViewById(R.id.variantRecyclerView)
         val circularButton: ImageButton = findViewById(R.id.chatSellerForThisProduct)
 
         // Set basic product details
@@ -285,24 +276,20 @@ class ProductScreenActivity : AppCompatActivity() {
         productDescription.text = product.description
         productBrand.text = "Brand: ${product.brand}"
 
-        // Handle variants
         val variants = product.variants
         val hasVariants = variants.isNotEmpty()
 
         if (hasVariants) {
-            // Filter out variants with zero stock
             val availableVariants = variants.filter { it.stock > 0 }
 
             if (availableVariants.isEmpty()) {
                 // No variants with stock available
-                productVariation.visibility = View.VISIBLE
-                productVariation.text = "No variants available"
-                chooseVariationAutoCompleteTextView.visibility = View.GONE
-                chooseVariationTextInputLayout.visibility = View.GONE
+                variantLabel.visibility = View.VISIBLE
+                variantLabel.text = "No variants available"
+                variantRecyclerView.visibility = View.GONE
                 return
             }
 
-            // First get all variant names for the dropdown
             val variantNames = availableVariants.map { it.size ?: "Default" }
 
             // Create the mapping for variant details
@@ -313,77 +300,71 @@ class ProductScreenActivity : AppCompatActivity() {
                 variantMap[variantName] = Triple(variant.variant_id, price, variant.stock)
             }
 
+            val flexboxLayoutManager = FlexboxLayoutManager(this).apply {
+                flexDirection = FlexDirection.ROW
+                flexWrap = FlexWrap.WRAP
+                justifyContent = JustifyContent.FLEX_START
+            }
+
+            variantRecyclerView.layoutManager = flexboxLayoutManager
+
             // Find the highest rated variant
             findHighestRatedVariant(availableVariants) { highestRatedVariant ->
-                // This code runs after we've determined the highest rated variant
-
-                // Set up dropdown adapter
-                val adapter = ArrayAdapter(this, R.layout.custom_spinner_dropdown_item, variantNames)
-                chooseVariationAutoCompleteTextView.setAdapter(adapter)
-                chooseVariationAutoCompleteTextView.visibility = View.VISIBLE
-                chooseVariationTextInputLayout.visibility = View.VISIBLE
-
-                // Determine default variant
                 val defaultVariant = highestRatedVariant ?: availableVariants.first()
                 val defaultVariantName = defaultVariant.size ?: "Default"
 
-                // Set default variant in dropdown
-                chooseVariationAutoCompleteTextView.setText(defaultVariantName, false)
+                val defaultPosition = variantNames.indexOf(defaultVariantName)
 
-                // Update selectedVariantId and UI with default variant details
-                selectedVariantId = defaultVariant.variant_id
-                val defaultPrice = defaultVariant.price.toDoubleOrNull() ?: 0.0
-                val defaultStock = defaultVariant.stock
-
-                // Update UI
-                priceTextView.text = "₱${formatPrice(defaultPrice)}"
-                productStock.text = "Stock: $defaultStock"
-
-                // Fetch and display ratings for the selected variant
-                fetchAndDisplayRatings(selectedVariantId)
-
-                Log.d("ProductScreenActivity", "Default Variant: $defaultVariantName, ID: $selectedVariantId, Price: $defaultPrice, Stock: $defaultStock")
-
-                // Handle dropdown selection when user changes it
-                chooseVariationAutoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+                val variantAdapter = VariantAdapter(variantNames) { position ->
                     val selectedVariantName = variantNames[position]
                     val variantDetails = variantMap[selectedVariantName]
 
                     if (variantDetails != null) {
-                        selectedVariantId = variantDetails.first // Get variant_id
-                        val newPrice = variantDetails.second // Get price
-                        val newStock = variantDetails.third // Get stock
+                        selectedVariantId = variantDetails.first
+                        val newPrice = variantDetails.second
+                        val newStock = variantDetails.third
                         quantity = 1
                         quantityText.text = quantity.toString()
 
-                        // Update UI
                         priceTextView.text = "₱${formatPrice(newPrice)}"
                         productStock.text = "Stock: $newStock"
 
-                        // Update ratings for the newly selected variant
                         fetchAndDisplayRatings(selectedVariantId)
 
                         Log.d("ProductScreenActivity", "Selected Variant: $selectedVariantName, ID: $selectedVariantId, Price: $newPrice, Stock: $newStock")
                     }
                 }
+
+                variantRecyclerView.adapter = variantAdapter
+
+                variantAdapter.setSelectedPosition(defaultPosition)
+
+                selectedVariantId = defaultVariant.variant_id
+                val defaultPrice = defaultVariant.price.toDoubleOrNull() ?: 0.0
+                val defaultStock = defaultVariant.stock
+
+                priceTextView.text = "₱${formatPrice(defaultPrice)}"
+                productStock.text = "Stock: $defaultStock"
+
+                fetchAndDisplayRatings(selectedVariantId)
+
+                variantLabel.visibility = View.VISIBLE
+                variantRecyclerView.visibility = View.VISIBLE
             }
         } else {
-            // Product has no variants, use the main product details
-            productVariation.visibility = View.VISIBLE
-            chooseVariationAutoCompleteTextView.visibility = View.GONE
-            chooseVariationTextInputLayout.visibility = View.GONE
+            // Product has no variants
+            variantLabel.visibility = View.VISIBLE
+            variantLabel.text = "No variants available"
+            variantRecyclerView.visibility = View.GONE
 
-            // If there are no variants, we should still set a default variant ID
             selectedVariantId = if (variants.isNotEmpty()) variants[0].variant_id else 0
 
-            // Set price and stock from the first/default variant or from product itself
             val price = if (variants.isNotEmpty()) variants[0].price.toDoubleOrNull() ?: 0.0 else 0.0
             val stock = if (variants.isNotEmpty()) variants[0].stock else 0
 
             priceTextView.text = "₱${formatPrice(price)}"
             productStock.text = "Stock: $stock"
 
-            // Fetch ratings for the default variant
             fetchAndDisplayRatings(selectedVariantId)
         }
 

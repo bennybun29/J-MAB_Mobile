@@ -2,6 +2,7 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -70,6 +71,9 @@ class OrderInfoActivity : AppCompatActivity() {
     private lateinit var orderInfoTitle: TextView
     private lateinit var supportCenterCV: CardView
     private lateinit var topCardViewOutForDelivery: CardView
+    private lateinit var userNameTV: TextView
+    private lateinit var userPhoneNumberTV: TextView
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +116,9 @@ class OrderInfoActivity : AppCompatActivity() {
         item_size = findViewById(R.id.item_size)
         orderInfoTitle = findViewById(R.id.orderInfoTitle)
         supportCenterCV  = findViewById(R.id.supportCenter)
+        userNameTV = findViewById(R.id.userNameTV)
+        userPhoneNumberTV = findViewById(R.id.userPhoneNumberTV)
+        sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
 
         // Retrieve data from intent
         val orderID = intent.getIntExtra("ORDER_ID", 0)
@@ -134,6 +141,12 @@ class OrderInfoActivity : AppCompatActivity() {
         requestTimeTV.text = boldText(formattedRequestTime)
         val etaTime = calculateEta(requestTimeRaw)
         setBoldText(etaTV, etaTime)
+        val firstName = getUserFirstName()
+        val lastName = getUserLastName()
+        val phoneNumber = getUserPhoneNumber()
+
+        userNameTV.text = "${firstName} ${lastName}"
+        userPhoneNumberTV.text = phoneNumber ?: "No phone number"
 
         val titleText = when (orderStatus.lowercase()) {
             "pending" -> "To Pay"
@@ -468,8 +481,19 @@ class OrderInfoActivity : AppCompatActivity() {
     }
 
     private fun getUserID(): Int {
-        val sharedPreferences = getSharedPreferences("myAppPrefs", Context.MODE_PRIVATE)
         return sharedPreferences.getInt("user_id", 1)
+    }
+
+    private fun getUserFirstName(): String? {
+        return sharedPreferences.getString("first_name", null)
+    }
+
+    private fun getUserLastName(): String? {
+        return sharedPreferences.getString("last_name", null)
+    }
+
+    private fun getUserPhoneNumber(): String? {
+        return sharedPreferences.getString("phone_number", null)
     }
 
 }

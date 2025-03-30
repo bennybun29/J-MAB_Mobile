@@ -59,6 +59,7 @@ dependencies {
     implementation("com.itextpdf:itext7-core:7.1.15")
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.google.zxing:javase:3.4.1")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
 
     implementation(libs.androidx.core.ktx)

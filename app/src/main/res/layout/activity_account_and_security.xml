@@ -33,7 +33,7 @@
         android:fontFamily="@font/dmsans_bold"
         android:text="Account &amp; Security"
         android:textColor="@color/white"
-        android:textSize="28sp"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -106,8 +106,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/edit_icon"
-                        android:background="@null"
-                        android:padding="8dp"/>
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true" />
                 </LinearLayout>
 
                 <View
@@ -191,7 +193,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/edit_icon"
-                    android:background="@null"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:focusable="true"
+                    android:clickable="true"
                     android:padding="8dp"/>
             </LinearLayout>
 
@@ -257,7 +261,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/edit_icon"
-                    android:background="@null"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:padding="8dp"/>
             </LinearLayout>
 

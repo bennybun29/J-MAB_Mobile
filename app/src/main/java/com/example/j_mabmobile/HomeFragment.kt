@@ -26,6 +26,7 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.Product
 import com.example.j_mabmobile.model.ProductResponse
+import com.google.android.material.textfield.TextInputLayout
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -54,6 +55,9 @@ class HomeFragment : Fragment() {
     private lateinit var bannerAdapter: BannerAdapter
     private val cartViewModel: CartViewModel by viewModels()
     private var currentPage = 0
+    // New filter components
+    private lateinit var filterTextInputLayout: TextInputLayout
+    private lateinit var filterAutoCompleteTextView: AutoCompleteTextView
 
 
     private var allProducts: List<Product> = listOf()
@@ -76,7 +80,11 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-        val spinner: Spinner = view.findViewById(R.id.spinner_options)
+
+        // Reference to the new filter components
+        filterTextInputLayout = view.findViewById(R.id.selectFilterTextInputLayout)
+        filterAutoCompleteTextView = view.findViewById(R.id.filterAutoCompleteTextview)
+
         val sharedPreferences = requireActivity().getSharedPreferences("myAppPrefs", MODE_PRIVATE)
 
         val imageUrls = listOf(
@@ -103,29 +111,24 @@ class HomeFragment : Fragment() {
             }
         }
 
-
-        val adapter = ArrayAdapter.createFromResource(
+        // Set up filter dropdown
+        val filterOptions = resources.getStringArray(R.array.spinner_filter)
+        val filterAdapter = ArrayAdapter(
             requireContext(),
-            R.array.spinner_filter,
-            R.layout.custom_spinner_item
+            R.layout.custom_spinner_dropdown_item,
+            filterOptions
         )
 
-        adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item)
-        spinner.adapter = adapter
+        filterAutoCompleteTextView.setAdapter(filterAdapter)
+        filterAutoCompleteTextView.setText(filterOptions[0], false) // Set default selection
 
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position).toString()
+        filterAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+            val selectedItem = parent.getItemAtPosition(position).toString()
 
-                when (selectedItem) {
-                    "Recently Added" -> filterProducts(currentCategory, currentBrand)
-                    "Price: High to Low" -> sortProductsByPrice(descending = true)
-                    "Price: Low to High" -> sortProductsByPrice(descending = false)
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-
+            when (selectedItem) {
+                "Recently Added" -> filterProducts(currentCategory, currentBrand)
+                "Price: High to Low" -> sortProductsByPrice(descending = true)
+                "Price: Low to High" -> sortProductsByPrice(descending = false)
             }
         }
 
@@ -481,6 +484,4 @@ class HomeFragment : Fragment() {
             }
         })
     }
-
-
 }
