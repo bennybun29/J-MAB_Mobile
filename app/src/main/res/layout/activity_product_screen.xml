@@ -418,6 +418,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/bottom_options_border"
+            android:fontFamily="@font/dmsans_bold"
             android:text="BUY NOW"/>
     </LinearLayout>
 

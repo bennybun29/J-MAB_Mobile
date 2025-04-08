@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
@@ -30,6 +31,7 @@ class EditContactInfoDialog : DialogFragment() {
     private var originalEmail: String? = null
     private var originalPhoneNumber: String? = null
     private lateinit var apiService: ApiService
+    private val phonePrefix = "+63"
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
@@ -41,16 +43,41 @@ class EditContactInfoDialog : DialogFragment() {
 
         val editEmail = view.findViewById<EditText>(R.id.editEmail)
         val editPhoneNumber = view.findViewById<EditText>(R.id.editPhoneNumber)
+        val phoneNumberPrefixText = view.findViewById<TextView>(R.id.phoneNumberPrefix)
         val saveButton = view.findViewById<Button>(R.id.saveChangesButton)
         val cancelButton = view.findViewById<TextView>(R.id.cancelButton)
 
         originalEmail = sharedPreferences.getString("user_email", "")
         originalPhoneNumber = sharedPreferences.getString("phone_number", "")
 
+        phoneNumberPrefixText.text = phonePrefix
+
         editEmail.setText(originalEmail)
-        editPhoneNumber.setText(originalPhoneNumber)
+
+        val phoneNumberWithoutPrefix = if (originalPhoneNumber?.startsWith(phonePrefix) == true) {
+            originalPhoneNumber?.substring(phonePrefix.length)
+        } else {
+            originalPhoneNumber
+        }
+        editPhoneNumber.setText(phoneNumberWithoutPrefix)
 
         updateSaveButtonState(saveButton, false)
+
+        editPhoneNumber.filters = arrayOf(InputFilter.LengthFilter(10))
+
+        editPhoneNumber.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s?.toString()?.matches(Regex("[0-9]*")) == false) {
+                    val filtered = s.toString().replace(Regex("[^0-9]"), "")
+                    editPhoneNumber.setText(filtered)
+                    editPhoneNumber.setSelection(filtered.length)
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -58,9 +85,10 @@ class EditContactInfoDialog : DialogFragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val emailText = editEmail.text.toString().trim()
                 val phoneText = editPhoneNumber.text.toString().trim()
+                val fullPhoneNumber = phonePrefix + phoneText
 
-                val isChanged = emailText != originalEmail || phoneText != originalPhoneNumber
-                val isValid = emailText.isNotEmpty() && phoneText.isNotEmpty()
+                val isChanged = emailText != originalEmail || fullPhoneNumber != originalPhoneNumber
+                val isValid = emailText.isNotEmpty() && phoneText.length == 10 && isValidEmail(emailText)
 
                 updateSaveButtonState(saveButton, isChanged && isValid)
             }
@@ -73,14 +101,16 @@ class EditContactInfoDialog : DialogFragment() {
 
         saveButton.setOnClickListener {
             val updatedEmail = editEmail.text.toString().trim()
-            val updatedPhoneNumber = editPhoneNumber.text.toString().trim()
+            val phoneText = editPhoneNumber.text.toString().trim()
+            val updatedPhoneNumber = phonePrefix + phoneText
 
             updateUserInfo(updatedEmail, updatedPhoneNumber)
         }
 
         cancelButton.setOnClickListener {
             val updatedEmail = editEmail.text.toString().trim()
-            val updatedPhoneNumber = editPhoneNumber.text.toString().trim()
+            val phoneText = editPhoneNumber.text.toString().trim()
+            val updatedPhoneNumber = phonePrefix + phoneText
 
             if (updatedEmail != originalEmail || updatedPhoneNumber != originalPhoneNumber) {
                 showCancelConfirmationDialog()
@@ -91,6 +121,10 @@ class EditContactInfoDialog : DialogFragment() {
 
         builder.setView(view)
         return builder.create()
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
     override fun onStart() {
@@ -137,7 +171,6 @@ class EditContactInfoDialog : DialogFragment() {
             password = null
         )
 
-        // Corrected call with userId and updateRequest
         apiService.updateProfilePicture(userId, updateRequest)
             .enqueue(object : Callback<UpdateProfileResponse> {
                 override fun onResponse(call: Call<UpdateProfileResponse>, response: Response<UpdateProfileResponse>) {

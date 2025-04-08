@@ -36,7 +36,6 @@ class EditPersonalInfoDialog : DialogFragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var apiService: ApiService
-    private val calendar = Calendar.getInstance()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
@@ -80,6 +79,24 @@ class EditPersonalInfoDialog : DialogFragment() {
         updateSaveButtonState(saveButton, false)
 
         birthdayEditText.setOnClickListener {
+            val initialDate = if (originalBirthday.isNotEmpty()) {
+                try {
+                    val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val date = format.parse(originalBirthday)
+                    val cal = Calendar.getInstance()
+                    cal.time = date!!
+                    cal
+                } catch (e: Exception) {
+                    val defaultCal = Calendar.getInstance()
+                    defaultCal.add(Calendar.YEAR, -18)
+                    defaultCal
+                }
+            } else {
+                val defaultCal = Calendar.getInstance()
+                defaultCal.add(Calendar.YEAR, -18)
+                defaultCal
+            }
+
             val datePicker = DatePickerDialog(
                 requireContext(),
                 { _, year, month, dayOfMonth ->
@@ -88,10 +105,15 @@ class EditPersonalInfoDialog : DialogFragment() {
                     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                     birthdayEditText.setText(dateFormat.format(selectedDate.time))
                 },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
+                initialDate.get(Calendar.YEAR),
+                initialDate.get(Calendar.MONTH),
+                initialDate.get(Calendar.DAY_OF_MONTH)
             )
+
+            val maxDate = Calendar.getInstance()
+            maxDate.add(Calendar.DAY_OF_YEAR, -1)
+            datePicker.datePicker.maxDate = maxDate.timeInMillis
+
             datePicker.show()
         }
 
@@ -110,7 +132,6 @@ class EditPersonalInfoDialog : DialogFragment() {
         lastNameEditText.addTextChangedListener(textWatcher)
         birthdayEditText.addTextChangedListener(textWatcher)
 
-        // Gender change listener
         genderSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
                 checkForChanges(firstNameEditText, lastNameEditText, genderSpinner, birthdayEditText, saveButton,
@@ -140,7 +161,6 @@ class EditPersonalInfoDialog : DialogFragment() {
                 updatedGender != originalGender ||
                 updatedBirthday != originalBirthday
             ) {
-
                 showCancelConfirmationDialog()
             } else {
                 dismiss()
@@ -180,9 +200,9 @@ class EditPersonalInfoDialog : DialogFragment() {
     private fun updateSaveButtonState(button: Button, isEnabled: Boolean) {
         button.isEnabled = isEnabled
         val color = if (isEnabled) {
-            ContextCompat.getColor(requireContext(), R.color.j_mab_blue) // Replace with actual enabled color
+            ContextCompat.getColor(requireContext(), R.color.j_mab_blue)
         } else {
-            ContextCompat.getColor(requireContext(), R.color.LTGRAY) // Replace with actual disabled color
+            ContextCompat.getColor(requireContext(), R.color.LTGRAY)
         }
         button.setBackgroundColor(color)
     }
@@ -214,7 +234,6 @@ class EditPersonalInfoDialog : DialogFragment() {
             return
         }
 
-        // Remove id from UpdateProfileRequest since it's in the URL
         val updateRequest = UpdateProfileRequest(
             first_name = firstName.ifEmpty { null },
             last_name = lastName.ifEmpty { null },
