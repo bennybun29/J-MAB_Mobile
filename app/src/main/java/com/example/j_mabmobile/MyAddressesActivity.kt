@@ -1,7 +1,6 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -13,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.j_mabmobile.viewmodels.AddressViewModel
 
 class MyAddressesActivity : AppCompatActivity() {
 

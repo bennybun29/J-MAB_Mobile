@@ -1,4 +1,4 @@
-package com.example.j_mabmobile
+package com.example.j_mabmobile.viewmodels
 
 import android.app.Application
 import android.util.Log
@@ -10,10 +10,8 @@ import com.example.j_mabmobile.api.ApiService
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartItem
 import com.example.j_mabmobile.model.CartResponse
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

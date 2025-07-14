@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Order
+import com.example.j_mabmobile.viewmodels.OrdersViewModel
 
 class ToRateFragment : Fragment() {
 

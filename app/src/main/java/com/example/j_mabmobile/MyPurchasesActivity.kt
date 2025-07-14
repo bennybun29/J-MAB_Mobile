@@ -1,7 +1,6 @@
 package com.example.j_mabmobile
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -13,9 +12,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.example.j_mabmobile.viewmodels.OrdersViewModel
 
 class MyPurchasesActivity : AppCompatActivity() {
 

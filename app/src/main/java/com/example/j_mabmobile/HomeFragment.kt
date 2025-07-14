@@ -4,14 +4,12 @@ import android.app.Activity
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.os.Bundle
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
@@ -26,6 +24,7 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.CartResponse
 import com.example.j_mabmobile.model.Product
 import com.example.j_mabmobile.model.ProductResponse
+import com.example.j_mabmobile.viewmodels.CartViewModel
 import com.google.android.material.textfield.TextInputLayout
 import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator
 import kotlinx.coroutines.delay
@@ -34,7 +33,6 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.logging.Handler
 
 class HomeFragment : Fragment() {
 

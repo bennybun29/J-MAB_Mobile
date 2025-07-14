@@ -1,11 +1,10 @@
-package com.example.j_mabmobile
+package com.example.j_mabmobile.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.DeleteNotificationResponse
 import com.example.j_mabmobile.model.Notification

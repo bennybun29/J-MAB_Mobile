@@ -9,11 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.api.NotificationWebSocketManager
+import com.example.j_mabmobile.viewmodels.NotificationViewModel
 
 class NotificationFragment : Fragment() {
     private lateinit var viewModel: NotificationViewModel

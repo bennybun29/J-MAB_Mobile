@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
@@ -26,14 +25,14 @@ import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.UpdateProfileRequest
 import com.example.j_mabmobile.model.UpdateProfileResponse
 import com.example.j_mabmobile.model.UserProfileResponse
+import com.example.j_mabmobile.viewmodels.AddressViewModel
+import com.example.j_mabmobile.viewmodels.OrdersViewModel
 import com.github.dhaval2404.imagepicker.ImagePicker
 import de.hdodenhof.circleimageview.CircleImageView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"

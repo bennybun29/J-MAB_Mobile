@@ -7,8 +7,6 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MenuItem
 import android.Manifest
 import android.content.pm.ServiceInfo
 import android.view.View
@@ -22,8 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.j_mabmobile.api.NotificationWebSocketManager
 import com.example.j_mabmobile.api.WebSocketService
 import com.example.j_mabmobile.databinding.ActivityMainBinding
-import com.google.android.material.bottomnavigation.BottomNavigationItemView
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.example.j_mabmobile.viewmodels.NotificationViewModel
 
 class MainActivity : AppCompatActivity() {
 

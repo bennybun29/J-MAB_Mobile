@@ -31,12 +31,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.j_mabmobile.model.AverageRatingResponse
 import com.example.j_mabmobile.model.ProductResponse
 import com.example.j_mabmobile.model.RatingResponse
 import com.example.j_mabmobile.model.Variant
+import com.example.j_mabmobile.viewmodels.CartViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

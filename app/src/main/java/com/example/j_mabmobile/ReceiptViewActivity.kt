@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.view.View
@@ -18,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.j_mabmobile.databinding.ActivityReceiptViewBinding
 import com.example.j_mabmobile.model.Receipt
+import com.example.j_mabmobile.viewmodels.ReceiptViewModel
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import org.json.JSONArray

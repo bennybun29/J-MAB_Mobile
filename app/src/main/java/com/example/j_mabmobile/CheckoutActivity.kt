@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
@@ -34,6 +33,8 @@ import com.example.j_mabmobile.model.CheckoutRequest
 import com.example.j_mabmobile.model.CheckoutResponse
 import com.example.j_mabmobile.model.NotificationResponse
 import com.example.j_mabmobile.model.SendNotifRequest
+import com.example.j_mabmobile.viewmodels.AddressViewModel
+import com.example.j_mabmobile.viewmodels.CartViewModel
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback

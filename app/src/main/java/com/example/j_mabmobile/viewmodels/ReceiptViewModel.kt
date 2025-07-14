@@ -1,11 +1,9 @@
-package com.example.j_mabmobile
+package com.example.j_mabmobile.viewmodels
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.ReceiptResponse
 import retrofit2.Call

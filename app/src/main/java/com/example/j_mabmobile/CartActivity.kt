@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.WindowInsetsController
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageButton
@@ -34,6 +32,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import androidx.core.content.ContextCompat
+import com.example.j_mabmobile.viewmodels.CartViewModel
 
 
 class CartActivity : AppCompatActivity() {

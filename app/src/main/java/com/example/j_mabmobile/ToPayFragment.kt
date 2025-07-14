@@ -15,13 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.j_mabmobile.api.ApiService
-import com.example.j_mabmobile.api.RetrofitClient
 import com.example.j_mabmobile.model.Order
-import com.example.j_mabmobile.model.OrderResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.example.j_mabmobile.viewmodels.OrdersViewModel
 
 class ToPayFragment : Fragment() {
 

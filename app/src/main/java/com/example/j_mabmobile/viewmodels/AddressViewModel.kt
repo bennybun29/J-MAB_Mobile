@@ -1,4 +1,4 @@
-package com.example.j_mabmobile
+package com.example.j_mabmobile.viewmodels
 
 import android.app.Application
 import android.content.Context

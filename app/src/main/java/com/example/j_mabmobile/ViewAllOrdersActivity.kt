@@ -2,11 +2,8 @@ package com.example.j_mabmobile
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -19,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.j_mabmobile.model.Order
+import com.example.j_mabmobile.viewmodels.OrdersViewModel
 
 
 class ViewAllOrdersActivity : AppCompatActivity() {
